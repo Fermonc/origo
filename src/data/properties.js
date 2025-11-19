@@ -1,0 +1,72 @@
+export const properties = [
+    {
+        id: 1,
+        title: "Finca El Paraíso",
+        type: "Finca",
+        price: "$1,250,000,000",
+        rawPrice: 1250000000,
+        location: "Rionegro, Antioquia",
+        area: "3,500 m²",
+        beds: 4,
+        baths: 3,
+        description: "Espectacular finca de recreo con arquitectura moderna y toques rústicos. Rodeada de naturaleza, cuenta con amplios espacios, zona BBQ, y nacimiento de agua propio. Ideal para desconectarse de la ciudad sin alejarse demasiado.",
+        features: ["Vista a la montaña", "Chimenea", "Kiosco", "Jardines", "Acceso pavimentado"],
+        image: "/images/finca-1.png",
+        images: ["/images/finca-1.png", "/images/lote-1.png", "/images/local-1.png"] // Placeholder gallery
+    },
+    {
+        id: 2,
+        title: "Lote Campestre La Reserva",
+        type: "Lote",
+        price: "$450,000,000",
+        rawPrice: 450000000,
+        location: "La Ceja, Antioquia",
+        area: "2,000 m²",
+        description: "Lote totalmente plano en unidad cerrada exclusiva. Listo para construir la casa de tus sueños. Vías internas pavimentadas, redes subterráneas y portería 24 horas.",
+        features: ["Unidad Cerrada", "Plano", "Redes subterráneas", "Vigilancia"],
+        image: "/images/lote-1.png",
+        images: ["/images/lote-1.png", "/images/finca-1.png"]
+    },
+    {
+        id: 3,
+        title: "Local Comercial Plaza",
+        type: "Local",
+        price: "$850,000,000",
+        rawPrice: 850000000,
+        location: "El Poblado, Medellín",
+        area: "120 m²",
+        baths: 2,
+        description: "Local comercial en primer piso con excelente vitrina. Ubicado en zona de alto flujo peatonal y vehicular. Ideal para restaurante o tienda de ropa.",
+        features: ["Vitrina", "Baño privado", "Cocineta", "Parqueadero visitantes"],
+        image: "/images/local-1.png",
+        images: ["/images/local-1.png"]
+    },
+    {
+        id: 4,
+        title: "Finca La Montaña",
+        type: "Finca",
+        price: "$950,000,000",
+        rawPrice: 950000000,
+        location: "Guarne, Antioquia",
+        area: "5,000 m²",
+        beds: 3,
+        baths: 2,
+        description: "Finca productiva con casa principal y casa de mayordomo. Cultivos de aguacate y frutales. Excelente ubicación cerca a la autopista.",
+        features: ["Cultivos", "Casa mayordomo", "Agua propia"],
+        image: "/images/finca-1.png",
+        images: ["/images/finca-1.png"]
+    },
+    {
+        id: 5,
+        title: "Lote Vía Principal",
+        type: "Lote",
+        price: "$320,000,000",
+        rawPrice: 320000000,
+        location: "Marinilla, Antioquia",
+        area: "1,500 m²",
+        description: "Lote con frente a vía principal, uso mixto (comercial/residencial). Topografía mixta con explanación lista.",
+        features: ["Uso mixto", "Vía principal", "Transporte público"],
+        image: "/images/lote-1.png",
+        images: ["/images/lote-1.png"]
+    }
+];
