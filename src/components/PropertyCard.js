@@ -9,7 +9,7 @@ export default function PropertyCard({ property }) {
       <div className="property-card">
         <div className="image-container">
           <Image
-            src={property.image || (property.images && property.images[0]) || '/placeholder.jpg'}
+            src={property.image}
             alt={property.title}
             fill
             style={{ objectFit: 'cover' }}
@@ -36,7 +36,9 @@ export default function PropertyCard({ property }) {
             box-shadow: 0 4px 20px rgba(0,0,0,0.05);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             border: 1px solid var(--color-border);
-            position: relative;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
           }
           .property-card:hover {
             transform: translateY(-5px);
@@ -63,6 +65,9 @@ export default function PropertyCard({ property }) {
           }
           .content {
             padding: 1.5rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
           }
           h3 {
             margin-bottom: 0.5rem;
@@ -95,6 +100,7 @@ export default function PropertyCard({ property }) {
             cursor: pointer;
             padding: 0;
             font-size: 1rem;
+            margin-top: auto;
           }
         `}</style>
       </div>

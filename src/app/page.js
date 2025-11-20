@@ -5,7 +5,6 @@ import PropertyCard from '@/components/PropertyCard';
 import Link from 'next/link';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
-import SeedDatabase from '@/components/SeedDatabase';
 import SkeletonCard from '@/components/SkeletonCard';
 
 export default function Home() {
@@ -47,7 +46,6 @@ export default function Home() {
 
       <main>
         {/* Hero Section */}
-        {/* Hero Section */}
         <section className="hero-section">
           <div className="hero-overlay"></div>
           <div className="container hero-content">
@@ -83,7 +81,7 @@ export default function Home() {
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.5); /* Dark overlay for contrast */
+            background: rgba(0, 0, 0, 0.5);
             z-index: 1;
           }
           .hero-content {
@@ -127,14 +125,6 @@ export default function Home() {
               </div>
               <Link href="/propiedades" style={{ color: 'var(--color-secondary)', fontWeight: '600' }}>Ver todas →</Link>
             </div>
-
-            {/* Seed Button (Dev Only) */}
-            {!loading && featuredProperties.length === 0 && (
-              <div style={{ margin: '2rem 0', padding: '1rem', border: '1px dashed var(--color-border)', borderRadius: '8px', textAlign: 'center' }}>
-                <p style={{ marginBottom: '1rem', fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>⚠️ Base de datos vacía</p>
-                <SeedDatabase />
-              </div>
-            )}
 
             <div style={{
               display: 'grid',

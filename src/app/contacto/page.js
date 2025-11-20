@@ -54,22 +54,15 @@ export default function ContactPage() {
 
                         {/* About Us */}
                         <div>
-                            <h1 style={{ fontSize: '2.5rem', color: 'var(--color-primary)', marginBottom: 'var(--space-md)' }}>Sobre Origo</h1>
-                            <p style={{ fontSize: '1.1rem', color: 'var(--color-text-muted)', marginBottom: 'var(--space-md)' }}>
-                                Somos una inmobiliaria boutique especializada en propiedades campestres, lotes y locales comerciales exclusivos en el Oriente Antioqueño.
+                            <h1 style={{ fontSize: '2.5rem', color: 'var(--color-primary)', marginBottom: 'var(--space-md)' }}>Sobre Nosotros</h1>
+                            <p style={{ marginBottom: '1rem', color: 'var(--color-text-muted)' }}>
+                                En Origo, nos especializamos en conectar personas con espacios únicos en el Oriente Antioqueño.
+                                Entendemos que una propiedad no es solo tierra o ladrillos, es el origen de nuevos proyectos y sueños.
                             </p>
-                            <p style={{ fontSize: '1.1rem', color: 'var(--color-text-muted)', marginBottom: 'var(--space-md)' }}>
-                                Nuestra misión es conectar a las personas con espacios que inspiren, ya sea para vivir en armonía con la naturaleza o para emprender nuevos negocios.
+                            <p style={{ color: 'var(--color-text-muted)' }}>
+                                Con más de 10 años de experiencia en el sector, ofrecemos un portafolio curado de locales comerciales,
+                                lotes campestres y fincas de recreo.
                             </p>
-
-                            <div style={{ marginTop: 'var(--space-lg)' }}>
-                                <h3 style={{ color: 'var(--color-primary)', marginBottom: 'var(--space-sm)' }}>¿Por qué elegirnos?</h3>
-                                <ul style={{ listStyle: 'none', color: 'var(--color-text-muted)' }}>
-                                    <li style={{ marginBottom: '0.5rem' }}>✅ Curaduría exclusiva de propiedades</li>
-                                    <li style={{ marginBottom: '0.5rem' }}>✅ Asesoría legal y financiera</li>
-                                    <li style={{ marginBottom: '0.5rem' }}>✅ Acompañamiento personalizado</li>
-                                </ul>
-                            </div>
                         </div>
 
                         {/* Contact Form */}
@@ -145,11 +138,9 @@ export default function ContactPage() {
 
                             <div style={{ marginTop: 'var(--space-md)', textAlign: 'center', color: 'var(--color-text-muted)' }}>
                                 <p>O escríbenos directamente:</p>
-                                <p style={{ marginTop: '0.5rem', fontWeight: 'bold', color: 'var(--color-secondary)' }}>+57 300 000 0000</p>
-                                <p>info@origo.com</p>
+                                <a href="mailto:info@origo.com" style={{ color: 'var(--color-secondary)', fontWeight: 'bold' }}>info@origo.com</a>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </main>

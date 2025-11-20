@@ -1,5 +1,3 @@
-'use client';
-
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -200,7 +198,7 @@ export default function PropertyDetailClient({ id }) {
           position: absolute;
           bottom: 0;
           left: 0;
-          width: 100%;
+          right: 0;
           background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
           padding: var(--space-lg) 0 var(--space-md);
           color: white;
@@ -220,12 +218,13 @@ export default function PropertyDetailClient({ id }) {
         .badge {
           background: var(--color-secondary);
           padding: 4px 12px;
-          border-radius: 4px;
-          font-weight: bold;
-          text-transform: uppercase;
+          border-radius: 20px;
           font-size: 0.8rem;
-          margin-bottom: 0.5rem;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 1px;
           display: inline-block;
+          margin-bottom: 0.5rem;
         }
         .title {
           font-size: 2.5rem;
@@ -235,19 +234,16 @@ export default function PropertyDetailClient({ id }) {
           font-size: 1.1rem;
           opacity: 0.9;
         }
-
+        
         .content-grid {
           display: grid;
           grid-template-columns: 1fr;
           gap: var(--space-lg);
         }
-
+        
         @media (min-width: 768px) {
           .content-grid {
             grid-template-columns: 2fr 1fr;
-          }
-          .mobile-only {
-            display: none;
           }
         }
 
@@ -257,8 +253,8 @@ export default function PropertyDetailClient({ id }) {
         .section h2 {
           font-size: 1.5rem;
           color: var(--color-primary);
-          margin-bottom: var(--space-sm);
-          border-bottom: 2px solid var(--color-border);
+          margin-bottom: 1rem;
+          border-bottom: 1px solid var(--color-border);
           padding-bottom: 0.5rem;
         }
 
@@ -269,24 +265,27 @@ export default function PropertyDetailClient({ id }) {
           gap: 1rem;
         }
         .features-list li {
+          background: white;
+          padding: 1rem;
+          border-radius: 8px;
+          border: 1px solid var(--color-border);
           color: var(--color-text-main);
         }
 
         .contact-card {
           background: white;
-          padding: var(--space-md);
+          padding: 1.5rem;
           border-radius: 12px;
-          border: 1px solid var(--color-border);
           box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+          border: 1px solid var(--color-border);
           position: sticky;
-          top: 100px;
+          top: 2rem;
         }
-
         .price-label {
           font-size: 0.9rem;
           color: var(--color-text-muted);
           text-transform: uppercase;
-          letter-spacing: 1px;
+          letter-spacing: 0.5px;
         }
         .price-value {
           font-size: 2rem;
