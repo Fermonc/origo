@@ -1,41 +1,121 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import PropertyCard from '@/components/PropertyCard';
-import { properties } from '@/data/properties';
+import Link from 'next/link';
+import { db } from '@/lib/firebase';
+import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
+import SeedDatabase from '@/components/SeedDatabase';
+import SkeletonCard from '@/components/SkeletonCard';
 
 export default function Home() {
-  const featuredProperties = properties.slice(0, 3);
+  const [featuredProperties, setFeaturedProperties] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchFeatured = async () => {
+      try {
+        const q = query(collection(db, 'properties'), orderBy('createdAt', 'desc'), limit(3));
+        const querySnapshot = await getDocs(q);
+        const props = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setFeaturedProperties(props);
+      } catch (error) {
+        console.error("Error fetching featured:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFeatured();
+  }, []);
 
   return (
     <div className="page">
-      <header style={{ padding: 'var(--space-sm) 0', borderBottom: '1px solid var(--color-border)', background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(10px)', position: 'sticky', top: 0, zIndex: 100 }}>
-        <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--color-primary)' }}>Origo</h1>
-          <nav>
-            <a href="/propiedades" style={{ marginRight: 'var(--space-sm)' }}>Propiedades</a>
-            <a href="/contacto" className="btn btn-primary">Contacto</a>
+      <header className="header desktop-only">
+        <div className="container header-content">
+          <div className="logo">Origo</div>
+          <nav className="nav">
+            <Link href="/propiedades">Propiedades</Link>
+            <Link href="/contacto">Contacto</Link>
+            <Link href="/admin/login" className="btn-login">Admin</Link>
           </nav>
         </div>
       </header>
 
       <main>
         {/* Hero Section */}
-        <section style={{
-          padding: 'var(--space-xl) 0',
-          textAlign: 'center',
-          background: 'linear-gradient(to bottom, var(--color-bg), #fff)'
-        }}>
-          <div className="container">
-            <h2 style={{ fontSize: '3.5rem', marginBottom: 'var(--space-sm)', color: 'var(--color-primary)', letterSpacing: '-1px' }}>
+        {/* Hero Section */}
+        <section className="hero-section">
+          <div className="hero-overlay"></div>
+          <div className="container hero-content">
+            <h2 className="hero-title">
               Encuentra tu espacio ideal
             </h2>
-            <p style={{ fontSize: '1.25rem', color: 'var(--color-text-muted)', marginBottom: 'var(--space-md)', maxWidth: '600px', margin: '0 auto var(--space-md)' }}>
+            <p className="hero-subtitle">
               Locales, Lotes y Fincas exclusivas. Conectamos con la naturaleza y el comercio.
             </p>
             <div style={{ display: 'flex', gap: 'var(--space-sm)', justifyContent: 'center' }}>
-              <button className="btn btn-primary">Ver Inmuebles</button>
-              <button className="btn" style={{ border: '1px solid var(--color-border)', background: 'white' }}>Saber más</button>
+              <Link href="/propiedades" className="btn btn-primary">Ver Inmuebles</Link>
+              <Link href="/contacto" className="btn btn-outline">Contáctanos</Link>
             </div>
           </div>
         </section>
+
+        <style jsx>{`
+          .hero-section {
+            position: relative;
+            padding: var(--space-xl) 0;
+            text-align: center;
+            background-image: url('https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            min-height: 60vh;
+            display: flex;
+            align-items: center;
+          }
+          .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5); /* Dark overlay for contrast */
+            z-index: 1;
+          }
+          .hero-content {
+            position: relative;
+            z-index: 2;
+          }
+          .hero-title {
+            font-size: 3.5rem;
+            margin-bottom: var(--space-sm);
+            color: white;
+            letter-spacing: -1px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+          }
+          .hero-subtitle {
+            font-size: 1.25rem;
+            color: #f3f4f6;
+            margin-bottom: var(--space-md);
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+          }
+          .btn-outline {
+            background: transparent;
+            border: 2px solid white;
+            color: white;
+          }
+          .btn-outline:hover {
+            background: white;
+            color: var(--color-primary);
+          }
+        `}</style>
 
         {/* Featured Properties */}
         <section style={{ padding: 'var(--space-lg) 0' }}>
@@ -45,17 +125,33 @@ export default function Home() {
                 <h3 style={{ fontSize: '2rem', color: 'var(--color-primary)' }}>Propiedades Destacadas</h3>
                 <p style={{ color: 'var(--color-text-muted)' }}>Oportunidades únicas seleccionadas para ti</p>
               </div>
-              <a href="#" style={{ color: 'var(--color-secondary)', fontWeight: '600' }}>Ver todas →</a>
+              <Link href="/propiedades" style={{ color: 'var(--color-secondary)', fontWeight: '600' }}>Ver todas →</Link>
             </div>
+
+            {/* Seed Button (Dev Only) */}
+            {!loading && featuredProperties.length === 0 && (
+              <div style={{ margin: '2rem 0', padding: '1rem', border: '1px dashed var(--color-border)', borderRadius: '8px', textAlign: 'center' }}>
+                <p style={{ marginBottom: '1rem', fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>⚠️ Base de datos vacía</p>
+                <SeedDatabase />
+              </div>
+            )}
 
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
               gap: 'var(--space-md)'
             }}>
-              {featuredProperties.map(property => (
-                <PropertyCard key={property.id} property={property} />
-              ))}
+              {loading ? (
+                <>
+                  <SkeletonCard />
+                  <SkeletonCard />
+                  <SkeletonCard />
+                </>
+              ) : (
+                featuredProperties.map(property => (
+                  <PropertyCard key={property.id} property={property} />
+                ))
+              )}
             </div>
           </div>
         </section>

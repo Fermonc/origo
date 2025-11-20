@@ -1,9 +1,12 @@
 :root {
   /* Brand Colors - Earthy & Premium */
-  --color-primary: #2C3E50; /* Deep Blue/Grey */
-  --color-secondary: #E67E22; /* Accent Terra */
-  --color-accent: #27AE60; /* Nature Green */
-  
+  --color-primary: #2C3E50;
+  /* Deep Blue/Grey */
+  --color-secondary: #E67E22;
+  /* Accent Terra */
+  --color-accent: #27AE60;
+  /* Nature Green */
+
   /* Neutral Colors */
   --color-bg: #F9FAFB;
   --color-surface: #FFFFFF;
@@ -28,8 +31,15 @@
     --color-bg: #111827;
     --color-surface: #1F2937;
     --color-text-main: #F9FAFB;
-    --color-text-muted: #9CA3AF;
+    --color-text-muted: #D1D5DB;
+    /* Lighter grey for better readability */
     --color-border: #374151;
+
+    /* Adjust brand colors for dark mode contrast */
+    --color-primary: #60A5FA;
+    /* Lighter Blue */
+    --color-secondary: #FB923C;
+    /* Lighter Orange */
   }
 }
 
@@ -39,12 +49,44 @@
   margin: 0;
 }
 
+/* Enable View Transitions */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.3s;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  background-color: var(--color-bg);
   color: var(--color-text-main);
-  font-family: var(--font-sans);
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
+  background: var(--color-bg);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  padding-bottom: 70px;
+  /* Space for BottomNav on mobile */
+}
+
+/* Desktop Adjustments */
+@media (min-width: 768px) {
+  body {
+    padding-bottom: 0;
+  }
+}
+
+/* Utility to hide elements on mobile/desktop */
+.desktop-only {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .desktop-only {
+    display: block;
+  }
+
+  .mobile-only {
+    display: none;
+  }
 }
 
 a {

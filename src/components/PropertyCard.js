@@ -1,18 +1,19 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function PropertyCard({ property }) {
   return (
     <Link href={`/propiedades/${property.id}`} style={{ display: 'block', textDecoration: 'none' }}>
       <div className="property-card">
         <div className="image-container">
-          {/* En un caso real, usaríamos next/image con una ruta real. 
-              Por ahora usaremos un div con background o una imagen generada. */}
-          <img
-            src={property.image}
+          <Image
+            src={property.image || (property.images && property.images[0]) || '/placeholder.jpg'}
             alt={property.title}
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            fill
+            style={{ objectFit: 'cover' }}
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
           <span className="badge">{property.type}</span>
         </div>
@@ -35,6 +36,7 @@ export default function PropertyCard({ property }) {
             box-shadow: 0 4px 20px rgba(0,0,0,0.05);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             border: 1px solid var(--color-border);
+            position: relative;
           }
           .property-card:hover {
             transform: translateY(-5px);
@@ -57,6 +59,7 @@ export default function PropertyCard({ property }) {
             color: var(--color-primary);
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            z-index: 1;
           }
           .content {
             padding: 1.5rem;

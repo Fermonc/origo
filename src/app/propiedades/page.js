@@ -1,14 +1,39 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PropertyCard from '@/components/PropertyCard';
-import { properties as initialProperties } from '@/data/properties';
+import { db } from '@/lib/firebase';
+import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import Link from 'next/link';
+import SkeletonCard from '@/components/SkeletonCard';
 
 export default function PropertiesPage() {
+  const [properties, setProperties] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState('Todos');
   const [searchTerm, setSearchTerm] = useState('');
 
-  const filteredProperties = initialProperties.filter(prop => {
+  useEffect(() => {
+    const fetchProperties = async () => {
+      try {
+        const q = query(collection(db, 'properties'), orderBy('createdAt', 'desc'));
+        const querySnapshot = await getDocs(q);
+        const props = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setProperties(props);
+      } catch (error) {
+        console.error("Error fetching properties:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProperties();
+  }, []);
+
+  const filteredProperties = properties.filter(prop => {
     const matchesType = filterType === 'Todos' || prop.type === filterType;
     const matchesSearch = prop.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       prop.location.toLowerCase().includes(searchTerm.toLowerCase());
@@ -17,12 +42,12 @@ export default function PropertiesPage() {
 
   return (
     <div className="page">
-      <header style={{ padding: 'var(--space-sm) 0', borderBottom: '1px solid var(--color-border)', background: 'white' }}>
+      <header className="desktop-only" style={{ padding: 'var(--space-sm) 0', borderBottom: '1px solid var(--color-border)', background: 'white' }}>
         <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <a href="/" style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--color-primary)' }}>Origo</a>
+          <Link href="/" style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--color-primary)' }}>Origo</Link>
           <nav>
-            <a href="/propiedades" style={{ marginRight: 'var(--space-sm)', fontWeight: 'bold', color: 'var(--color-secondary)' }}>Propiedades</a>
-            <a href="/contacto" className="btn btn-primary">Contacto</a>
+            <Link href="/propiedades" style={{ marginRight: 'var(--space-sm)', fontWeight: 'bold', color: 'var(--color-secondary)' }}>Propiedades</Link>
+            <Link href="/contacto" className="btn btn-primary">Contacto</Link>
           </nav>
         </div>
       </header>
@@ -59,7 +84,16 @@ export default function PropertiesPage() {
 
           {/* Grid */}
           <div className="properties-grid">
-            {filteredProperties.length > 0 ? (
+            {loading ? (
+              <>
+                <SkeletonCard />
+                <SkeletonCard />
+                <SkeletonCard />
+                <SkeletonCard />
+                <SkeletonCard />
+                <SkeletonCard />
+              </>
+            ) : filteredProperties.length > 0 ? (
               filteredProperties.map(property => (
                 <PropertyCard key={property.id} property={property} />
               ))
