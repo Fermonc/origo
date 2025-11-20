@@ -3,22 +3,54 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, addDoc, query, where, limit, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import SkeletonDetail from '@/components/SkeletonDetail';
 import PropertyMap from '@/components/PropertyMap';
+import PropertyCard from '@/components/PropertyCard';
 
 export default function PropertyDetailClient({ id }) {
   const [property, setProperty] = useState(null);
+  const [similarProperties, setSimilarProperties] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Contact Form State
+  const [contactForm, setContactForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    message: ''
+  });
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+
   useEffect(() => {
-    const fetchProperty = async () => {
+    const fetchPropertyAndSimilar = async () => {
       try {
+        // 1. Fetch current property
         const docRef = doc(db, 'properties', id);
         const docSnap = await getDoc(docRef);
+
         if (docSnap.exists()) {
-          setProperty({ id: docSnap.id, ...docSnap.data() });
+          const propData = { id: docSnap.id, ...docSnap.data() };
+          setProperty(propData);
+
+          // 2. Fetch similar properties (same type, excluding current)
+          if (propData.type) {
+            const q = query(
+              collection(db, 'properties'),
+              where('type', '==', propData.type),
+              limit(4)
+            );
+            const querySnapshot = await getDocs(q);
+            const similar = [];
+            querySnapshot.forEach((doc) => {
+              if (doc.id !== id) {
+                similar.push({ id: doc.id, ...doc.data() });
+              }
+            });
+            setSimilarProperties(similar);
+          }
         }
       } catch (error) {
         console.error("Error fetching property:", error);
@@ -28,9 +60,35 @@ export default function PropertyDetailClient({ id }) {
     };
 
     if (id) {
-      fetchProperty();
+      fetchPropertyAndSimilar();
     }
   }, [id]);
+
+  const handleContactChange = (e) => {
+    const { name, value } = e.target;
+    setContactForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleContactSubmit = async (e) => {
+    e.preventDefault();
+    setSending(true);
+    try {
+      await addDoc(collection(db, 'messages'), {
+        ...contactForm,
+        propertyId: property.id,
+        propertyTitle: property.title,
+        createdAt: new Date().toISOString(),
+        read: false
+      });
+      setSent(true);
+      setContactForm({ name: '', email: '', phone: '', message: '' });
+    } catch (error) {
+      console.error("Error sending message:", error);
+      alert("Hubo un error al enviar el mensaje. Intenta nuevamente.");
+    } finally {
+      setSending(false);
+    }
+  };
 
   if (loading) {
     return <SkeletonDetail />;
@@ -46,6 +104,13 @@ export default function PropertyDetailClient({ id }) {
       </div>
     );
   }
+
+  // Helper to get images array safely
+  const images = property.images && property.images.length > 0
+    ? property.images
+    : property.image
+      ? [property.image]
+      : ['https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80'];
 
   return (
     <div className="page">
@@ -63,33 +128,19 @@ export default function PropertyDetailClient({ id }) {
         {/* Image Gallery Carousel */}
         <div className="gallery-container">
           <div className="gallery-scroll">
-            {property.images && property.images.length > 0 ? (
-              property.images.map((img, index) => (
-                <div key={index} className="gallery-item">
-                  <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-                    <Image
-                      src={img}
-                      alt={`${property.title} - ${index + 1}`}
-                      fill
-                      style={{ objectFit: 'cover' }}
-                      priority={index === 0}
-                    />
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="gallery-item">
+            {images.map((img, index) => (
+              <div key={index} className="gallery-item">
                 <div style={{ position: 'relative', width: '100%', height: '100%' }}>
                   <Image
-                    src={property.image}
-                    alt={property.title}
+                    src={img}
+                    alt={`${property.title} - ${index + 1}`}
                     fill
                     style={{ objectFit: 'cover' }}
-                    priority
+                    priority={index === 0}
                   />
                 </div>
               </div>
-            )}
+            ))}
           </div>
 
           <div className="overlay">
@@ -97,9 +148,9 @@ export default function PropertyDetailClient({ id }) {
               <span className="badge">{property.type}</span>
               <h1 className="title">{property.title}</h1>
               <p className="location">📍 {property.location}</p>
-              {property.images && property.images.length > 1 && (
+              {images.length > 1 && (
                 <div className="gallery-indicator">
-                  📷 {property.images.length} Fotos (Desliza →)
+                  📷 {images.length} Fotos (Desliza →)
                 </div>
               )}
             </div>
@@ -117,7 +168,7 @@ export default function PropertyDetailClient({ id }) {
 
               <section className="section">
                 <h2>Descripción</h2>
-                <p style={{ color: 'var(--color-text-muted)', whiteSpace: 'pre-line' }}>
+                <p style={{ color: 'var(--color-text-muted)', whiteSpace: 'pre-line', lineHeight: '1.6' }}>
                   {property.description}
                 </p>
               </section>
@@ -125,10 +176,10 @@ export default function PropertyDetailClient({ id }) {
               <section className="section">
                 <h2>Características</h2>
                 <ul className="features-list">
-                  <li>📐 <strong>Área:</strong> {property.area}</li>
-                  {property.beds && <li>🛏️ <strong>Habitaciones:</strong> {property.beds}</li>}
-                  {property.baths && <li>🚿 <strong>Baños:</strong> {property.baths}</li>}
-                  {/* Handle features if array or undefined */}
+                  <li>📐 <strong>Área:</strong> {property.area} m²</li>
+                  {property.bedrooms && <li>🛏️ <strong>Habitaciones:</strong> {property.bedrooms}</li>}
+                  {property.bathrooms && <li>🚿 <strong>Baños:</strong> {property.bathrooms}</li>}
+                  {property.stratum && <li>🏙️ <strong>Estrato:</strong> {property.stratum}</li>}
                   {property.features && Array.isArray(property.features) && property.features.map((feature, index) => (
                     <li key={index}>✅ {feature}</li>
                   ))}
@@ -141,6 +192,20 @@ export default function PropertyDetailClient({ id }) {
                   <PropertyMap lat={property.lat} lng={property.lng} title={property.title} />
                 </section>
               )}
+
+              {/* Similar Properties Section */}
+              {similarProperties.length > 0 && (
+                <section className="section similar-section">
+                  <h2>Propiedades Similares</h2>
+                  <div className="similar-grid">
+                    {similarProperties.map(sim => (
+                      <div key={sim.id} style={{ minWidth: '250px' }}>
+                        <PropertyCard property={sim} />
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
             </div>
 
             {/* Sidebar / Sticky Contact */}
@@ -149,16 +214,67 @@ export default function PropertyDetailClient({ id }) {
                 <p className="price-label">Precio de Venta</p>
                 <p className="price-value">{property.price}</p>
                 <hr style={{ margin: '1rem 0', border: 'none', borderTop: '1px solid var(--color-border)' }} />
-                <p style={{ marginBottom: '1rem', fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>
-                  ¿Te interesa esta propiedad? Contáctanos directamente por WhatsApp para agendar una visita.
-                </p>
+
+                <h3>Me interesa esta propiedad</h3>
+
+                {sent ? (
+                  <div className="success-message">
+                    <p>✅ ¡Mensaje enviado!</p>
+                    <p>Nos pondremos en contacto contigo pronto.</p>
+                    <button onClick={() => setSent(false)} className="btn-text">Enviar otro mensaje</button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleContactSubmit} className="contact-form">
+                    <input
+                      type="text"
+                      name="name"
+                      placeholder="Tu Nombre"
+                      value={contactForm.name}
+                      onChange={handleContactChange}
+                      required
+                      className="form-input"
+                    />
+                    <input
+                      type="email"
+                      name="email"
+                      placeholder="Tu Correo"
+                      value={contactForm.email}
+                      onChange={handleContactChange}
+                      required
+                      className="form-input"
+                    />
+                    <input
+                      type="tel"
+                      name="phone"
+                      placeholder="Tu Teléfono"
+                      value={contactForm.phone}
+                      onChange={handleContactChange}
+                      required
+                      className="form-input"
+                    />
+                    <textarea
+                      name="message"
+                      placeholder="Hola, me interesa esta propiedad..."
+                      value={contactForm.message}
+                      onChange={handleContactChange}
+                      rows="3"
+                      className="form-input"
+                    ></textarea>
+
+                    <button type="submit" className="btn btn-primary btn-block" disabled={sending}>
+                      {sending ? 'Enviando...' : 'Enviar Mensaje'}
+                    </button>
+                  </form>
+                )}
+
+                <div className="divider">o contáctanos por</div>
+
                 <a
                   href={`https://wa.me/573000000000?text=Hola, estoy interesado en la propiedad ${property.title} (ID: ${property.id})`}
                   target="_blank"
-                  className="btn btn-primary"
-                  style={{ width: '100%', textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}
+                  className="btn btn-whatsapp btn-block"
                 >
-                  <span>💬</span> Contactar por WhatsApp
+                  <span>💬</span> WhatsApp
                 </a>
               </div>
             </aside>
@@ -294,7 +410,68 @@ export default function PropertyDetailClient({ id }) {
           font-weight: bold;
           color: var(--color-primary);
         }
+
+        .contact-form {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+          margin-top: 1rem;
+        }
+
+        .form-input {
+          padding: 0.8rem;
+          border: 1px solid var(--color-border);
+          border-radius: 8px;
+          font-size: 1rem;
+          width: 100%;
+        }
+
+        .btn-block {
+          width: 100%;
+          justify-content: center;
+        }
+
+        .btn-whatsapp {
+          background-color: #25D366;
+          color: white;
+          padding: 0.8rem 1.5rem;
+          border-radius: 8px;
+          font-weight: 600;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          transition: opacity 0.2s;
+        }
+        
+        .btn-whatsapp:hover {
+          opacity: 0.9;
+        }
+
+        .divider {
+          text-align: center;
+          margin: 1rem 0;
+          color: var(--color-text-muted);
+          font-size: 0.9rem;
+        }
+
+        .success-message {
+          background: #dcfce7;
+          color: #166534;
+          padding: 1rem;
+          border-radius: 8px;
+          text-align: center;
+          margin-top: 1rem;
+        }
+
+        .similar-grid {
+          display: flex;
+          overflow-x: auto;
+          gap: 1rem;
+          padding-bottom: 1rem;
+        }
       `}</style>
     </div>
   );
 }
+
