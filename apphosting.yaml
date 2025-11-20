@@ -1,7 +1,13 @@
 env:
   - variable: NEXT_PUBLIC_FIREBASE_API_KEY
+    value: "AIzaSyBLtxZFPGg1chx-SRazpqIht25Ou20q2ks"
   - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    value: "origo-1629f.firebaseapp.com"
   - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    value: "origo-1629f"
   - variable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+    value: "origo-1629f.firebasestorage.app"
   - variable: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+    value: "94575911536"
   - variable: NEXT_PUBLIC_FIREBASE_APP_ID
+    value: "1:94575911536:web:53dd74a4ddc61799054ab5"
