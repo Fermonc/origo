@@ -40,7 +40,7 @@ El error de compilación que viste se debe a que faltaban estas variables. Vamos
     ```bash
     git add .
     git commit -m "Fix: Add apphosting.yaml for environment variables"
-    git push
+    git push -u origin main
     ```
 
 2.  Vuelve a la **Consola de Firebase**. Verás que se inicia un nuevo "Lanzamiento" (Rollout) automáticamente.
