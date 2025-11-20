@@ -2,12 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+'use client';
+
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import Image from 'next/image';
 import { doc, getDoc, collection, addDoc, query, where, limit, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import SkeletonDetail from '@/components/SkeletonDetail';
 import PropertyMap from '@/components/PropertyMap';
 import PropertyCard from '@/components/PropertyCard';
+import { formatPrice } from '@/utils/format';
 
 export default function PropertyDetailClient({ id }) {
   const [property, setProperty] = useState(null);
@@ -163,12 +168,12 @@ export default function PropertyDetailClient({ id }) {
             <div className="details">
               <div className="price-card mobile-only">
                 <p className="price-label">Precio de Venta</p>
-                <p className="price-value">{property.price}</p>
+                <p className="price-value">{formatPrice(property.price)}</p>
               </div>
 
               <section className="section">
                 <h2>Descripción</h2>
-                <p style={{ color: 'var(--color-text-muted)', whiteSpace: 'pre-line', lineHeight: '1.6' }}>
+                <p style={{ color: 'var(--color-text-muted)', whiteWhiteSpace: 'pre-line', lineHeight: '1.6' }}>
                   {property.description}
                 </p>
               </section>
@@ -212,7 +217,7 @@ export default function PropertyDetailClient({ id }) {
             <aside className="sidebar">
               <div className="contact-card">
                 <p className="price-label">Precio de Venta</p>
-                <p className="price-value">{property.price}</p>
+                <p className="price-value">{formatPrice(property.price)}</p>
                 <hr style={{ margin: '1rem 0', border: 'none', borderTop: '1px solid var(--color-border)' }} />
 
                 <h3>Me interesa esta propiedad</h3>
@@ -274,7 +279,11 @@ export default function PropertyDetailClient({ id }) {
                   target="_blank"
                   className="btn btn-whatsapp btn-block"
                 >
-                  <span>💬</span> WhatsApp
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M17.472 14.382C17.112 14.202 15.344 13.332 15.013 13.212C14.682 13.092 14.442 13.032 14.202 13.392C13.962 13.752 13.272 14.562 13.062 14.802C12.852 15.042 12.642 15.072 12.282 14.892C11.922 14.712 10.762 14.332 9.382 13.102C8.272 12.112 7.522 10.892 7.312 10.532C7.102 10.172 7.292 9.982 7.472 9.802C7.632 9.642 7.832 9.382 8.012 9.172C8.192 8.962 8.252 8.812 8.372 8.572C8.492 8.332 8.432 8.122 8.342 7.942C8.252 7.762 7.532 5.992 7.232 5.272C6.942 4.572 6.642 4.672 6.432 4.672C6.232 4.662 6.002 4.662 5.762 4.662C5.522 4.662 5.132 4.752 4.802 5.112C4.472 5.472 3.542 6.342 3.542 8.112C3.542 9.882 4.832 11.592 5.012 11.832C5.192 12.072 7.562 15.732 11.192 17.302C12.052 17.672 12.732 17.892 13.262 18.062C14.322 18.402 15.282 18.352 16.042 18.232C16.892 18.102 18.662 17.152 19.032 16.112C19.402 15.072 19.402 14.192 19.282 13.992C19.172 13.792 18.932 13.662 18.572 13.482H17.472V14.382Z" />
+                    <path d="M12 0C5.373 0 0 5.373 0 12C0 14.084 0.536 16.036 1.476 17.748L0.085 22.833L5.29 21.467C6.936 22.364 8.803 22.835 10.724 22.835H12C18.627 22.835 24 17.462 24 10.835C24 4.208 18.627 0 12 0ZM12 20.949C10.187 20.949 8.468 20.449 6.988 19.57L6.638 19.362L2.885 20.347L3.887 16.688L3.658 16.323C2.706 14.809 2.159 13.049 2.159 11.165C2.159 5.743 6.572 1.33 11.994 1.33C17.416 1.33 21.829 5.743 21.829 11.165C21.829 16.587 17.416 20.949 12 20.949Z" />
+                  </svg>
+                  WhatsApp
                 </a>
               </div>
             </aside>
@@ -420,10 +429,18 @@ export default function PropertyDetailClient({ id }) {
 
         .form-input {
           padding: 0.8rem;
-          border: 1px solid var(--color-border);
+          border: 1px solid #ccc;
           border-radius: 8px;
           font-size: 1rem;
           width: 100%;
+          background: #f9f9f9;
+          color: #333;
+        }
+        
+        .form-input:focus {
+          outline: none;
+          border-color: var(--color-primary);
+          background: white;
         }
 
         .btn-block {
@@ -474,4 +491,3 @@ export default function PropertyDetailClient({ id }) {
     </div>
   );
 }
-
