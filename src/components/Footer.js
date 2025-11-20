@@ -3,60 +3,60 @@
 import Link from 'next/link';
 
 export default function Footer() {
-    return (
-        <footer className="footer">
-            <div className="container">
-                <div className="footer-grid">
-                    {/* Brand Column */}
-                    <div className="footer-col">
-                        <h3 className="footer-logo">Origo</h3>
-                        <p className="footer-desc">
-                            Conectamos personas con espacios únicos en el Oriente Antioqueño.
-                            Tu próximo proyecto comienza aquí.
-                        </p>
-                        <div className="social-links">
-                            <a href="#" aria-label="Instagram">📸</a>
-                            <a href="#" aria-label="Facebook">📘</a>
-                            <a href="#" aria-label="WhatsApp">💬</a>
-                        </div>
-                    </div>
-
-                    {/* Links Column */}
-                    <div className="footer-col">
-                        <h4>Explorar</h4>
-                        <nav className="footer-nav">
-                            <Link href="/propiedades">Propiedades</Link>
-                            <Link href="/propiedades?type=Lote">Lotes</Link>
-                            <Link href="/propiedades?type=Finca">Fincas</Link>
-                            <Link href="/propiedades?type=Local">Locales</Link>
-                        </nav>
-                    </div>
-
-                    {/* Company Column */}
-                    <div className="footer-col">
-                        <h4>Empresa</h4>
-                        <nav className="footer-nav">
-                            <Link href="/contacto">Sobre Nosotros</Link>
-                            <Link href="/contacto">Contáctanos</Link>
-                            <Link href="/admin/login">Acceso Admin</Link>
-                        </nav>
-                    </div>
-
-                    {/* Contact Column */}
-                    <div className="footer-col">
-                        <h4>Contacto</h4>
-                        <p>📍 Rionegro, Antioquia</p>
-                        <p>📞 +57 300 123 4567</p>
-                        <p>✉️ info@origo.com</p>
-                    </div>
-                </div>
-
-                <div className="footer-bottom">
-                    <p>&copy; {new Date().getFullYear()} Origo Inmobiliaria. Todos los derechos reservados.</p>
-                </div>
+  return (
+    <footer className="footer desktop-only">
+      <div className="container">
+        <div className="footer-grid">
+          {/* Brand Column */}
+          <div className="footer-col">
+            <h3 className="footer-logo">Origo</h3>
+            <p className="footer-desc">
+              Conectamos personas con espacios únicos en el Oriente Antioqueño.
+              Tu próximo proyecto comienza aquí.
+            </p>
+            <div className="social-links">
+              <a href="#" aria-label="Instagram">📸</a>
+              <a href="#" aria-label="Facebook">📘</a>
+              <a href="#" aria-label="WhatsApp">💬</a>
             </div>
+          </div>
 
-            <style jsx>{`
+          {/* Links Column */}
+          <div className="footer-col">
+            <h4>Explorar</h4>
+            <nav className="footer-nav">
+              <Link href="/propiedades">Propiedades</Link>
+              <Link href="/propiedades?type=Lote">Lotes</Link>
+              <Link href="/propiedades?type=Finca">Fincas</Link>
+              <Link href="/propiedades?type=Local">Locales</Link>
+            </nav>
+          </div>
+
+          {/* Company Column */}
+          <div className="footer-col">
+            <h4>Empresa</h4>
+            <nav className="footer-nav">
+              <Link href="/contacto">Sobre Nosotros</Link>
+              <Link href="/contacto">Contáctanos</Link>
+              <Link href="/admin/login">Acceso Admin</Link>
+            </nav>
+          </div>
+
+          {/* Contact Column */}
+          <div className="footer-col">
+            <h4>Contacto</h4>
+            <p>📍 Rionegro, Antioquia</p>
+            <p>📞 +57 300 123 4567</p>
+            <p>✉️ info@origo.com</p>
+          </div>
+        </div>
+
+        <div className="footer-bottom">
+          <p>&copy; {new Date().getFullYear()} Origo Inmobiliaria. Todos los derechos reservados.</p>
+        </div>
+      </div>
+
+      <style jsx>{`
         .footer {
           background-color: var(--color-primary);
           color: white;
@@ -140,6 +140,6 @@ export default function Footer() {
           font-size: 0.9rem;
         }
       `}</style>
-        </footer>
-    );
+    </footer>
+  );
 }
