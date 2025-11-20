@@ -9,7 +9,7 @@ export default function PropertyCard({ property }) {
       <div className="property-card">
         <div className="image-container">
           <Image
-            src={property.image}
+            src={property.images?.[0] || property.image || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80'}
             alt={property.title}
             fill
             style={{ objectFit: 'cover' }}
