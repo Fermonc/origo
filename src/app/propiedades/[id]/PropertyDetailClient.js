@@ -2,10 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-'use client';
-
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import Image from 'next/image';
 import { doc, getDoc, collection, addDoc, query, where, limit, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -173,7 +169,7 @@ export default function PropertyDetailClient({ id }) {
 
               <section className="section">
                 <h2>Descripción</h2>
-                <p style={{ color: 'var(--color-text-muted)', whiteWhiteSpace: 'pre-line', lineHeight: '1.6' }}>
+                <p style={{ color: 'var(--color-text-muted)', whiteSpace: 'pre-line', lineHeight: '1.6' }}>
                   {property.description}
                 </p>
               </section>
