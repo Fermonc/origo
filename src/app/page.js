@@ -152,40 +152,6 @@ export default function Home() {
             </div>
           </div>
         </section>
-
-        {/* Social Proof / Testimonials */}
-        <section className="testimonials-section">
-          <div className="container">
-            <div className="stats-grid">
-              <div className="stat-item">
-                <span className="stat-number">+10</span>
-                <span className="stat-label">Años de Experiencia</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-number">+500</span>
-                <span className="stat-label">Propiedades Vendidas</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-number">100%</span>
-                <span className="stat-label">Clientes Satisfechos</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* CTA Section */}
-        <section className="cta-section">
-          <div className="container">
-            <div className="cta-content">
-              <h2>¿Tienes una propiedad para vender?</h2>
-              <p>Únete a nuestra red exclusiva y encuentra el comprador ideal más rápido.</p>
-              <Link href="/contacto" className="btn btn-primary btn-large">
-                Publicar con Origo
-              </Link>
-            </div>
-          </div>
-        </section>
-
       </main>
 
       <style jsx>{`
@@ -233,72 +199,7 @@ export default function Home() {
           font-weight: 600;
         }
 
-        .testimonials-section {
-          background: var(--color-surface);
-          padding: var(--space-xl) 0;
-          border-top: 1px solid var(--color-border);
-        }
-
-        .stats-grid {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: var(--space-md);
-          text-align: center;
-        }
-
-        .stat-number {
-          display: block;
-          font-size: 2.5rem;
-          font-weight: 800;
-          color: var(--color-secondary);
-          margin-bottom: 0.5rem;
-        }
-
-        .stat-label {
-          color: var(--color-text-muted);
-          font-weight: 500;
-        }
-
-        .cta-section {
-          padding: var(--space-xl) 0;
-          text-align: center;
-          background: linear-gradient(rgba(44, 62, 80, 0.9), rgba(44, 62, 80, 0.9)), url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=80');
-          background-size: cover;
-          background-position: center;
-          color: white;
-        }
-
-        .cta-content h2 {
-          font-size: 2.5rem;
-          margin-bottom: 1rem;
-        }
-
-        .cta-content p {
-          font-size: 1.2rem;
-          margin-bottom: 2rem;
-          opacity: 0.9;
-          max-width: 600px;
-          margin-left: auto;
-          margin-right: auto;
-        }
-
-        .btn-large {
-          padding: 1rem 2.5rem;
-          font-size: 1.1rem;
-          background: var(--color-secondary);
-        }
-        
-        .btn-large:hover {
-          background: white;
-          color: var(--color-primary);
-        }
-
         @media (max-width: 768px) {
-          .stats-grid {
-            grid-template-columns: 1fr;
-            gap: var(--space-lg);
-          }
-          
           .search-container {
             flex-direction: column;
             background: transparent;
