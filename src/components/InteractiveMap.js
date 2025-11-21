@@ -188,79 +188,247 @@ export default function InteractiveMap({ properties }) {
   };
 
   const handleLocationSelect = (coords, zoom) => {
-    z - index: 1000;
-    background: white;
-    border: none;
-    padding: 10px 20px;
-    border - radius: 30px;
-    box - shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    font - weight: 600;
-    color: var(--color - primary);
-  }
+    setMapCenter(coords);
+    // Zoom logic is handled by MapController flying to center
+  };
 
-        .fab - container {
-    position: absolute;
-    bottom: 30px;
-    right: 30px;
-    display: flex;
-    flex - direction: column;
-    gap: 12px;
-    z - index: 1000;
-  }
+  return (
+    <div className="map-wrapper">
+      {/* Sidebar */}
+      <MapSidebar
+        locations={locations}
+        filters={filters}
+        setFilters={setFilters}
+        onLocationSelect={handleLocationSelect}
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+      />
+
+      {/* Main Map Area */}
+      <div className="map-area">
+        <MapContainer
+          center={mapCenter}
+          zoom={13}
+          style={{ height: '100%', width: '100%' }}
+          zoomControl={false}
+          whenReady={(map) => {
+            handleBoundsChange(map.target.getBounds());
+          }}
+        >
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+
+          <MapController center={mapCenter} onBoundsChange={handleBoundsChange} />
+
+          {/* User Location Marker */}
+          {userLocation && (
+            <Marker position={userLocation} icon={new L.Icon({
+              iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+              shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+              iconSize: [25, 41],
+              iconAnchor: [12, 41],
+              popupAnchor: [1, -34],
+              shadowSize: [41, 41]
+            })}>
+              <Popup>Estás aquí</Popup>
+            </Marker>
+          )}
+
+          {/* Property Markers */}
+          {filteredProperties.map(property => {
+            if (!property.lat || !property.lng) return null;
+
+            return (
+              <Marker
+                key={property.id}
+                position={[property.lat, property.lng]}
+                icon={createCustomIcon(property.type)}
+              >
+                <Popup className="custom-popup" closeButton={false}>
+                  <MapPopup property={property} />
+                </Popup>
+              </Marker>
+            );
+          })}
+        </MapContainer>
+
+        {/* Mobile Sidebar Toggle */}
+        {!isSidebarOpen && (
+          <button
+            className="sidebar-toggle mobile-only"
+            onClick={() => setIsSidebarOpen(true)}
+          >
+            🔍 Filtros
+          </button>
+        )}
+
+        {/* Bottom Controls */}
+        <div className="fab-container">
+          <button
+            className="fab list-fab"
+            onClick={() => setShowList(!showList)}
+            title="Ver lista"
+          >
+            {showList ? '🗺️' : '📋'}
+            <span className="fab-badge">{visibleProperties.length}</span>
+          </button>
+
+          <button className="fab" onClick={handleLocateMe} title="Cerca de mí">
+            📍
+          </button>
+        </div>
+      </div>
+
+      {/* Property List View */}
+      <PropertyMapList
+        properties={visibleProperties}
+        isOpen={showList}
+        onClose={() => setShowList(false)}
+      />
+
+      <style jsx global>{`
+        /* Custom Marker Styles */
+        .custom-marker-icon {
+          background: none;
+          border: none;
+        }
+        .marker-circle {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          background: white;
+          box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--color-primary);
+          border: 2px solid var(--color-primary);
+          transition: transform 0.2s;
+        }
+        .marker-circle svg {
+          width: 20px;
+          height: 20px;
+        }
+        .marker-circle:hover {
+          transform: scale(1.15);
+          z-index: 1000 !important;
+        }
+        .marker-circle.lote { 
+          border-color: var(--color-accent); 
+          color: var(--color-accent);
+        }
+        .marker-circle.finca { 
+          border-color: var(--color-secondary); 
+          color: var(--color-secondary);
+        }
         
-        .mobile - only { display: none; }
+        .leaflet-popup-content-wrapper {
+          padding: 0;
+          border-radius: 12px;
+          overflow: hidden;
+        }
+        .leaflet-popup-content {
+          margin: 0;
+          width: auto !important;
+        }
+      `}</style>
 
-  @media(max - width: 768px) {
-          .mobile - only { display: block; }
+      <style jsx>{`
+        .map-wrapper {
+          position: relative;
+          height: calc(100vh - 60px);
+          width: 100%;
+          overflow: hidden;
+        }
+
+        .map-area {
+          width: 100%;
+          height: 100%;
+          position: absolute;
+          top: 0;
+          left: 0;
+          z-index: 0;
+        }
+
+        .sidebar-toggle {
+          position: absolute;
+          top: 20px;
+          left: 20px;
+          z-index: 1000;
+          background: white;
+          border: none;
+          padding: 10px 20px;
+          border-radius: 30px;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+          font-weight: 600;
+          color: var(--color-primary);
+        }
+
+        .fab-container {
+          position: absolute;
+          bottom: 30px;
+          right: 30px;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          z-index: 1000;
+        }
+        
+        .mobile-only { display: none; }
+
+        @media (max-width: 768px) {
+          .mobile-only { display: block; }
           
-          .fab - container {
-      bottom: 90px;
-      right: 20px;
-    }
-  }
+          .fab-container {
+            bottom: 90px;
+            right: 20px;
+          }
+        }
 
         .fab {
-    width: 50px;
-    height: 50px;
-    border - radius: 50 %;
-    background: white;
-    border: none;
-    box - shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    font - size: 1.5rem;
-    display: flex;
-    align - items: center;
-    justify - content: center;
-    cursor: pointer;
-    transition: transform 0.2s;
-    position: relative;
-  }
+          width: 50px;
+          height: 50px;
+          border-radius: 50%;
+          background: white;
+          border: none;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+          font-size: 1.5rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: transform 0.2s;
+          position: relative;
+        }
 
         .fab:active {
-    transform: scale(0.95);
-  }
+          transform: scale(0.95);
+        }
 
-        .list - fab {
-    background: var(--color - primary);
-    color: white;
-  }
+        .list-fab {
+          background: var(--color-primary);
+          color: white;
+        }
 
-        .fab - badge {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background: var(--color - secondary);
-    color: white;
-    font - size: 0.7rem;
-    font - weight: 700;
-    width: 20px;
-    height: 20px;
-    border - radius: 50 %;
-    display: flex;
-    align - items: center;
-    justify - content: center;
-    border: 2px solid white;
-  }
-  `}</style>
+        .fab-badge {
+          position: absolute;
+          top: -5px;
+          right: -5px;
+          background: var(--color-secondary);
+          color: white;
+          font-size: 0.7rem;
+          font-weight: 700;
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 2px solid white;
+        }
+      `}</style>
     </div>
   );
 }
