@@ -1,27 +1,53 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import MapPopup from './MapPopup';
+import PropertyMapList from './PropertyMapList';
 
-// Fix for default marker icon
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
+// Custom Marker Icon Definition
+const createCustomIcon = (price, type) => {
+    return L.divIcon({
+        className: 'custom-marker',
+        html: `<div class="marker-pin ${type.toLowerCase()}">
+             <span class="marker-price">${formatPriceShort(price)}</span>
+           </div>`,
+        iconSize: [60, 30],
+        iconAnchor: [30, 30],
+        popupAnchor: [0, -35]
+    });
+};
 
-// Component to handle map view updates
-function MapController({ center }) {
+const formatPriceShort = (price) => {
+    if (!price) return '';
+    // Extract numbers
+    const num = parseInt(price.replace(/\D/g, ''));
+    if (num >= 1000000000) return `$${(num / 1000000000).toFixed(1)}MM`;
+    if (num >= 1000000) return `$${(num / 1000000).toFixed(0)}M`;
+    return price;
+};
+
+// Component to handle map view updates and events
+function MapController({ center, onBoundsChange }) {
     const map = useMap();
+
     useEffect(() => {
         if (center) {
             map.flyTo(center, 14);
         }
     }, [center, map]);
+
+    useMapEvents({
+        moveend: () => {
+            onBoundsChange(map.getBounds());
+        },
+        zoomend: () => {
+            onBoundsChange(map.getBounds());
+        }
+    });
+
     return null;
 }
 
@@ -34,6 +60,17 @@ export default function InteractiveMap({ properties }) {
     const [userLocation, setUserLocation] = useState(null);
     const [mapCenter, setMapCenter] = useState([6.1551, -75.3737]); // Default: Rionegro
     const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [visibleProperties, setVisibleProperties] = useState([]);
+    const [showList, setShowList] = useState(false);
+
+    // Zones configuration
+    const zones = [
+        { name: 'Rionegro', coords: [6.1551, -75.3737] },
+        { name: 'Llanogrande', coords: [6.1167, -75.4167] },
+        { name: 'La Ceja', coords: [6.0333, -75.4333] },
+        { name: 'El Retiro', coords: [6.0583, -75.5000] },
+        { name: 'Marinilla', coords: [6.1750, -75.3333] },
+    ];
 
     // Filter properties
     const filteredProperties = useMemo(() => {
@@ -41,7 +78,7 @@ export default function InteractiveMap({ properties }) {
             // Type filter
             if (filters.type !== 'all' && p.type !== filters.type) return false;
 
-            // Price filter (simple parsing, assuming format like "$100.000.000")
+            // Price filter
             if (filters.minPrice || filters.maxPrice) {
                 const price = parseInt(p.price.replace(/\D/g, ''));
                 if (filters.minPrice && price < parseInt(filters.minPrice)) return false;
@@ -51,6 +88,16 @@ export default function InteractiveMap({ properties }) {
             return true;
         });
     }, [properties, filters]);
+
+    // Update visible properties when bounds change
+    const handleBoundsChange = (bounds) => {
+        const visible = filteredProperties.filter(p => {
+            if (!p.lat || !p.lng) return false;
+            const latLng = L.latLng(p.lat, p.lng);
+            return bounds.contains(latLng);
+        });
+        setVisibleProperties(visible);
+    };
 
     const handleLocateMe = () => {
         if (navigator.geolocation) {
@@ -78,13 +125,17 @@ export default function InteractiveMap({ properties }) {
                     zoom={13}
                     style={{ height: '100%', width: '100%' }}
                     zoomControl={false}
+                    whenReady={(map) => {
+                        // Initial bounds check
+                        handleBoundsChange(map.target.getBounds());
+                    }}
                 >
                     <TileLayer
                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
 
-                    <MapController center={mapCenter} />
+                    <MapController center={mapCenter} onBoundsChange={handleBoundsChange} />
 
                     {/* User Location Marker */}
                     {userLocation && (
@@ -102,12 +153,15 @@ export default function InteractiveMap({ properties }) {
 
                     {/* Property Markers */}
                     {filteredProperties.map(property => {
-                        // Fallback if coords are missing (should be validated in data)
                         if (!property.lat || !property.lng) return null;
 
                         return (
-                            <Marker key={property.id} position={[property.lat, property.lng]}>
-                                <Popup className="custom-popup">
+                            <Marker
+                                key={property.id}
+                                position={[property.lat, property.lng]}
+                                icon={createCustomIcon(property.price, property.type)}
+                            >
+                                <Popup className="custom-popup" closeButton={false}>
                                     <MapPopup property={property} />
                                 </Popup>
                             </Marker>
@@ -163,24 +217,90 @@ export default function InteractiveMap({ properties }) {
                                 onChange={(e) => setFilters({ ...filters, maxPrice: e.target.value })}
                             />
                         </div>
-                        <div className="filter-results">
-                            {filteredProperties.length} propiedades encontradas
-                        </div>
                     </div>
                 )}
 
-                {/* Floating Action Buttons */}
-                <div className="fab-container">
-                    <button className="fab" onClick={handleLocateMe} title="Cerca de mí">
-                        📍
-                    </button>
+                {/* Zone Selector Chips */}
+                <div className="zones-scroll">
+                    {zones.map(zone => (
+                        <button
+                            key={zone.name}
+                            className="zone-chip"
+                            onClick={() => setMapCenter(zone.coords)}
+                        >
+                            {zone.name}
+                        </button>
+                    ))}
                 </div>
             </div>
+
+            {/* Property List View */}
+            <PropertyMapList
+                properties={visibleProperties}
+                isOpen={showList}
+                onClose={() => setShowList(false)}
+            />
+
+            {/* Bottom Controls */}
+            <div className="fab-container">
+                <button
+                    className="fab list-fab"
+                    onClick={() => setShowList(!showList)}
+                    title="Ver lista"
+                >
+                    {showList ? '🗺️' : '📋'}
+                    <span className="fab-badge">{visibleProperties.length}</span>
+                </button>
+
+                <button className="fab" onClick={handleLocateMe} title="Cerca de mí">
+                    📍
+                </button>
+            </div>
+
+            <style jsx global>{`
+        /* Custom Marker Styles */
+        .custom-marker {
+          background: none;
+          border: none;
+        }
+        .marker-pin {
+          background: white;
+          border-radius: 20px;
+          padding: 4px 8px;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 700;
+          font-size: 0.75rem;
+          color: var(--color-primary);
+          border: 2px solid var(--color-primary);
+          white-space: nowrap;
+          transition: transform 0.2s;
+        }
+        .marker-pin:hover {
+          transform: scale(1.1);
+          z-index: 1000 !important;
+        }
+        .marker-pin.lote { border-color: var(--color-accent); }
+        .marker-pin.finca { border-color: var(--color-secondary); }
+        
+        /* Popup Styles Override */
+        .leaflet-popup-content-wrapper {
+          padding: 0;
+          border-radius: 12px;
+          overflow: hidden;
+        }
+        .leaflet-popup-content {
+          margin: 0;
+          width: auto !important;
+        }
+      `}</style>
 
             <style jsx>{`
         .map-wrapper {
           position: relative;
-          height: calc(100vh - 60px); /* Adjust for bottom nav/header if needed */
+          height: calc(100vh - 60px);
           width: 100%;
           overflow: hidden;
         }
@@ -239,6 +359,7 @@ export default function InteractiveMap({ properties }) {
           font-size: 0.9rem;
           cursor: pointer;
           transition: all 0.2s;
+          color: var(--color-text-main);
         }
 
         .filter-toggle.active {
@@ -253,6 +374,34 @@ export default function InteractiveMap({ properties }) {
           border-radius: 16px;
           box-shadow: 0 4px 20px rgba(0,0,0,0.15);
           animation: slideDown 0.3s ease;
+        }
+
+        .zones-scroll {
+          display: flex;
+          gap: 8px;
+          overflow-x: auto;
+          padding: 4px 0;
+          scrollbar-width: none;
+        }
+        .zones-scroll::-webkit-scrollbar { display: none; }
+
+        .zone-chip {
+          background: rgba(255,255,255,0.9);
+          backdrop-filter: blur(4px);
+          border: 1px solid white;
+          padding: 6px 16px;
+          border-radius: 20px;
+          font-size: 0.85rem;
+          font-weight: 600;
+          color: var(--color-primary);
+          white-space: nowrap;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+          cursor: pointer;
+          transition: transform 0.2s;
+        }
+        .zone-chip:hover {
+          transform: translateY(-2px);
+          background: white;
         }
 
         @keyframes slideDown {
@@ -277,39 +426,22 @@ export default function InteractiveMap({ properties }) {
           border: 1px solid var(--color-border);
           border-radius: 8px;
           font-size: 1rem;
-        }
-
-        .filter-results {
-          text-align: center;
-          font-size: 0.9rem;
-          color: var(--color-secondary);
-          font-weight: 600;
-          margin-top: 8px;
+          color: var(--color-text-main);
         }
 
         .fab-container {
           position: absolute;
-          bottom: -80vh; /* Push to bottom right relative to top container, hacky but works within relative parent */
-          right: -45%; /* Adjust based on parent width */
+          bottom: 30px;
+          right: 30px;
           display: flex;
           flex-direction: column;
-          gap: 10px;
+          gap: 12px;
+          z-index: 1000;
         }
         
-        /* Better positioning for FAB */
-        @media (min-width: 768px) {
-           .fab-container {
-             position: fixed;
-             bottom: 30px;
-             right: 30px;
-           }
-        }
-        
-        /* Mobile FAB positioning override */
         @media (max-width: 767px) {
           .fab-container {
-            position: fixed;
-            bottom: 90px; /* Above bottom nav */
+            bottom: 90px;
             right: 20px;
           }
         }
@@ -327,10 +459,33 @@ export default function InteractiveMap({ properties }) {
           justify-content: center;
           cursor: pointer;
           transition: transform 0.2s;
+          position: relative;
         }
 
         .fab:active {
           transform: scale(0.95);
+        }
+
+        .list-fab {
+          background: var(--color-primary);
+          color: white;
+        }
+
+        .fab-badge {
+          position: absolute;
+          top: -5px;
+          right: -5px;
+          background: var(--color-secondary);
+          color: white;
+          font-size: 0.7rem;
+          font-weight: 700;
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 2px solid white;
         }
       `}</style>
         </div>
