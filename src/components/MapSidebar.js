@@ -2,212 +2,263 @@
 
 import { useState, useEffect } from 'react';
 
+// Major Colombian Cities Data
+const COLOMBIAN_CITIES = [
+  { name: 'Bogotá', coords: [4.7110, -74.0721] },
+  { name: 'Medellín', coords: [6.2442, -75.5812] },
+  { name: 'Cali', coords: [3.4516, -76.5320] },
+  { name: 'Barranquilla', coords: [10.9685, -74.7813] },
+  { name: 'Cartagena', coords: [10.3910, -75.4794] },
+  { name: 'Rionegro', coords: [6.1551, -75.3737] },
+  { name: 'La Ceja', coords: [6.0333, -75.4333] },
+  { name: 'El Retiro', coords: [6.0583, -75.5000] },
+  { name: 'Marinilla', coords: [6.1750, -75.3333] },
+  { name: 'Bucaramanga', coords: [7.1193, -73.1227] },
+  { name: 'Pereira', coords: [4.8133, -75.6961] },
+  { name: 'Manizales', coords: [5.0703, -75.5138] },
+  { name: 'Santa Marta', coords: [11.2408, -74.1990] },
+  { name: 'Villavicencio', coords: [4.1420, -73.6266] },
+  { name: 'Cúcuta', coords: [7.8939, -72.5078] },
+  { name: 'Ibagué', coords: [4.4389, -75.2322] },
+  { name: 'Armenia', coords: [4.5339, -75.6811] },
+  { name: 'Pasto', coords: [1.2136, -77.2811] },
+  { name: 'Montería', coords: [8.7479, -75.8814] },
+  { name: 'Neiva', coords: [2.9273, -75.2819] }
+];
+
 export default function MapSidebar({
-    locations,
-    filters,
-    setFilters,
-    onLocationSelect,
-    isOpen,
-    onClose
+  locations, // Keeping for backward compatibility if needed, but mainly using COLOMBIAN_CITIES
+  filters,
+  setFilters,
+  onLocationSelect,
+  isOpen,
+  onClose
 }) {
-    const [selectedCity, setSelectedCity] = useState('');
-    const [selectedZone, setSelectedZone] = useState('');
+  const [selectedCity, setSelectedCity] = useState('');
+  const [citySearch, setCitySearch] = useState('');
+  const [showCityList, setShowCityList] = useState(false);
 
-    // Update local state when filters change externally
-    useEffect(() => {
-        if (filters.city !== selectedCity) setSelectedCity(filters.city);
-        if (filters.zone !== selectedZone) setSelectedZone(filters.zone);
-    }, [filters]);
+  // Update local state when filters change externally
+  useEffect(() => {
+    if (filters.city !== selectedCity) setSelectedCity(filters.city);
+  }, [filters]);
 
-    const handleCityChange = (e) => {
-        const city = e.target.value;
-        setSelectedCity(city);
-        setSelectedZone(''); // Reset zone
-        setFilters(prev => ({ ...prev, city, zone: '' }));
+  const handleCitySelect = (city) => {
+    setSelectedCity(city.name);
+    setCitySearch(city.name);
+    setFilters(prev => ({ ...prev, city: city.name, zone: '' }));
+    onLocationSelect(city.coords, 13);
+    setShowCityList(false);
+  };
 
-        // Find city coords and center map
-        const cityData = locations.find(l => l.name === city);
-        if (cityData) {
-            onLocationSelect(cityData.coords, 13);
-        }
-    };
+  const handleTypeToggle = (type) => {
+    setFilters(prev => ({
+      ...prev,
+      type: prev.type === type ? 'all' : type
+    }));
+  };
 
-    const handleZoneChange = (e) => {
-        const zone = e.target.value;
-        setSelectedZone(zone);
-        setFilters(prev => ({ ...prev, zone }));
+  const amenitiesList = [
+    'Parqueadero', 'Patio', 'Estudio', 'Balcón', 'Portería', 'Ascensor'
+  ];
 
-        // Find zone coords
-        const cityData = locations.find(l => l.name === selectedCity);
-        if (cityData) {
-            const zoneData = cityData.zones.find(z => z.name === zone);
-            if (zoneData) {
-                onLocationSelect(zoneData.coords, 15);
-            }
-        }
-    };
+  const handleAmenityToggle = (amenity) => {
+    setFilters(prev => {
+      const current = prev.amenities || [];
+      if (current.includes(amenity)) {
+        return { ...prev, amenities: current.filter(a => a !== amenity) };
+      } else {
+        return { ...prev, amenities: [...current, amenity] };
+      }
+    });
+  };
 
-    const handleTypeToggle = (type) => {
-        setFilters(prev => ({
-            ...prev,
-            type: prev.type === type ? 'all' : type
-        }));
-    };
+  const filteredCities = COLOMBIAN_CITIES.filter(c =>
+    c.name.toLowerCase().includes(citySearch.toLowerCase())
+  );
 
-    const amenitiesList = [
-        'Parqueadero', 'Patio', 'Estudio', 'Balcón', 'Portería', 'Ascensor'
-    ];
+  return (
+    <div className={`map-sidebar ${isOpen ? 'open' : ''}`}>
+      <div className="sidebar-header">
+        <h2>Filtros</h2>
+        <button className="close-btn" onClick={onClose}>×</button>
+      </div>
 
-    const handleAmenityToggle = (amenity) => {
-        setFilters(prev => {
-            const current = prev.amenities || [];
-            if (current.includes(amenity)) {
-                return { ...prev, amenities: current.filter(a => a !== amenity) };
-            } else {
-                return { ...prev, amenities: [...current, amenity] };
-            }
-        });
-    };
+      <div className="sidebar-content">
+        {/* Location Section */}
+        <div className="filter-section">
+          <h3>Ubicación</h3>
 
-    return (
-        <div className={`map-sidebar ${isOpen ? 'open' : ''}`}>
-            <div className="sidebar-header">
-                <h2>Filtros</h2>
-                <button className="close-btn mobile-only" onClick={onClose}>×</button>
+          <div className="form-group relative">
+            <label>Ciudad</label>
+            <input
+              type="text"
+              placeholder="Buscar ciudad..."
+              value={citySearch}
+              onChange={(e) => {
+                setCitySearch(e.target.value);
+                setShowCityList(true);
+              }}
+              onFocus={() => setShowCityList(true)}
+            />
+            {showCityList && citySearch && (
+              <ul className="city-dropdown">
+                {filteredCities.map(city => (
+                  <li key={city.name} onClick={() => handleCitySelect(city)}>
+                    {city.name}
+                  </li>
+                ))}
+                {filteredCities.length === 0 && (
+                  <li className="no-results">No se encontraron ciudades</li>
+                )}
+              </ul>
+            )}
+          </div>
+
+          <div className="form-group">
+            <label>Barrio / Sector (Opcional)</label>
+            <input
+              type="text"
+              placeholder="Escribe el barrio..."
+              value={filters.neighborhood || ''}
+              onChange={(e) => setFilters({ ...filters, neighborhood: e.target.value })}
+            />
+          </div>
+        </div>
+
+        <hr className="divider" />
+
+        {/* Characteristics Section */}
+        <div className="filter-section">
+          <h3>Características</h3>
+
+          <div className="form-group">
+            <label>Tipo de Inmueble</label>
+            <div className="chip-group">
+              {['Casa', 'Apartamento', 'Finca', 'Local', 'Lote'].map(type => (
+                <button
+                  key={type}
+                  className={`chip ${filters.type === type ? 'active' : ''}`}
+                  onClick={() => handleTypeToggle(type)}
+                >
+                  {type}
+                </button>
+              ))}
             </div>
+          </div>
 
-            <div className="sidebar-content">
-                {/* Location Section */}
-                <div className="filter-section">
-                    <h3>Ubicación</h3>
-
-                    <div className="form-group">
-                        <label>Ciudad</label>
-                        <select value={selectedCity} onChange={handleCityChange}>
-                            <option value="">Seleccionar Ciudad</option>
-                            {locations.map(loc => (
-                                <option key={loc.name} value={loc.name}>{loc.name}</option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div className="form-group">
-                        <label>Zona</label>
-                        <select
-                            value={selectedZone}
-                            onChange={handleZoneChange}
-                            disabled={!selectedCity}
-                        >
-                            <option value="">Seleccionar Zona</option>
-                            {selectedCity && locations.find(l => l.name === selectedCity)?.zones.map(zone => (
-                                <option key={zone.name} value={zone.name}>{zone.name}</option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div className="form-group">
-                        <label>Barrio (Opcional)</label>
-                        <input
-                            type="text"
-                            placeholder="Escribe el barrio..."
-                            value={filters.neighborhood || ''}
-                            onChange={(e) => setFilters({ ...filters, neighborhood: e.target.value })}
-                        />
-                    </div>
-                </div>
-
-                <hr className="divider" />
-
-                {/* Characteristics Section */}
-                <div className="filter-section">
-                    <h3>Características</h3>
-
-                    <div className="form-group">
-                        <label>Tipo de Inmueble</label>
-                        <div className="chip-group">
-                            {['Casa', 'Apartamento', 'Finca', 'Local', 'Lote'].map(type => (
-                                <button
-                                    key={type}
-                                    className={`chip ${filters.type === type ? 'active' : ''}`}
-                                    onClick={() => handleTypeToggle(type)}
-                                >
-                                    {type}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="row-group">
-                        <div className="form-group half">
-                            <label>Habitaciones</label>
-                            <div className="counter-input">
-                                <button onClick={() => setFilters(p => ({ ...p, bedrooms: Math.max(0, (p.bedrooms || 0) - 1) }))}>-</button>
-                                <span>{filters.bedrooms || '0+'}</span>
-                                <button onClick={() => setFilters(p => ({ ...p, bedrooms: (p.bedrooms || 0) + 1 }))}>+</button>
-                            </div>
-                        </div>
-                        <div className="form-group half">
-                            <label>Baños</label>
-                            <div className="counter-input">
-                                <button onClick={() => setFilters(p => ({ ...p, bathrooms: Math.max(0, (p.bathrooms || 0) - 1) }))}>-</button>
-                                <span>{filters.bathrooms || '0+'}</span>
-                                <button onClick={() => setFilters(p => ({ ...p, bathrooms: (p.bathrooms || 0) + 1 }))}>+</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="form-group">
-                        <label>Precio (Millones)</label>
-                        <div className="row-group">
-                            <input
-                                type="number"
-                                placeholder="Mín"
-                                value={filters.minPrice}
-                                onChange={(e) => setFilters({ ...filters, minPrice: e.target.value })}
-                            />
-                            <input
-                                type="number"
-                                placeholder="Máx"
-                                value={filters.maxPrice}
-                                onChange={(e) => setFilters({ ...filters, maxPrice: e.target.value })}
-                            />
-                        </div>
-                    </div>
-
-                    <div className="form-group">
-                        <label>Espacios y Amenities</label>
-                        <div className="checkbox-grid">
-                            {amenitiesList.map(amenity => (
-                                <label key={amenity} className="checkbox-label">
-                                    <input
-                                        type="checkbox"
-                                        checked={filters.amenities?.includes(amenity) || false}
-                                        onChange={() => handleAmenityToggle(amenity)}
-                                    />
-                                    {amenity}
-                                </label>
-                            ))}
-                        </div>
-                    </div>
-                </div>
+          <div className="row-group">
+            <div className="form-group half">
+              <label>Habitaciones</label>
+              <div className="counter-input">
+                <button onClick={() => setFilters(p => ({ ...p, bedrooms: Math.max(0, (p.bedrooms || 0) - 1) }))}>-</button>
+                <span>{filters.bedrooms || '0+'}</span>
+                <button onClick={() => setFilters(p => ({ ...p, bedrooms: (p.bedrooms || 0) + 1 }))}>+</button>
+              </div>
             </div>
+            <div className="form-group half">
+              <label>Baños</label>
+              <div className="counter-input">
+                <button onClick={() => setFilters(p => ({ ...p, bathrooms: Math.max(0, (p.bathrooms || 0) - 1) }))}>-</button>
+                <span>{filters.bathrooms || '0+'}</span>
+                <button onClick={() => setFilters(p => ({ ...p, bathrooms: (p.bathrooms || 0) + 1 }))}>+</button>
+              </div>
+            </div>
+          </div>
 
-            <style jsx>{`
+          <div className="form-group">
+            <label>Precio (Millones)</label>
+            <div className="row-group">
+              <input
+                type="number"
+                placeholder="Mín"
+                value={filters.minPrice}
+                onChange={(e) => setFilters({ ...filters, minPrice: e.target.value })}
+              />
+              <input
+                type="number"
+                placeholder="Máx"
+                value={filters.maxPrice}
+                onChange={(e) => setFilters({ ...filters, maxPrice: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label>Espacios y Amenities</label>
+            <div className="checkbox-grid">
+              {amenitiesList.map(amenity => (
+                <label key={amenity} className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={filters.amenities?.includes(amenity) || false}
+                    onChange={() => handleAmenityToggle(amenity)}
+                  />
+                  {amenity}
+                </label>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <style jsx>{`
         .map-sidebar {
-          width: 350px;
-          background: white;
-          border-right: 1px solid var(--color-border);
-          height: 100%;
+          position: absolute;
+          top: 20px;
+          left: 20px;
+          width: 320px;
+          max-height: calc(100vh - 40px);
+          background: rgba(255, 255, 255, 0.85);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          border-radius: 24px;
+          border: 1px solid rgba(255, 255, 255, 0.5);
           display: flex;
           flex-direction: column;
-          z-index: 1001;
-          box-shadow: 4px 0 20px rgba(0,0,0,0.05);
-          transition: transform 0.3s ease;
+          z-index: 2000;
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+          transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+          overflow: hidden;
+        }
+
+        /* Mobile: Slide from bottom or full screen overlay */
+        @media (max-width: 768px) {
+          .map-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            max-height: 100vh;
+            border-radius: 0;
+            transform: translateY(100%);
+            opacity: 0;
+            background: rgba(255, 255, 255, 0.95);
+          }
+          
+          .map-sidebar.open {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+
+        /* Desktop: Slide from left if hidden (though usually visible) */
+        @media (min-width: 769px) {
+           .map-sidebar {
+             transform: translateX(0);
+             opacity: 1;
+           }
+           /* If we want to hide it on desktop too, we can add a class */
+           .map-sidebar.hidden {
+             transform: translateX(-110%);
+             opacity: 0;
+           }
         }
 
         .sidebar-header {
-          padding: 20px;
-          border-bottom: 1px solid var(--color-border);
+          padding: 20px 24px;
+          border-bottom: 1px solid rgba(0,0,0,0.05);
           display: flex;
           justify-content: space-between;
           align-items: center;
@@ -215,56 +266,93 @@ export default function MapSidebar({
 
         .sidebar-header h2 {
           margin: 0;
-          font-size: 1.2rem;
-          color: var(--color-primary);
+          font-size: 1.1rem;
+          color: #1a1a1a;
+          font-weight: 700;
+          letter-spacing: -0.5px;
         }
 
         .sidebar-content {
           flex: 1;
           overflow-y: auto;
-          padding: 20px;
+          padding: 24px;
+          scrollbar-width: thin;
         }
 
         .filter-section {
-          margin-bottom: 24px;
+          margin-bottom: 28px;
         }
 
         .filter-section h3 {
-          font-size: 0.95rem;
-          color: var(--color-text-muted);
+          font-size: 0.8rem;
+          color: #666;
           text-transform: uppercase;
-          letter-spacing: 0.5px;
+          letter-spacing: 1px;
           margin-bottom: 16px;
-          font-weight: 700;
+          font-weight: 600;
         }
 
         .form-group {
-          margin-bottom: 16px;
+          margin-bottom: 20px;
+        }
+        
+        .form-group.relative {
+          position: relative;
         }
 
         .form-group label {
           display: block;
           font-size: 0.9rem;
-          color: var(--color-text-main);
+          color: #333;
           margin-bottom: 8px;
           font-weight: 500;
         }
 
-        select, input[type="text"], input[type="number"] {
+        input[type="text"], input[type="number"] {
           width: 100%;
-          padding: 10px;
-          border: 1px solid var(--color-border);
-          border-radius: 8px;
+          padding: 12px 16px;
+          border: 1px solid rgba(0,0,0,0.1);
+          border-radius: 12px;
           font-size: 0.95rem;
-          color: var(--color-text-main);
-          background: var(--color-bg);
-          transition: border-color 0.2s;
+          color: #333;
+          background: rgba(255,255,255,0.6);
+          transition: all 0.2s;
         }
 
-        select:focus, input:focus {
+        input:focus {
           outline: none;
           border-color: var(--color-primary);
           background: white;
+          box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
+        }
+
+        .city-dropdown {
+          position: absolute;
+          top: 100%;
+          left: 0;
+          width: 100%;
+          background: white;
+          border-radius: 12px;
+          box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+          margin-top: 4px;
+          max-height: 200px;
+          overflow-y: auto;
+          z-index: 10;
+          list-style: none;
+          padding: 0;
+          border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .city-dropdown li {
+          padding: 10px 16px;
+          cursor: pointer;
+          font-size: 0.9rem;
+          color: #333;
+          border-bottom: 1px solid #f5f5f5;
+        }
+
+        .city-dropdown li:hover {
+          background: #f9f9f9;
         }
 
         .chip-group {
@@ -274,20 +362,27 @@ export default function MapSidebar({
         }
 
         .chip {
-          background: var(--color-bg);
-          border: 1px solid var(--color-border);
-          padding: 6px 12px;
+          background: rgba(255,255,255,0.5);
+          border: 1px solid rgba(0,0,0,0.1);
+          padding: 8px 16px;
           border-radius: 20px;
           font-size: 0.85rem;
           cursor: pointer;
           transition: all 0.2s;
-          color: var(--color-text-main);
+          color: #444;
+          font-weight: 500;
+        }
+
+        .chip:hover {
+          background: white;
+          transform: translateY(-1px);
         }
 
         .chip.active {
           background: var(--color-primary);
           color: white;
           border-color: var(--color-primary);
+          box-shadow: 0 4px 10px rgba(var(--color-primary-rgb), 0.3);
         }
 
         .row-group {
@@ -303,10 +398,10 @@ export default function MapSidebar({
           display: flex;
           align-items: center;
           justify-content: space-between;
-          background: var(--color-bg);
-          border: 1px solid var(--color-border);
-          border-radius: 8px;
-          padding: 4px;
+          background: rgba(255,255,255,0.6);
+          border: 1px solid rgba(0,0,0,0.1);
+          border-radius: 12px;
+          padding: 6px;
         }
 
         .counter-input button {
@@ -314,22 +409,27 @@ export default function MapSidebar({
           height: 32px;
           border: none;
           background: white;
-          border-radius: 6px;
+          border-radius: 8px;
           cursor: pointer;
           font-weight: bold;
           color: var(--color-primary);
           box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+          transition: transform 0.1s;
+        }
+
+        .counter-input button:active {
+          transform: scale(0.95);
         }
 
         .counter-input span {
           font-weight: 600;
-          color: var(--color-text-main);
+          color: #333;
         }
 
         .checkbox-grid {
           display: grid;
           grid-template-columns: 1fr 1fr;
-          gap: 10px;
+          gap: 12px;
         }
 
         .checkbox-label {
@@ -338,41 +438,29 @@ export default function MapSidebar({
           gap: 8px;
           font-size: 0.9rem;
           cursor: pointer;
-          color: var(--color-text-main);
+          color: #444;
+        }
+        
+        .checkbox-label input {
+          accent-color: var(--color-primary);
         }
 
         .divider {
           border: none;
-          border-top: 1px solid var(--color-border);
+          border-top: 1px solid rgba(0,0,0,0.05);
           margin: 20px 0;
         }
 
         .close-btn {
           background: none;
           border: none;
-          font-size: 1.5rem;
-          color: var(--color-text-main);
-        }
-
-        .mobile-only { display: none; }
-
-        @media (max-width: 768px) {
-          .map-sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            transform: translateX(-100%);
-          }
-          
-          .map-sidebar.open {
-            transform: translateX(0);
-          }
-
-          .mobile-only { display: block; }
+          font-size: 1.8rem;
+          color: #333;
+          cursor: pointer;
+          line-height: 1;
+          padding: 0 8px;
         }
       `}</style>
-        </div>
-    );
+    </div>
+  );
 }
