@@ -392,7 +392,7 @@ export default function PropertyDetailClient({ id }) {
           padding: 1rem;
           border-radius: 8px;
           border: 1px solid var(--color-border);
-          color: var(--color-text-main);
+          color: #333;
         }
 
         .contact-card {
