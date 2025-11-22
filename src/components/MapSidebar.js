@@ -3,27 +3,15 @@
 import { useState, useEffect } from 'react';
 
 // Major Colombian Cities Data
+// Major Colombian Cities Data (Fallback)
 const COLOMBIAN_CITIES = [
   { name: 'Bogotá', coords: [4.7110, -74.0721] },
   { name: 'Medellín', coords: [6.2442, -75.5812] },
   { name: 'Cali', coords: [3.4516, -76.5320] },
   { name: 'Barranquilla', coords: [10.9685, -74.7813] },
   { name: 'Cartagena', coords: [10.3910, -75.4794] },
-  { name: 'Rionegro', coords: [6.1551, -75.3737] },
-  { name: 'La Ceja', coords: [6.0333, -75.4333] },
-  { name: 'El Retiro', coords: [6.0583, -75.5000] },
-  { name: 'Marinilla', coords: [6.1750, -75.3333] },
-  { name: 'Bucaramanga', coords: [7.1193, -73.1227] },
-  { name: 'Pereira', coords: [4.8133, -75.6961] },
-  { name: 'Manizales', coords: [5.0703, -75.5138] },
-  { name: 'Santa Marta', coords: [11.2408, -74.1990] },
-  { name: 'Villavicencio', coords: [4.1420, -73.6266] },
-  { name: 'Cúcuta', coords: [7.8939, -72.5078] },
-  { name: 'Ibagué', coords: [4.4389, -75.2322] },
-  { name: 'Armenia', coords: [4.5339, -75.6811] },
-  { name: 'Pasto', coords: [1.2136, -77.2811] },
-  { name: 'Montería', coords: [8.7479, -75.8814] },
-  { name: 'Neiva', coords: [2.9273, -75.2819] }
+  { name: 'Popayán', coords: [2.4448, -76.6147] }, // Added explicitly as requested
+  { name: 'Rionegro', coords: [6.1551, -75.3737] }
 ];
 
 export default function MapSidebar({
@@ -37,6 +25,46 @@ export default function MapSidebar({
   const [selectedCity, setSelectedCity] = useState('');
   const [citySearch, setCitySearch] = useState('');
   const [showCityList, setShowCityList] = useState(false);
+  const [filteredCities, setFilteredCities] = useState(COLOMBIAN_CITIES);
+
+  // Debounced Search Effect
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(async () => {
+      if (citySearch.length > 2) {
+        try {
+          // First check local list for instant results
+          const localMatches = COLOMBIAN_CITIES.filter(c =>
+            c.name.toLowerCase().includes(citySearch.toLowerCase())
+          );
+
+          // Then fetch from API
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(citySearch)}&countrycodes=co&limit=5`
+          );
+          const data = await response.json();
+
+          const apiMatches = data.map(item => ({
+            name: item.display_name.split(',')[0], // Get just the city/place name
+            coords: [parseFloat(item.lat), parseFloat(item.lon)]
+          }));
+
+          // Combine and deduplicate (prefer API for broader search, but local for specific curated coords)
+          // For simplicity, we'll just show API results if available, or fallback to local
+          setFilteredCities(apiMatches.length > 0 ? apiMatches : localMatches);
+        } catch (error) {
+          console.error("Error searching cities:", error);
+          // Fallback to local filtering on error
+          setFilteredCities(COLOMBIAN_CITIES.filter(c =>
+            c.name.toLowerCase().includes(citySearch.toLowerCase())
+          ));
+        }
+      } else {
+        setFilteredCities(COLOMBIAN_CITIES);
+      }
+    }, 500); // 500ms debounce
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [citySearch]);
 
   // Update local state when filters change externally
   useEffect(() => {
@@ -73,9 +101,7 @@ export default function MapSidebar({
     });
   };
 
-  const filteredCities = COLOMBIAN_CITIES.filter(c =>
-    c.name.toLowerCase().includes(citySearch.toLowerCase())
-  );
+
 
   return (
     <div className={`map-sidebar ${isOpen ? 'open' : ''}`}>
@@ -93,23 +119,23 @@ export default function MapSidebar({
             <label>Ciudad</label>
             <input
               type="text"
-              placeholder="Buscar ciudad..."
+              placeholder="Buscar ciudad o municipio..."
               value={citySearch}
               onChange={(e) => {
                 setCitySearch(e.target.value);
-                setShowCityList(true);
+                // Debounce logic will be handled in useEffect
               }}
               onFocus={() => setShowCityList(true)}
             />
-            {showCityList && citySearch && (
+            {showCityList && (citySearch.length > 2 || filteredCities.length > 0) && (
               <ul className="city-dropdown">
-                {filteredCities.map(city => (
-                  <li key={city.name} onClick={() => handleCitySelect(city)}>
+                {filteredCities.map((city, index) => (
+                  <li key={`${city.name}-${index}`} onClick={() => handleCitySelect(city)}>
                     {city.name}
                   </li>
                 ))}
-                {filteredCities.length === 0 && (
-                  <li className="no-results">No se encontraron ciudades</li>
+                {filteredCities.length === 0 && citySearch.length > 2 && (
+                  <li className="no-results">Buscando...</li>
                 )}
               </ul>
             )}
@@ -167,7 +193,7 @@ export default function MapSidebar({
           </div>
 
           <div className="form-group">
-            <label>Precio (Millones)</label>
+            <label>Precio (COP)</label>
             <div className="row-group">
               <input
                 type="number"

@@ -137,9 +137,22 @@ export default function InteractiveMap({ properties }) {
 
       // Price filter
       if (filters.minPrice || filters.maxPrice) {
+        // Extract numeric price from property string (e.g., "$ 1.200.000.000" -> 1200000000)
         const price = parseInt(p.price.replace(/\D/g, ''));
-        if (filters.minPrice && price < parseInt(filters.minPrice) * 1000000) return false; // Assuming input is in millions
-        if (filters.maxPrice && price > parseInt(filters.maxPrice) * 1000000) return false;
+
+        if (filters.minPrice) {
+          let min = parseInt(filters.minPrice.replace(/\D/g, ''));
+          // Heuristic: If user types < 100,000, assume they mean millions. 
+          // E.g. "200" -> 200,000,000. "200000000" -> 200,000,000.
+          if (min < 100000) min = min * 1000000;
+          if (price < min) return false;
+        }
+
+        if (filters.maxPrice) {
+          let max = parseInt(filters.maxPrice.replace(/\D/g, ''));
+          if (max < 100000) max = max * 1000000;
+          if (price > max) return false;
+        }
       }
 
       // Bedrooms & Bathrooms
