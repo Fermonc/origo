@@ -39,7 +39,12 @@ export default function MapSidebar({
 
           // Then fetch from API
           const response = await fetch(
-            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(citySearch)}&countrycodes=co&limit=5`
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(citySearch)}&countrycodes=co&limit=5`,
+            {
+              headers: {
+                'User-Agent': 'OrigoWeb/1.0 (fermonc@origo.com)' // Required by Nominatim Usage Policy
+              }
+            }
           );
           const data = await response.json();
 
