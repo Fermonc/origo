@@ -1,5 +1,5 @@
 'use client';
-// Triggering redeploy
+// Triggering redeploy - Billing Enabled
 
 import { useState, useEffect, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
