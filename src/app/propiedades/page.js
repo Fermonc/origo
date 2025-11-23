@@ -197,18 +197,21 @@ export default function PropertiesPage() {
         }
         .page-header {
           text-align: center;
-          margin-bottom: 40px;
+          margin-bottom: 32px;
+          padding-top: 20px;
         }
         .page-title {
-          font-size: 2.5rem;
-          font-weight: 800;
+          font-size: 2rem;
+          font-weight: 700;
           color: #111;
           margin-bottom: 8px;
-          letter-spacing: -1px;
+          letter-spacing: -0.5px;
         }
         .page-subtitle {
           color: #666;
-          font-size: 1.1rem;
+          font-size: 1rem;
+          max-width: 600px;
+          margin: 0 auto;
         }
 
         /* Filters */
