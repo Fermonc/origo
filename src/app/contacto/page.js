@@ -1,158 +1,149 @@
 'use client';
 
-{/* About Us */ }
-<div className="about-section">
-    <h1 className="section-title">Sobre Nosotros</h1>
-    <p className="about-text">
-        En Origo, nos especializamos en conectar personas con espacios únicos en el Oriente Antioqueño.
-        Entendemos que una propiedad no es solo tierra o ladrillos, es el origen de nuevos proyectos y sueños.
-    </p>
-    <p className="about-text">
-        Con más de 10 años de experiencia en el sector, ofrecemos un portafolio curado de locales comerciales,
-        lotes campestres y fincas de recreo.
-    </p>
+import { useState } from 'react';
+import Link from 'next/link';
+import { db } from '@/lib/firebase';
+import { collection, addDoc } from 'firebase/firestore';
+import Header from '@/components/Header';
 
-    <div className="contact-info-block">
-        <h3>Información de Contacto</h3>
-        <p>📍 Rionegro, Antioquia</p>
-        <p>📞 +57 300 123 4567</p>
-        <p>✉️ info@origo.com</p>
-    </div>
-</div>
+export default function ContactPage() {
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        message: ''
+    });
+    const [status, setStatus] = useState('idle'); // idle, loading, success, error
 
-{/* Contact Form */ }
-<div className="form-card">
-    <h2 className="form-title">Contáctanos</h2>
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
 
-    {status === 'success' ? (
-        <div className="success-state">
-            <div className="success-icon">✅</div>
-            <h3>¡Mensaje Enviado!</h3>
-            <p>Gracias por escribirnos. Te contactaremos muy pronto.</p>
-            <button
-                onClick={() => setStatus('idle')}
-                className="btn-reset"
-            >
-                Enviar otro mensaje
-            </button>
-        </div>
-    ) : (
-        <form onSubmit={handleSubmit} className="contact-form">
-            <div className="form-group">
-                <label>Nombre</label>
-                <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    required
-                    placeholder="Tu nombre"
-                    className="form-input"
-                />
-            </div>
-            <div className="form-group">
-                <label>Email</label>
-                <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
-                    placeholder="tucorreo@ejemplo.com"
-                    className="form-input"
-                />
-            </div>
-            <div className="form-group">
-                <label>Mensaje</label>
-                <textarea
-                    rows="4"
-                    name="message"
-                    value={formData.message}
-                    onChange={handleChange}
-                    required
-                    placeholder="¿En qué podemos ayudarte?"
-                    className="form-input"
-                ></textarea>
-            </div>
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setStatus('loading');
 
-            {status === 'error' && (
-                <p className="error-msg">Hubo un error al enviar el mensaje. Intenta de nuevo.</p>
-            )}
+        try {
+            await addDoc(collection(db, 'messages'), {
+                ...formData,
+                createdAt: new Date(),
+                read: false
+            });
+            setStatus('success');
+            setFormData({ name: '', email: '', message: '' });
+        } catch (error) {
+            console.error("Error sending message:", error);
+            setStatus('error');
+        }
+    };
 
-            <button
-                type="submit"
-                className="btn-submit"
-                disabled={status === 'loading'}
-            >
-                {status === 'loading' ? 'Enviando...' : 'Enviar Mensaje'}
-            </button>
-        </form>
-    )}
-</div>
-                    </div >
-                </div >
-            </main >
+    return (
+        <div className="page">
+            <Header />
 
-    <style jsx>{`
+            <main className="main-content">
+                <div className="container">
+                    <div className="contact-grid">
+
+                        {/* About Us */}
+                        <div className="about-section">
+                            <h1 className="section-title">Sobre Nosotros</h1>
+                            <p className="about-text">
+                                En Origo, nos especializamos en conectar personas con espacios únicos en el Oriente Antioqueño.
+                                Entendemos que una propiedad no es solo tierra o ladrillos, es el origen de nuevos proyectos y sueños.
+                            </p>
+                            <p className="about-text">
+                                Con más de 10 años de experiencia en el sector, ofrecemos un portafolio curado de locales comerciales,
+                                lotes campestres y fincas de recreo.
+                            </p>
+
+                            <div className="contact-info-block">
+                                <h3>Información de Contacto</h3>
+                                <p>📍 Rionegro, Antioquia</p>
+                                <p>📞 +57 300 123 4567</p>
+                                <p>✉️ info@origo.com</p>
+                            </div>
+                        </div>
+
+                        {/* Contact Form */}
+                        <div className="form-card">
+                            <h2 className="form-title">Contáctanos</h2>
+
+                            {status === 'success' ? (
+                                <div className="success-state">
+                                    <div className="success-icon">✅</div>
+                                    <h3>¡Mensaje Enviado!</h3>
+                                    <p>Gracias por escribirnos. Te contactaremos muy pronto.</p>
+                                    <button
+                                        onClick={() => setStatus('idle')}
+                                        className="btn-reset"
+                                    >
+                                        Enviar otro mensaje
+                                    </button>
+                                </div>
+                            ) : (
+                                <form onSubmit={handleSubmit} className="contact-form">
+                                    <div className="form-group">
+                                        <label>Nombre</label>
+                                        <input
+                                            type="text"
+                                            name="name"
+                                            value={formData.name}
+                                            onChange={handleChange}
+                                            required
+                                            placeholder="Tu nombre"
+                                            className="form-input"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Email</label>
+                                        <input
+                                            type="email"
+                                            name="email"
+                                            value={formData.email}
+                                            onChange={handleChange}
+                                            required
+                                            placeholder="tucorreo@ejemplo.com"
+                                            className="form-input"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Mensaje</label>
+                                        <textarea
+                                            rows="4"
+                                            name="message"
+                                            value={formData.message}
+                                            onChange={handleChange}
+                                            required
+                                            placeholder="¿En qué podemos ayudarte?"
+                                            className="form-input"
+                                        ></textarea>
+                                    </div>
+
+                                    {status === 'error' && (
+                                        <p className="error-msg">Hubo un error al enviar el mensaje. Intenta de nuevo.</p>
+                                    )}
+
+                                    <button
+                                        type="submit"
+                                        className="btn-submit"
+                                        disabled={status === 'loading'}
+                                    >
+                                        {status === 'loading' ? 'Enviando...' : 'Enviar Mensaje'}
+                                    </button>
+                                </form>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <style jsx>{`
                 .page {
                     min-height: 100vh;
                     background: #fff;
                     padding-top: 80px;
                 }
-
-                /* Header (Shared Style) */
-                .header {
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    z-index: 100;
-                    padding: 20px 0;
-                    background: rgba(255, 255, 255, 0.8);
-                    backdrop-filter: blur(12px);
-                    border-bottom: 1px solid rgba(0,0,0,0.05);
-                }
-                .header-content {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                }
-                .logo {
-                    font-size: 1.8rem;
-                    font-weight: 800;
-                    letter-spacing: -1px;
-                    color: #111;
-                    text-decoration: none;
-                }
-                .nav {
-                    display: flex;
-                    gap: 32px;
-                    align-items: center;
-                }
-                .nav-link {
-                    color: #666;
-                    font-weight: 500;
-                    text-decoration: none;
-                    transition: color 0.2s;
-                }
-                .nav-link:hover, .nav-link.active {
-                    color: #111;
-                }
-                .btn-login {
-                    padding: 8px 20px;
-                    background: #111;
-                    color: white;
-                    border-radius: 20px;
-                    text-decoration: none;
-                    font-size: 0.9rem;
-                    font-weight: 600;
-                    transition: transform 0.2s;
-                }
-                .btn-login:hover {
-                    transform: scale(1.05);
-                }
-                .desktop-only { display: none; }
-                @media (min-width: 768px) { .desktop-only { display: flex; } }
 
                 /* Content */
                 .main-content {
@@ -279,6 +270,6 @@
                     }
                 }
             `}</style>
-        </div >
+        </div>
     );
 }
