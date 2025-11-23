@@ -27,38 +27,47 @@ export default function LoginPage() {
 
   return (
     <div className="login-page">
-      <div className="login-card">
-        <h1 style={{ textAlign: 'center', color: 'var(--color-primary)', marginBottom: 'var(--space-md)' }}>Origo Admin</h1>
-
-        {error && <div className="error-message">{error}</div>}
-
-        <form onSubmit={handleLogin}>
-          <div className="form-group">
-            <label>Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@origo.com"
-              required
-            />
+      <div className="login-container">
+        <div className="login-card">
+          <div className="logo-area">
+            <h1>Origo</h1>
+            <p>Acceso Administrativo</p>
           </div>
 
-          <div className="form-group">
-            <label>Contraseña</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="******"
-              required
-            />
-          </div>
+          {error && <div className="error-message">{error}</div>}
 
-          <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
-            Ingresar
-          </button>
-        </form>
+          <form onSubmit={handleLogin}>
+            <div className="form-group">
+              <label>Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="admin@origo.com"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Contraseña</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••"
+                required
+              />
+            </div>
+
+            <button type="submit" className="btn-login">
+              Ingresar
+            </button>
+          </form>
+
+          <div className="back-link">
+            <a href="/">← Volver al inicio</a>
+          </div>
+        </div>
       </div>
 
       <style jsx>{`
@@ -67,41 +76,116 @@ export default function LoginPage() {
           display: flex;
           align-items: center;
           justify-content: center;
-          background-color: var(--color-bg);
+          background-image: url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=2000&q=80');
+          background-size: cover;
+          background-position: center;
+          position: relative;
         }
-        .login-card {
-          background: white;
-          padding: var(--space-lg);
-          border-radius: 12px;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        .login-page::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: rgba(0,0,0,0.4);
+          backdrop-filter: blur(8px);
+        }
+
+        .login-container {
+          position: relative;
+          z-index: 1;
           width: 100%;
-          max-width: 400px;
-          border: 1px solid var(--color-border);
+          max-width: 420px;
+          padding: 20px;
         }
+
+        .login-card {
+          background: rgba(255, 255, 255, 0.9);
+          backdrop-filter: blur(20px);
+          padding: 40px;
+          border-radius: 24px;
+          box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+          border: 1px solid rgba(255,255,255,0.5);
+        }
+
+        .logo-area {
+          text-align: center;
+          margin-bottom: 32px;
+        }
+        .logo-area h1 {
+          font-size: 2rem;
+          font-weight: 800;
+          color: #111;
+          margin-bottom: 4px;
+          letter-spacing: -1px;
+        }
+        .logo-area p {
+          color: #666;
+          font-size: 0.9rem;
+        }
+
         .form-group {
-          margin-bottom: var(--space-md);
+          margin-bottom: 20px;
         }
         .form-group label {
           display: block;
-          margin-bottom: 0.5rem;
+          margin-bottom: 8px;
           font-weight: 600;
-          color: var(--color-text-main);
+          color: #333;
+          font-size: 0.9rem;
         }
         .form-group input {
           width: 100%;
-          padding: 0.75rem;
-          border-radius: 8px;
-          border: 1px solid var(--color-border);
+          padding: 12px 16px;
+          border-radius: 12px;
+          border: 1px solid #e0e0e0;
+          background: #fff;
           font-size: 1rem;
+          outline: none;
+          transition: all 0.2s;
         }
+        .form-group input:focus {
+          border-color: #111;
+          box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
+        }
+
+        .btn-login {
+          width: 100%;
+          padding: 14px;
+          background: #111;
+          color: white;
+          border: none;
+          border-radius: 12px;
+          font-weight: 600;
+          font-size: 1rem;
+          cursor: pointer;
+          transition: background 0.2s;
+          margin-top: 8px;
+        }
+        .btn-login:hover {
+          background: #333;
+        }
+
         .error-message {
           background-color: #fee2e2;
           color: #ef4444;
-          padding: 0.75rem;
+          padding: 12px;
           border-radius: 8px;
-          margin-bottom: var(--space-md);
+          margin-bottom: 20px;
           text-align: center;
           font-size: 0.9rem;
+        }
+
+        .back-link {
+          text-align: center;
+          margin-top: 24px;
+        }
+        .back-link a {
+          color: #666;
+          font-size: 0.9rem;
+          text-decoration: none;
+          transition: color 0.2s;
+        }
+        .back-link a:hover {
+          color: #111;
         }
       `}</style>
     </div>

@@ -38,126 +38,296 @@ export default function ContactPage() {
 
     return (
         <div className="page">
-            <header className="desktop-only" style={{ padding: 'var(--space-sm) 0', borderBottom: '1px solid var(--color-border)', background: 'white' }}>
-                <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Link href="/" style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--color-primary)' }}>Origo</Link>
-                    <nav>
-                        <Link href="/propiedades" style={{ marginRight: 'var(--space-sm)', fontWeight: 'bold', color: 'var(--color-secondary)' }}>Propiedades</Link>
-                        <Link href="/contacto" className="btn btn-primary">Contacto</Link>
+            {/* Premium Header */}
+            <header className="header">
+                <div className="container header-content">
+                    <Link href="/" className="logo">Origo</Link>
+                    <nav className="nav desktop-only">
+                        <Link href="/propiedades" className="nav-link">Propiedades</Link>
+                        <Link href="/mapa" className="nav-link">Mapa</Link>
+                        <Link href="/contacto" className="nav-link active">Contacto</Link>
+                        <Link href="/admin/login" className="btn-login">Admin</Link>
                     </nav>
                 </div>
             </header>
 
-            <main style={{ padding: 'var(--space-xl) 0' }}>
+            <main className="main-content">
                 <div className="container">
                     <div className="contact-grid">
 
                         {/* About Us */}
-                        <div>
-                            <h1 style={{ fontSize: '2.5rem', color: 'var(--color-primary)', marginBottom: 'var(--space-md)' }}>Sobre Nosotros</h1>
-                            <p style={{ marginBottom: '1rem', color: 'var(--color-text-muted)' }}>
+                        <div className="about-section">
+                            <h1 className="section-title">Sobre Nosotros</h1>
+                            <p className="about-text">
                                 En Origo, nos especializamos en conectar personas con espacios únicos en el Oriente Antioqueño.
                                 Entendemos que una propiedad no es solo tierra o ladrillos, es el origen de nuevos proyectos y sueños.
                             </p>
-                            <p style={{ color: 'var(--color-text-muted)' }}>
+                            <p className="about-text">
                                 Con más de 10 años de experiencia en el sector, ofrecemos un portafolio curado de locales comerciales,
                                 lotes campestres y fincas de recreo.
                             </p>
+
+                            <div className="contact-info-block">
+                                <h3>Información de Contacto</h3>
+                                <p>📍 Rionegro, Antioquia</p>
+                                <p>📞 +57 300 123 4567</p>
+                                <p>✉️ info@origo.com</p>
+                            </div>
                         </div>
 
                         {/* Contact Form */}
                         <div className="form-card">
-                            <h2 style={{ fontSize: '1.8rem', color: 'var(--color-primary)', marginBottom: 'var(--space-md)' }}>Contáctanos</h2>
+                            <h2 className="form-title">Contáctanos</h2>
 
                             {status === 'success' ? (
-                                <div style={{ textAlign: 'center', padding: '2rem 0' }}>
-                                    <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>✅</div>
-                                    <h3 style={{ color: 'var(--color-primary)' }}>¡Mensaje Enviado!</h3>
-                                    <p style={{ color: 'var(--color-text-muted)' }}>Gracias por escribirnos. Te contactaremos muy pronto.</p>
+                                <div className="success-state">
+                                    <div className="success-icon">✅</div>
+                                    <h3>¡Mensaje Enviado!</h3>
+                                    <p>Gracias por escribirnos. Te contactaremos muy pronto.</p>
                                     <button
                                         onClick={() => setStatus('idle')}
-                                        className="btn-text"
-                                        style={{ marginTop: '1rem', textDecoration: 'underline' }}
+                                        className="btn-reset"
                                     >
                                         Enviar otro mensaje
                                     </button>
                                 </div>
                             ) : (
-                                <form onSubmit={handleSubmit}>
-                                    <div style={{ marginBottom: 'var(--space-sm)' }}>
-                                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Nombre</label>
+                                <form onSubmit={handleSubmit} className="contact-form">
+                                    <div className="form-group">
+                                        <label>Nombre</label>
                                         <input
                                             type="text"
                                             name="name"
                                             value={formData.name}
                                             onChange={handleChange}
                                             required
-                                            style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}
                                             placeholder="Tu nombre"
+                                            className="form-input"
                                         />
                                     </div>
-                                    <div style={{ marginBottom: 'var(--space-sm)' }}>
-                                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Email</label>
+                                    <div className="form-group">
+                                        <label>Email</label>
                                         <input
                                             type="email"
                                             name="email"
                                             value={formData.email}
                                             onChange={handleChange}
                                             required
-                                            style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}
                                             placeholder="tucorreo@ejemplo.com"
+                                            className="form-input"
                                         />
                                     </div>
-                                    <div style={{ marginBottom: 'var(--space-sm)' }}>
-                                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Mensaje</label>
+                                    <div className="form-group">
+                                        <label>Mensaje</label>
                                         <textarea
                                             rows="4"
                                             name="message"
                                             value={formData.message}
                                             onChange={handleChange}
                                             required
-                                            style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}
                                             placeholder="¿En qué podemos ayudarte?"
+                                            className="form-input"
                                         ></textarea>
                                     </div>
 
                                     {status === 'error' && (
-                                        <p style={{ color: 'red', marginBottom: '1rem' }}>Hubo un error al enviar el mensaje. Intenta de nuevo.</p>
+                                        <p className="error-msg">Hubo un error al enviar el mensaje. Intenta de nuevo.</p>
                                     )}
 
                                     <button
                                         type="submit"
-                                        className="btn btn-primary"
-                                        style={{ width: '100%' }}
+                                        className="btn-submit"
                                         disabled={status === 'loading'}
                                     >
                                         {status === 'loading' ? 'Enviando...' : 'Enviar Mensaje'}
                                     </button>
                                 </form>
                             )}
-
-                            <div style={{ marginTop: 'var(--space-md)', textAlign: 'center', color: 'var(--color-text-muted)' }}>
-                                <p>O escríbenos directamente:</p>
-                                <a href="mailto:info@origo.com" style={{ color: 'var(--color-secondary)', fontWeight: 'bold' }}>info@origo.com</a>
-                            </div>
                         </div>
                     </div>
                 </div>
             </main>
 
             <style jsx>{`
+                .page {
+                    min-height: 100vh;
+                    background: #fff;
+                    padding-top: 80px;
+                }
+
+                /* Header (Shared Style) */
+                .header {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    z-index: 100;
+                    padding: 20px 0;
+                    background: rgba(255, 255, 255, 0.8);
+                    backdrop-filter: blur(12px);
+                    border-bottom: 1px solid rgba(0,0,0,0.05);
+                }
+                .header-content {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+                .logo {
+                    font-size: 1.8rem;
+                    font-weight: 800;
+                    letter-spacing: -1px;
+                    color: #111;
+                    text-decoration: none;
+                }
+                .nav {
+                    display: flex;
+                    gap: 32px;
+                    align-items: center;
+                }
+                .nav-link {
+                    color: #666;
+                    font-weight: 500;
+                    text-decoration: none;
+                    transition: color 0.2s;
+                }
+                .nav-link:hover, .nav-link.active {
+                    color: #111;
+                }
+                .btn-login {
+                    padding: 8px 20px;
+                    background: #111;
+                    color: white;
+                    border-radius: 20px;
+                    text-decoration: none;
+                    font-size: 0.9rem;
+                    font-weight: 600;
+                    transition: transform 0.2s;
+                }
+                .btn-login:hover {
+                    transform: scale(1.05);
+                }
+                .desktop-only { display: none; }
+                @media (min-width: 768px) { .desktop-only { display: flex; } }
+
+                /* Content */
+                .main-content {
+                    padding: 60px 0;
+                }
                 .contact-grid {
                     display: grid; 
                     grid-template-columns: 1fr; 
-                    gap: var(--space-xl);
+                    gap: 60px;
+                    align-items: start;
                 }
+                
+                .section-title {
+                    font-size: 3rem;
+                    font-weight: 800;
+                    color: #111;
+                    margin-bottom: 24px;
+                    letter-spacing: -1px;
+                }
+                .about-text {
+                    font-size: 1.1rem;
+                    line-height: 1.6;
+                    color: #555;
+                    margin-bottom: 24px;
+                }
+                .contact-info-block {
+                    margin-top: 40px;
+                    padding: 24px;
+                    background: #f9f9f9;
+                    border-radius: 16px;
+                }
+                .contact-info-block h3 {
+                    margin-bottom: 16px;
+                    font-size: 1.2rem;
+                }
+                .contact-info-block p {
+                    margin-bottom: 8px;
+                    color: #444;
+                }
+
+                /* Form Card */
                 .form-card {
                     background: white; 
-                    padding: var(--space-lg); 
-                    border-radius: 12px; 
-                    box-shadow: 0 4px 20px rgba(0,0,0,0.05); 
-                    border: 1px solid var(--color-border);
+                    padding: 40px; 
+                    border-radius: 24px; 
+                    box-shadow: 0 10px 40px rgba(0,0,0,0.08); 
+                    border: 1px solid rgba(0,0,0,0.05);
                 }
+                .form-title {
+                    font-size: 1.8rem;
+                    font-weight: 700;
+                    margin-bottom: 32px;
+                    color: #111;
+                }
+                .form-group {
+                    margin-bottom: 20px;
+                }
+                .form-group label {
+                    display: block;
+                    margin-bottom: 8px;
+                    font-weight: 600;
+                    color: #333;
+                    font-size: 0.9rem;
+                }
+                .form-input {
+                    width: 100%;
+                    padding: 12px 16px;
+                    border-radius: 12px;
+                    border: 1px solid #e5e5e5;
+                    background: #fcfcfc;
+                    font-size: 1rem;
+                    outline: none;
+                    transition: all 0.2s;
+                }
+                .form-input:focus {
+                    border-color: #111;
+                    background: #fff;
+                }
+                .btn-submit {
+                    width: 100%;
+                    padding: 14px;
+                    background: #111;
+                    color: white;
+                    border: none;
+                    border-radius: 12px;
+                    font-weight: 600;
+                    font-size: 1rem;
+                    cursor: pointer;
+                    transition: background 0.2s;
+                }
+                .btn-submit:hover {
+                    background: #333;
+                }
+                .btn-submit:disabled {
+                    opacity: 0.7;
+                    cursor: not-allowed;
+                }
+
+                .success-state {
+                    text-align: center;
+                    padding: 40px 0;
+                }
+                .success-icon {
+                    font-size: 3rem;
+                    margin-bottom: 16px;
+                }
+                .btn-reset {
+                    margin-top: 16px;
+                    background: none;
+                    border: none;
+                    text-decoration: underline;
+                    cursor: pointer;
+                    color: #666;
+                }
+                .error-msg {
+                    color: #ef4444;
+                    margin-bottom: 16px;
+                    font-size: 0.9rem;
+                }
+
                 @media (min-width: 768px) {
                     .contact-grid {
                         grid-template-columns: 1fr 1fr;
