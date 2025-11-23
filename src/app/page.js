@@ -8,6 +8,12 @@ import PropertyCard from '@/components/PropertyCard';
 import SkeletonCard from '@/components/SkeletonCard';
 
 import Header from '@/components/Header';
+import dynamic from 'next/dynamic';
+
+const HomeMapPreview = dynamic(() => import('@/components/HomeMapPreview'), {
+  ssr: false,
+  loading: () => <div style={{ height: '450px', background: '#f0f0f0', margin: '40px 0' }}></div>
+});
 
 export default function Home() {
   const [activeCategory, setActiveCategory] = useState(null);
@@ -103,6 +109,9 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {/* Map Preview Section */}
+        <HomeMapPreview />
 
         {/* Categories Section */}
         <section className="categories-section">
