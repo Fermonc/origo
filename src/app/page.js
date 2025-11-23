@@ -383,7 +383,7 @@ export default function Home() {
         .card-overlay {
           position: absolute;
           inset: 0;
-          background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+          background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 50%, transparent 100%);
           display: flex;
           flex-direction: column;
           justify-content: flex-end;
@@ -394,10 +394,12 @@ export default function Home() {
           font-size: 1.8rem;
           font-weight: 700;
           margin-bottom: 8px;
+          text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
         .card-info p {
           font-size: 0.95rem;
           opacity: 0.9;
+          max-width: 90%;
         }
         .card-toggle {
           position: absolute;
