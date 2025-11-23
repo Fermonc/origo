@@ -88,7 +88,7 @@ export default function BottomNav() {
           align-items: center;
           justify-content: center;
           text-decoration: none;
-          color: #999;
+          color: #111; /* Changed from #999 to #111 for better visibility */
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           padding: 8px;
           border-radius: 12px;
@@ -97,7 +97,7 @@ export default function BottomNav() {
 
         .nav-item:hover {
           background: rgba(0, 0, 0, 0.03);
-          color: #666;
+          color: #000;
         }
 
         .nav-item.active {
