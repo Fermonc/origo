@@ -26,37 +26,11 @@ export default function PropertyCard({ property }) {
           <div className="features">
             <span>{property.area}</span>
             {property.beds && <span> • {property.beds} Hab</span>}
-            'use client';
+          </div>
+          <span className="btn-text">Ver Detalles →</span>
+        </div>
 
-            import Link from 'next/link';
-            import Image from 'next/image';
-
-            export default function PropertyCard({property}) {
-  return (
-            <Link href={`/propiedades/${property.id}`} style={{ display: 'block', textDecoration: 'none' }}>
-              <div className="property-card">
-                <div className="image-container">
-                  <Image
-                    src={property.images?.[0] || property.image || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80'}
-                    alt={property.title}
-                    fill
-                    style={{ objectFit: 'cover' }}
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  />
-                  <span className="badge">{property.type}</span>
-                </div>
-                <div className="content">
-                  <h3>{property.title}</h3>
-                  <p className="location">📍 {property.location}</p>
-                  <p className="price">{property.price}</p>
-                  <div className="features">
-                    <span>{property.area}</span>
-                    {property.beds && <span> • {property.beds} Hab</span>}
-                  </div>
-                  <span className="btn-text">Ver Detalles →</span>
-                </div>
-
-                <style jsx>{`
+        <style jsx>{`
           .property-card {
             background: #fff;
             border-radius: 16px;
@@ -147,7 +121,7 @@ export default function PropertyCard({ property }) {
             background: #333;
           }
         `}</style>
-              </div>
-            </Link>
-            );
+      </div>
+    </Link>
+  );
 }
