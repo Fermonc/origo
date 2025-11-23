@@ -7,20 +7,13 @@ import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import Link from 'next/link';
 import SkeletonCard from '@/components/SkeletonCard';
 
+import Header from '@/components/Header';
+
 export default function PropertiesPage() {
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState('Todos');
   const [searchTerm, setSearchTerm] = useState('');
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   useEffect(() => {
     const fetchProperties = async () => {
@@ -51,18 +44,7 @@ export default function PropertiesPage() {
 
   return (
     <div className="page">
-      {/* Premium Header */}
-      <header className={`header ${scrolled ? 'scrolled' : ''}`}>
-        <div className="container header-content">
-          <Link href="/" className="logo">Origo</Link>
-          <nav className="nav desktop-only">
-            <Link href="/propiedades" className="nav-link active">Propiedades</Link>
-            <Link href="/mapa" className="nav-link">Mapa</Link>
-            <Link href="/contacto" className="nav-link">Contacto</Link>
-            <Link href="/admin/login" className="btn-login">Admin</Link>
-          </nav>
-        </div>
-      </header>
+      <Header />
 
       <main className="main-content">
         <div className="container">

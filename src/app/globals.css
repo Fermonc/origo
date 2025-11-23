@@ -202,33 +202,6 @@ body {
   }
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-/* Utilities */
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 var(--space-sm);
-}
-
-.btn {
-  display: inline-block;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 0.2s ease;
-  cursor: pointer;
-  border: none;
-}
-
-.btn-primary {
-  background-color: var(--color-primary);
-  color: white;
-}
-
 :root {
   /* Brand Colors - Earthy & Premium */
   --color-primary: #2C3E50;

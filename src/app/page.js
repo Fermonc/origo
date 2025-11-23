@@ -7,12 +7,14 @@ import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
 import PropertyCard from '@/components/PropertyCard';
 import SkeletonCard from '@/components/SkeletonCard';
 
+import Header from '@/components/Header';
+
 export default function Home() {
   const [activeCategory, setActiveCategory] = useState(null);
   const [properties, setProperties] = useState({});
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [scrolled, setScrolled] = useState(false);
+  // scrolled state is handled in Header now
 
   // Categories configuration
   const categories = [
@@ -22,14 +24,7 @@ export default function Home() {
   ];
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  useEffect(() => {
+    // Scroll listener removed as it's in Header
     const fetchAllProperties = async () => {
       try {
         const q = query(collection(db, 'properties'), orderBy('createdAt', 'desc'), limit(20));
@@ -69,18 +64,7 @@ export default function Home() {
 
   return (
     <div className="page">
-      {/* Premium Header */}
-      <header className={`header ${scrolled ? 'scrolled' : ''}`}>
-        <div className="container header-content">
-          <div className="logo">Origo</div>
-          <nav className="nav desktop-only">
-            <Link href="/propiedades" className="nav-link">Propiedades</Link>
-            <Link href="/mapa" className="nav-link">Mapa</Link>
-            <Link href="/contacto" className="nav-link">Contacto</Link>
-            <Link href="/admin/login" className="btn-login">Admin</Link>
-          </nav>
-        </div>
-      </header>
+      <Header />
 
       <main>
         {/* Hero Section */}

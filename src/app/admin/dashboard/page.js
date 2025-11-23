@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Header from '@/components/Header';
 import { useAuth } from '@/context/AuthContext';
 import { signOut } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
@@ -90,20 +91,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="page">
-      <header className="header">
-        <div className="container header-content">
-          <div className="logo-wrapper">
-            <Link href="/" className="logo">Origo</Link>
-            <span className="badge-admin">Admin</span>
-          </div>
-          <div className="user-actions">
-            <span className="user-email desktop-only">{user.email}</span>
-            <button onClick={handleLogout} className="btn-logout">
-              Cerrar Sesión
-            </button>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       <main className="main-content">
         <div className="container">
