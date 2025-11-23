@@ -175,14 +175,23 @@ export default function InteractiveMap({ properties }) {
     });
   }, [properties, filters]);
 
-  // Update visible properties when bounds change
-  const handleBoundsChange = (bounds) => {
+  const [mapBounds, setMapBounds] = useState(null);
+
+  // Update visible properties when bounds OR filters change
+  useEffect(() => {
+    if (!mapBounds) return;
+
     const visible = filteredProperties.filter(p => {
       if (!p.lat || !p.lng) return false;
       const latLng = L.latLng(p.lat, p.lng);
-      return bounds.contains(latLng);
+      return mapBounds.contains(latLng);
     });
     setVisibleProperties(visible);
+  }, [filteredProperties, mapBounds]);
+
+  // Update bounds state
+  const handleBoundsChange = (bounds) => {
+    setMapBounds(bounds);
   };
 
   const handleLocateMe = () => {
