@@ -113,6 +113,7 @@ export default function BottomNav() {
 
         .nav-item svg {
           transition: all 0.3s ease;
+          stroke: #111; /* Force black stroke */
         }
 
         /* Hide on desktop */
