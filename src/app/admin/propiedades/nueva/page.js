@@ -9,59 +9,71 @@ import PropertyForm from '@/components/admin/PropertyForm';
 import Link from 'next/link';
 
 export default function NewPropertyPage() {
-    const { user, loading: authLoading } = useAuth();
-    const router = useRouter();
-    const [saving, setSaving] = useState(false);
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
+  const [saving, setSaving] = useState(false);
 
-    useEffect(() => {
-        if (!authLoading && !user) {
-            router.push('/admin/login');
-        }
-    }, [user, authLoading, router]);
-
-    const handleCreate = async (propertyData) => {
-        setSaving(true);
-        try {
-            // Add metadata
-            const dataToSave = {
-                ...propertyData,
-                createdAt: new Date().toISOString(),
-                createdBy: user.email
-            };
-
-            // Save to Firestore
-            await addDoc(collection(db, 'properties'), dataToSave);
-
-            alert('Propiedad creada exitosamente');
-            router.push('/admin/dashboard');
-        } catch (error) {
-            console.error("Error creating property:", error);
-            alert("Error al crear la propiedad: " + error.message);
-        } finally {
-            setSaving(false);
-        }
-    };
-
-    if (authLoading || !user) {
-        return <div className="loading">Cargando...</div>;
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/admin/login');
     }
+  }, [user, authLoading, router]);
 
-    return (
-        <div className="admin-page">
-            <header className="admin-header">
-                <div className="container">
-                    <div className="header-flex">
-                        <Link href="/admin/dashboard" className="back-link">← Volver al Dashboard</Link>
-                        <h1>Nueva Propiedad</h1>
-                    </div>
-                </div>
-            </header>
+  const handleCreate = async (propertyData) => {
+    setSaving(true);
+    try {
+      // Add metadata
+      const dataToSave = {
+        ...propertyData,
+        createdAt: new Date().toISOString(),
+        createdBy: user.email
+      };
 
-            <main className="container main-content">
-                <PropertyForm onSubmit={handleCreate} loading={saving} />
-            </main>
+      // Save to Firestore
+      const docRef = await addDoc(collection(db, 'properties'), dataToSave);
 
-            <style jsx>{`
+      // Trigger Matchmaker
+      try {
+        await fetch('/api/matchmaker', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: docRef.id, ...dataToSave })
+        });
+      } catch (matchError) {
+        console.error("Matchmaker trigger failed:", matchError);
+        // Don't block the flow if matchmaker fails
+      }
+
+      alert('Propiedad creada exitosamente');
+      router.push('/admin/dashboard');
+    } catch (error) {
+      console.error("Error creating property:", error);
+      alert("Error al crear la propiedad: " + error.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (authLoading || !user) {
+    return <div className="loading">Cargando...</div>;
+  }
+
+  return (
+    <div className="admin-page">
+      <header className="admin-header">
+        <div className="container">
+          <div className="header-flex">
+            <Link href="/admin/dashboard" className="back-link">← Volver al Dashboard</Link>
+            <h1>Nueva Propiedad</h1>
+          </div>
+        </div>
+      </header>
+
+      <main className="container main-content">
+        <PropertyForm onSubmit={handleCreate} loading={saving} />
+      </main>
+
+      <style jsx>{`
         .admin-page {
           min-height: 100vh;
           background-color: var(--color-bg);
@@ -109,6 +121,6 @@ export default function NewPropertyPage() {
           color: var(--color-text-muted);
         }
       `}</style>
-        </div>
-    );
+    </div>
+  );
 }

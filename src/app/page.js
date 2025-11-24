@@ -5,8 +5,6 @@ import Link from 'next/link';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
 import PropertyCard from '@/components/PropertyCard';
-import SkeletonCard from '@/components/SkeletonCard';
-
 import Header from '@/components/Header';
 import dynamic from 'next/dynamic';
 
@@ -16,40 +14,24 @@ const HomeMapPreview = dynamic(() => import('@/components/HomeMapPreview'), {
 });
 
 export default function Home() {
-  const [activeCategory, setActiveCategory] = useState(null);
-  const [properties, setProperties] = useState({});
+  const [activeTab, setActiveTab] = useState('Destacados');
+  const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  // scrolled state is handled in Header now
 
-  // Categories configuration
-  const categories = [
-    { id: 'Lote', title: 'Lotes', image: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80', description: 'Terrenos listos para construir tus sueños.' },
-    { id: 'Local', title: 'Locales', image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80', description: 'Espacios comerciales estratégicos.' },
-    { id: 'Finca', title: 'Fincas', image: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80', description: 'Descanso y naturaleza en un solo lugar.' }
-  ];
+  const tabs = ['Destacados', 'Lotes', 'Casas/apartamentos', 'Fincas', 'Locales'];
 
   useEffect(() => {
-    // Scroll listener removed as it's in Header
-    const fetchAllProperties = async () => {
+    const fetchProperties = async () => {
       try {
-        const q = query(collection(db, 'properties'), orderBy('createdAt', 'desc'), limit(20));
+        // Fetch a larger batch of properties to populate all tabs
+        const q = query(collection(db, 'properties'), orderBy('createdAt', 'desc'), limit(50));
         const querySnapshot = await getDocs(q);
-
-        const propsByCategory = {
-          Lote: [],
-          Local: [],
-          Finca: []
-        };
-
+        const props = [];
         querySnapshot.forEach(doc => {
-          const data = doc.data();
-          if (propsByCategory[data.type]) {
-            propsByCategory[data.type].push({ id: doc.id, ...data });
-          }
+          props.push({ id: doc.id, ...doc.data() });
         });
-
-        setProperties(propsByCategory);
+        setProperties(props);
       } catch (error) {
         console.error("Error fetching properties:", error);
       } finally {
@@ -57,16 +39,19 @@ export default function Home() {
       }
     };
 
-    fetchAllProperties();
+    fetchProperties();
   }, []);
 
-  const toggleCategory = (catId) => {
-    if (activeCategory === catId) {
-      setActiveCategory(null);
-    } else {
-      setActiveCategory(catId);
-    }
+  const getFilteredProperties = () => {
+    if (activeTab === 'Destacados') return properties;
+    if (activeTab === 'Lotes') return properties.filter(p => p.type === 'Lote');
+    if (activeTab === 'Fincas') return properties.filter(p => p.type === 'Finca');
+    if (activeTab === 'Locales') return properties.filter(p => p.type === 'Local');
+    if (activeTab === 'Casas/apartamentos') return properties.filter(p => p.type === 'Casa' || p.type === 'Apartamento');
+    return properties;
   };
+
+  const filteredProps = getFilteredProperties();
 
   return (
     <div className="page">
@@ -113,7 +98,7 @@ export default function Home() {
         {/* Map Preview Section */}
         <HomeMapPreview />
 
-        {/* Categories Section */}
+        {/* Categories / Properties Section */}
         <section className="categories-section">
           <div className="container">
             <div className="section-header">
@@ -121,48 +106,48 @@ export default function Home() {
               <p className="section-desc">Encuentra el espacio perfecto para tu inversión.</p>
             </div>
 
-            <div className="categories-grid">
-              {categories.map((cat) => (
-                <div key={cat.id} className={`category-card ${activeCategory === cat.id ? 'expanded' : ''}`}>
-                  <div
-                    className="card-visual"
-                    onClick={() => toggleCategory(cat.id)}
-                    style={{ backgroundImage: `url(${cat.image})` }}
+            {/* Tabs */}
+            <div className="tabs-container">
+              <div className="tabs-scroll">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab}
+                    className={`tab-btn ${activeTab === tab ? 'active' : ''}`}
+                    onClick={() => setActiveTab(tab)}
                   >
-                    <div className="card-overlay">
-                      <div className="card-info">
-                        <h3>{cat.title}</h3>
-                        <p>{cat.description}</p>
-                      </div>
-                      <button className="card-toggle">
-                        {activeCategory === cat.id ? '−' : '+'}
-                      </button>
-                    </div>
-                  </div>
+                    {tab}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-                  {/* Expandable Content */}
-                  <div className={`card-content ${activeCategory === cat.id ? 'show' : ''}`}>
-                    <div className="content-inner">
-                      {loading ? (
-                        <div className="loading-state">Cargando...</div>
-                      ) : properties[cat.id]?.length > 0 ? (
-                        <div className="props-list">
-                          {properties[cat.id].slice(0, 3).map(property => (
-                            <div key={property.id} className="mini-prop-card">
-                              <PropertyCard property={property} compact={true} />
-                            </div>
-                          ))}
-                          <Link href={`/propiedades?type=${cat.id}`} className="view-all-link">
-                            Ver todos los {cat.title} →
-                          </Link>
-                        </div>
-                      ) : (
-                        <p className="empty-state">Pronto tendremos propiedades aquí.</p>
-                      )}
-                    </div>
-                  </div>
+            {/* Properties Grid */}
+            <div className="properties-grid">
+              {loading ? (
+                <div className="loading-state">
+                  <div className="spinner"></div>
+                  <p>Cargando propiedades...</p>
                 </div>
-              ))}
+              ) : filteredProps.length > 0 ? (
+                filteredProps.map(property => (
+                  <div key={property.id} className="prop-card-wrapper">
+                    <PropertyCard property={property} />
+                  </div>
+                ))
+              ) : (
+                <div className="empty-state">
+                  <p>No encontramos propiedades en esta categoría por el momento.</p>
+                  <button onClick={() => setActiveTab('Destacados')} className="btn-reset">
+                    Ver todas las propiedades
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="view-more-container">
+              <Link href="/propiedades" className="btn-view-more">
+                Ver Catálogo Completo →
+              </Link>
             </div>
           </div>
         </section>
@@ -181,63 +166,6 @@ export default function Home() {
           margin: 0 auto;
           padding: 0 24px;
         }
-
-        /* Header */
-        .header {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          z-index: 100;
-          padding: 20px 0;
-          transition: all 0.3s ease;
-        }
-        .header.scrolled {
-          background: rgba(255, 255, 255, 0.9);
-          backdrop-filter: blur(12px);
-          padding: 12px 0;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-        }
-        .header-content {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-        .logo {
-          font-size: 1.8rem;
-          font-weight: 800;
-          letter-spacing: -1px;
-          color: #111;
-        }
-        .nav {
-          display: flex;
-          gap: 32px;
-          align-items: center;
-        }
-        .nav-link {
-          color: #444;
-          font-weight: 500;
-          text-decoration: none;
-          transition: color 0.2s;
-        }
-        .nav-link:hover {
-          color: #000;
-        }
-        .btn-login {
-          padding: 8px 20px;
-          background: #111;
-          color: white;
-          border-radius: 20px;
-          text-decoration: none;
-          font-size: 0.9rem;
-          font-weight: 600;
-          transition: transform 0.2s;
-        }
-        .btn-login:hover {
-          transform: scale(1.05);
-        }
-        .desktop-only { display: none; }
-        @media (min-width: 768px) { .desktop-only { display: flex; } }
 
         /* Hero Section */
         .hero {
@@ -337,12 +265,12 @@ export default function Home() {
 
         /* Categories Section */
         .categories-section {
-          padding: 100px 0;
+          padding: 80px 0;
           background: #fff;
         }
         .section-header {
           text-align: center;
-          margin-bottom: 60px;
+          margin-bottom: 40px;
         }
         .section-title {
           font-size: 2.5rem;
@@ -355,155 +283,121 @@ export default function Home() {
           color: #666;
         }
 
-        .categories-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-          gap: 24px;
-        }
-        .category-card {
-          border-radius: 24px;
-          overflow: hidden;
-          background: #f7f7f7;
-          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-          box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        }
-        .category-card:hover {
-          transform: translateY(-8px);
-          box-shadow: 0 20px 40px rgba(0,0,0,0.12);
-        }
-        .card-visual {
-          height: 400px;
-          background-size: cover;
-          background-position: center;
-          position: relative;
-          cursor: pointer;
-          transition: transform 0.5s ease;
-        }
-        .category-card:hover .card-visual {
-          transform: scale(1.05);
-        }
-        .card-overlay {
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 40%, transparent 100%);
+        /* Tabs */
+        .tabs-container {
           display: flex;
-          flex-direction: column;
-          justify-content: flex-end;
-          padding: 32px;
-          color: white;
-        }
-        .card-info h3 {
-          font-size: 2rem;
-          font-weight: 800;
-          margin-bottom: 8px;
-          text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-          letter-spacing: -0.5px;
-        }
-        .card-info p {
-          font-size: 1rem;
-          opacity: 0.95;
-          max-width: 90%;
-          font-weight: 500;
-        }
-        .card-toggle {
-          position: absolute;
-          top: 24px;
-          right: 24px;
-          width: 44px;
-          height: 44px;
-          border-radius: 50%;
-          background: rgba(255,255,255,0.15);
-          backdrop-filter: blur(8px);
-          border: 1px solid rgba(255,255,255,0.2);
-          color: white;
-          font-size: 1.5rem;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
           justify-content: center;
-          transition: all 0.2s;
-          z-index: 10;
+          margin-bottom: 40px;
         }
-        .card-toggle:hover {
-          background: rgba(255,255,255,0.3);
-          transform: scale(1.1);
+        .tabs-scroll {
+          display: flex;
+          gap: 12px;
+          overflow-x: auto;
+          padding: 8px;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none; /* Firefox */
+        }
+        .tabs-scroll::-webkit-scrollbar {
+          display: none; /* Chrome/Safari */
+        }
+        .tab-btn {
+          padding: 12px 24px;
+          border-radius: 30px;
+          border: 1px solid #eee;
+          background: white;
+          color: #666;
+          font-size: 1rem;
+          font-weight: 600;
+          cursor: pointer;
+          white-space: nowrap;
+          transition: all 0.2s ease;
+        }
+        .tab-btn:hover {
+          background: #f9f9f9;
+          border-color: #ddd;
+          color: #333;
+        }
+        .tab-btn.active {
+          background: #111;
+          color: white;
+          border-color: #111;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
 
-        .card-content {
-          height: 0;
-          overflow: hidden;
-          transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-          background: white;
+        /* Properties Grid */
+        .properties-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+          gap: 32px;
+          min-height: 400px;
         }
-        .card-content.show {
-          height: auto;
+        
+        .loading-state {
+            grid-column: 1 / -1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px;
+            color: #666;
         }
-        .content-inner {
-          padding: 24px;
-          border-top: 1px solid rgba(0,0,0,0.05);
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #eee;
+            border-top-color: #111;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
         }
-        .props-list {
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
-        .view-all-link {
-          display: block;
-          text-align: center;
-          padding: 14px;
-          background: #f9f9f9;
-          border-radius: 16px;
-          text-decoration: none;
-          color: #111;
-          font-weight: 700;
-          margin-top: 16px;
-          transition: all 0.2s;
+
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px;
+            background: #f9f9f9;
+            border-radius: 24px;
         }
-        .view-all-link:hover {
-          background: #eee;
-          transform: translateY(-2px);
+        .btn-reset {
+            margin-top: 16px;
+            padding: 10px 20px;
+            background: #111;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        .view-more-container {
+            margin-top: 60px;
+            display: flex;
+            justify-content: center;
+        }
+        .btn-view-more {
+            padding: 14px 32px;
+            background: white;
+            border: 1px solid #111;
+            color: #111;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .btn-view-more:hover {
+            background: #111;
+            color: white;
         }
 
         @media (max-width: 768px) {
           .hero-title { font-size: 2.5rem; }
-          
-          /* Mobile Carousel */
-          .categories-grid {
-            display: flex;
-            overflow-x: auto;
-            scroll-snap-type: x mandatory;
-            gap: 16px;
-            padding: 0 24px 40px 24px; /* Bottom padding for shadow */
-            margin: 0 -24px; /* Negative margin to allow full bleed scroll */
-            -webkit-overflow-scrolling: touch;
+          .tabs-container {
+            justify-content: flex-start; /* Align left on mobile for scrolling */
           }
-          /* Hide scrollbar */
-          .categories-grid::-webkit-scrollbar {
-            display: none;
-          }
-          .categories-grid {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-          }
-          
-          .category-card {
-            min-width: 85%;
-            scroll-snap-align: center;
-            margin-right: 0;
-          }
-          /* Add spacer at the end */
-          .category-card:last-child {
-            margin-right: 24px;
-          }
-          
-          .card-visual { height: 450px; } /* Taller on mobile for impact */
-          
-          .section-header {
-            text-align: left;
-            margin-bottom: 32px;
-          }
-          .section-title {
-            font-size: 2rem;
+          .properties-grid {
+            grid-template-columns: 1fr;
           }
         }
       `}</style>

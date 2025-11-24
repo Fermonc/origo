@@ -2,8 +2,41 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/context/AuthContext';
+import { toggleFavorite, checkIsFavorite } from '@/lib/db/favorites';
 
 export default function PropertyCard({ property }) {
+  const { user } = useAuth();
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [loadingFav, setLoadingFav] = useState(false);
+
+  useEffect(() => {
+    if (user && property?.id) {
+      checkIsFavorite(user.uid, property.id).then(setIsFavorite);
+    }
+  }, [user, property]);
+
+  const handleToggleFavorite = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!user) {
+      alert('Inicia sesión para guardar favoritos');
+      return;
+    }
+
+    setLoadingFav(true);
+    try {
+      await toggleFavorite(user.uid, property.id, isFavorite);
+      setIsFavorite(!isFavorite);
+    } catch (error) {
+      console.error("Error toggling favorite:", error);
+    } finally {
+      setLoadingFav(false);
+    }
+  };
+
   return (
     <Link href={`/propiedades/${property.id}`} style={{ display: 'block', textDecoration: 'none' }}>
       <div className="property-card">
@@ -16,6 +49,24 @@ export default function PropertyCard({ property }) {
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
           <span className="badge">{property.type}</span>
+          <button
+            className={`btn-favorite ${isFavorite ? 'active' : ''}`}
+            onClick={handleToggleFavorite}
+            disabled={loadingFav}
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill={isFavorite ? "#ef4444" : "none"}
+              stroke={isFavorite ? "#ef4444" : "currentColor"}
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+          </button>
         </div>
         <div className="content">
           <h3>{property.title}</h3>
@@ -41,6 +92,7 @@ export default function PropertyCard({ property }) {
             height: 100%;
             display: flex;
             flex-direction: column;
+            position: relative;
           }
           .property-card:hover {
             transform: translateY(-4px);
@@ -66,6 +118,33 @@ export default function PropertyCard({ property }) {
             letter-spacing: 0.5px;
             z-index: 1;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+          }
+          .btn-favorite {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(4px);
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 2;
+            transition: all 0.2s;
+            color: #666;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+          }
+          .btn-favorite:hover {
+            transform: scale(1.1);
+            background: white;
+          }
+          .btn-favorite.active {
+            color: #ef4444;
+            background: white;
           }
           .content {
             padding: 20px;
