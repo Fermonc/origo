@@ -166,241 +166,74 @@ export default function ProfilePage() {
               />
 
               <div>
-                'use client';
+                <h1>{user.displayName}</h1>
+                <p>{user.email}</p>
+              </div>
+            </div>
+            <button onClick={handleLogout} className="btn-logout">Cerrar Sesión</button>
+          </div>
 
-                import {useState, useEffect, useRef} from 'react';
-                import {useRouter} from 'next/navigation';
-                import {useAuth} from '@/context/AuthContext';
-                import {getUserProfile, createOrUpdateUser} from '@/lib/db/users';
-                import {storage, db} from '@/lib/firebase';
-                import {ref, uploadBytes, getDownloadURL} from 'firebase/storage';
-                import {updateProfile, deleteUser} from 'firebase/auth';
-                import {doc, deleteDoc} from 'firebase/firestore';
-                import Header from '@/components/Header';
-                import UserFavorites from '@/components/UserFavorites';
-                import UserAlerts from '@/components/UserAlerts';
-                import UserDocuments from '@/components/UserDocuments';
+          {/* Tabs Navigation */}
+          <div className="tabs-nav">
+            <button className={`tab-btn ${activeTab === 'account' ? 'active' : ''}`} onClick={() => setActiveTab('account')}>👤 Mi Cuenta</button>
+            <button className={`tab-btn ${activeTab === 'favorites' ? 'active' : ''}`} onClick={() => setActiveTab('favorites')}>❤️ Favoritos</button>
+            <button className={`tab-btn ${activeTab === 'alerts' ? 'active' : ''}`} onClick={() => setActiveTab('alerts')}>🔍 Buscando</button>
+          </div>
 
-                export default function ProfilePage() {
-  const {user, loading, logout} = useAuth();
-                const router = useRouter();
-                const [activeTab, setActiveTab] = useState('account');
-                const [profile, setProfile] = useState(null);
-                const [saving, setSaving] = useState(false);
-                const [uploadingImg, setUploadingImg] = useState(false);
-                const fileInputRef = useRef(null);
-
-                const [formData, setFormData] = useState({
-                  phoneNumber: '',
-                preferences: {notifications: true, newsletter: false }
-  });
-
-  useEffect(() => {
-    if (!loading && !user) {
-                  router.push('/login');
-    } else if (user) {
-                  loadProfile();
-    }
-  }, [user, loading, router]);
-
-  const loadProfile = async () => {
-    try {
-      const data = await getUserProfile(user.uid);
-                if (data) {
-                  setProfile(data);
-                setFormData({
-                  phoneNumber: data.phoneNumber || '',
-                preferences: {
-                  notifications: data.preferences?.notifications ?? true,
-                newsletter: data.preferences?.newsletter ?? false
-          }
-        });
-      }
-    } catch (error) {
-                  console.error("Error loading profile:", error);
-    }
-  };
-
-  const handleSave = async (e) => {
-                  e.preventDefault();
-                setSaving(true);
-                try {
-                  await createOrUpdateUser(user, {
-                    phoneNumber: formData.phoneNumber,
-                    preferences: formData.preferences
-                  });
-                alert('Perfil actualizado correctamente');
-                loadProfile();
-    } catch (error) {
-                  console.error("Error saving profile:", error);
-                alert('Error al guardar el perfil');
-    } finally {
-                  setSaving(false);
-    }
-  };
-
-  const handleImageClick = () => {
-                  fileInputRef.current.click();
-  };
-
-  const handleImageChange = async (e) => {
-    const file = e.target.files[0];
-                if (!file) return;
-
-                setUploadingImg(true);
-                try {
-      // Create a reference to 'profile_images/UID'
-      const storageRef = ref(storage, `profile_images/${user.uid}`);
-                await uploadBytes(storageRef, file);
-                const photoURL = await getDownloadURL(storageRef);
-
-                // Update Auth Profile
-                await updateProfile(user, {photoURL});
-
-                // Update Firestore User Doc
-                await createOrUpdateUser(user, {photoURL});
-
-                // Force reload to update UI
-                window.location.reload();
-    } catch (error) {
-                  console.error("Error uploading image:", error);
-                alert("Error al subir la imagen. Intenta de nuevo.");
-    } finally {
-                  setUploadingImg(false);
-    }
-  };
-
-  const handleDeleteAccount = async () => {
-    if (!confirm("⚠️ ¿Estás seguro de que quieres eliminar tu cuenta? Esta acción es irreversible y perderás todos tus datos, favoritos y alertas.")) {
-      return;
-    }
-
-                try {
-      const uid = user.uid;
-                // 1. Delete Firestore Data
-                await deleteDoc(doc(db, 'users', uid));
-
-                // 2. Delete Auth User
-                await deleteUser(user);
-
-                alert("Tu cuenta ha sido eliminada correctamente.");
-                router.push('/');
-    } catch (error) {
-                  console.error("Error deleting account:", error);
-                if (error.code === 'auth/requires-recent-login') {
-                  alert("Por seguridad, debes iniciar sesión nuevamente antes de eliminar tu cuenta.");
-                await logout();
-                router.push('/login');
-      } else {
-                  alert("Hubo un error al eliminar la cuenta. Por favor contacta a soporte.");
-      }
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-                  await logout();
-                router.push('/');
-    } catch (error) {
-                  console.error("Logout error:", error);
-    }
-  };
-
-                if (loading || !user) return <div className="loading">Cargando...</div>;
-
-                return (
-                <div className="page">
-                  <Header />
-                  <div className="profile-container">
-                    <div className="container">
-                      {/* Profile Header */}
-                      <div className="profile-header-card">
-                        <div className="user-summary">
-                          <div className="avatar-wrapper" onClick={handleImageClick} title="Cambiar foto de perfil">
-                            <div className="avatar-large">
-                              {user.photoURL ? <img src={user.photoURL} alt={user.displayName} /> : <span>{user.displayName?.[0]}</span>}
-                            </div>
-                            <div className="avatar-overlay">
-                              <span>📷</span>
-                            </div>
-                            {uploadingImg && <div className="avatar-loading">...</div>}
-                          </div>
-                          <input
-                            type="file"
-                            ref={fileInputRef}
-                            onChange={handleImageChange}
-                            style={{ display: 'none' }}
-                            accept="image/*"
-                          />
-
-                          <div>
-                            <h1>{user.displayName}</h1>
-                            <p>{user.email}</p>
-                          </div>
-                        </div>
-                        <button onClick={handleLogout} className="btn-logout">Cerrar Sesión</button>
-                      </div>
-                      {/* Tabs Navigation */}
-                      <div className="tabs-nav">
-                        <button className={`tab-btn ${activeTab === 'account' ? 'active' : ''}`} onClick={() => setActiveTab('account')}>👤 Mi Cuenta</button>
-                        <button className={`tab-btn ${activeTab === 'favorites' ? 'active' : ''}`} onClick={() => setActiveTab('favorites')}>❤️ Favoritos</button>
-                        <button className={`tab-btn ${activeTab === 'alerts' ? 'active' : ''}`} onClick={() => setActiveTab('alerts')}>🔍 Buscando</button>
-                      </div>
-
-                      {/* Tab Content */}
-                      <div className="tab-content">
-                        {activeTab === 'account' && (
-                          <div className="account-settings">
-                            <div className="settings-card">
-                              <h3>Información Personal</h3>
-                              <form onSubmit={handleSave}>
-                                <div className="form-group">
-                                  <label>Teléfono de Contacto</label>
-                                  <input
-                                    type="tel"
-                                    value={formData.phoneNumber}
-                                    onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                                    placeholder="+57 300 ..."
-                                    className="input-premium"
-                                  />
-                                </div>
-                                <div className="form-group">
-                                  <label>Preferencias</label>
-                                  <div className="checkbox-group">
-                                    <label className="checkbox-label">
-                                      <input type="checkbox" checked={formData.preferences.notifications} onChange={(e) => setFormData({ ...formData, preferences: { ...formData.preferences, notifications: e.target.checked } })} />
-                                      <span>Recibir notificaciones</span>
-                                    </label>
-                                    <label className="checkbox-label">
-                                      <input type="checkbox" checked={formData.preferences.newsletter} onChange={(e) => setFormData({ ...formData, preferences: { ...formData.preferences, newsletter: e.target.checked } })} />
-                                      <span>Suscribirse al newsletter</span>
-                                    </label>
-                                  </div>
-                                </div>
-                                <button type="submit" className="btn-save" disabled={saving}>{saving ? 'Guardando...' : 'Guardar Cambios'}</button>
-                              </form>
-                            </div>
-
-                            <div className="settings-card">
-                              <h3>Documentación</h3>
-                              <UserDocuments user={user} />
-                            </div>
-
-                            <div className="settings-card danger-zone">
-                              <h3>Zona de Peligro</h3>
-                              <p>Estas acciones no se pueden deshacer. Se eliminarán permanentemente tus datos, favoritos y alertas.</p>
-                              <button className="btn-delete-account" onClick={handleDeleteAccount}>Eliminar Cuenta</button>
-                            </div>
-                          </div>
-                        )}
-
-                        {activeTab === 'favorites' && <UserFavorites user={user} />}
-                        {activeTab === 'alerts' && <UserAlerts user={user} />}
+          {/* Tab Content */}
+          <div className="tab-content">
+            {activeTab === 'account' && (
+              <div className="account-settings">
+                <div className="settings-card">
+                  <h3>Información Personal</h3>
+                  <form onSubmit={handleSave}>
+                    <div className="form-group">
+                      <label>Teléfono de Contacto</label>
+                      <input
+                        type="tel"
+                        value={formData.phoneNumber}
+                        onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                        placeholder="+57 300 ..."
+                        className="input-premium"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Preferencias</label>
+                      <div className="checkbox-group">
+                        <label className="checkbox-label">
+                          <input type="checkbox" checked={formData.preferences.notifications} onChange={(e) => setFormData({ ...formData, preferences: { ...formData.preferences, notifications: e.target.checked } })} />
+                          <span>Recibir notificaciones</span>
+                        </label>
+                        <label className="checkbox-label">
+                          <input type="checkbox" checked={formData.preferences.newsletter} onChange={(e) => setFormData({ ...formData, preferences: { ...formData.preferences, newsletter: e.target.checked } })} />
+                          <span>Suscribirse al newsletter</span>
+                        </label>
                       </div>
                     </div>
-                  </div>
+                    <button type="submit" className="btn-save" disabled={saving}>{saving ? 'Guardando...' : 'Guardar Cambios'}</button>
+                  </form>
+                </div>
 
-                  <style jsx>{`
+                <div className="settings-card">
+                  <h3>Documentación</h3>
+                  <UserDocuments user={user} />
+                </div>
+
+                <div className="settings-card danger-zone">
+                  <h3>Zona de Peligro</h3>
+                  <p>Estas acciones no se pueden deshacer. Se eliminarán permanentemente tus datos, favoritos y alertas.</p>
+                  <button className="btn-delete-account" onClick={handleDeleteAccount}>Eliminar Cuenta</button>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'favorites' && <UserFavorites user={user} />}
+            {activeTab === 'alerts' && <UserAlerts user={user} />}
+          </div>
+        </div>
+      </div>
+
+      <style jsx>{`
         .page { min-height: 100vh; background: #f8f9fa; padding-top: 80px; }
         .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
         
@@ -580,6 +413,6 @@ export default function ProfilePage() {
             .user-summary { flex-direction: column; }
         }
       `}</style>
-                </div>
-                );
+    </div>
+  );
 }
