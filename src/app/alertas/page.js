@@ -4,219 +4,329 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { getUserAlerts, createAlert, deleteAlert } from '@/lib/db/alerts';
+import { db } from '@/lib/firebase';
+import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
+import PropertyCard from '@/components/PropertyCard';
+import Header from '@/components/Header';
 
 export default function AlertsPage() {
-    const { user, loading } = useAuth();
-    const router = useRouter();
-    const [alerts, setAlerts] = useState([]);
-    const [fetching, setFetching] = useState(true);
-    const [creating, setCreating] = useState(false);
-    const [showForm, setShowForm] = useState(false);
+  const { user, loading } = useAuth();
+  const router = useRouter();
+  const [alerts, setAlerts] = useState([]);
+  const [fetching, setFetching] = useState(true);
+  const [creating, setCreating] = useState(false);
+  const [showForm, setShowForm] = useState(false);
 
-    // Form State
-    const [criteria, setCriteria] = useState({
-        type: 'Apartamento',
-        minPrice: '',
-        maxPrice: '',
-        zone: 'Norte'
-    });
+  // Matches State
+  const [matches, setMatches] = useState({}); // { alertId: [properties] }
+  const [loadingMatches, setLoadingMatches] = useState({});
 
-    useEffect(() => {
-        if (!loading && !user) {
-            router.push('/login');
-        } else if (user) {
-            loadAlerts();
-        }
-    }, [user, loading, router]);
+  // Form State
+  const [criteria, setCriteria] = useState({
+    type: 'Apartamento',
+    minPrice: '',
+    maxPrice: '',
+    zone: 'Norte'
+  });
+  const [preferences, setPreferences] = useState({
+    email: true,
+    push: true
+  });
 
-    const loadAlerts = async () => {
-        setFetching(true);
-        try {
-            const data = await getUserAlerts(user.uid);
-            setAlerts(data);
-        } catch (error) {
-            console.error("Error loading alerts:", error);
-        } finally {
-            setFetching(false);
-        }
-    };
-
-    const handleCreate = async (e) => {
-        e.preventDefault();
-        setCreating(true);
-        try {
-            // Clean up criteria
-            const cleanCriteria = {
-                type: criteria.type,
-                zone: criteria.zone,
-                minPrice: criteria.minPrice ? Number(criteria.minPrice) : 0,
-                maxPrice: criteria.maxPrice ? Number(criteria.maxPrice) : 0
-            };
-
-            await createAlert(user.uid, cleanCriteria);
-            setShowForm(false);
-            setCriteria({ type: 'Apartamento', minPrice: '', maxPrice: '', zone: 'Norte' }); // Reset
-            loadAlerts();
-        } catch (error) {
-            console.error("Error creating alert:", error);
-            alert('Error al crear la alerta');
-        } finally {
-            setCreating(false);
-        }
-    };
-
-    const handleDelete = async (alertItem) => {
-        if (!confirm('¿Estás seguro de eliminar esta alerta?')) return;
-        try {
-            await deleteAlert(user.uid, alertItem);
-            loadAlerts();
-        } catch (error) {
-            console.error("Error deleting alert:", error);
-        }
-    };
-
-    if (loading || !user) {
-        return <div className="loading">Cargando...</div>;
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login');
+    } else if (user) {
+      loadAlerts();
     }
+  }, [user, loading, router]);
 
-    return (
-        <div className="alerts-page">
-            <div className="container">
-                <div className="header">
-                    <div>
-                        <h1>Mis Alertas</h1>
-                        <p>Recibe notificaciones cuando publiquemos propiedades que te interesen.</p>
-                    </div>
-                    <button
-                        className="btn-create"
-                        onClick={() => setShowForm(!showForm)}
+  const loadAlerts = async () => {
+    setFetching(true);
+    try {
+      const data = await getUserAlerts(user.uid);
+      setAlerts(data);
+      // Load matches for each alert
+      data.forEach(alert => findMatches(alert));
+    } catch (error) {
+      console.error("Error loading alerts:", error);
+    } finally {
+      setFetching(false);
+    }
+  };
+
+  const findMatches = async (alertItem) => {
+    setLoadingMatches(prev => ({ ...prev, [alertItem.id]: true }));
+    try {
+      // Build query
+      let q = query(
+        collection(db, 'properties'),
+        where('type', '==', alertItem.criteria.type),
+        orderBy('price'), // Need index for this specific combo usually, but let's try basic
+        limit(10)
+      );
+
+      // Note: Compound queries with range filters (<, >) on different fields (price) 
+      // and equality filters (type, zone) often require composite indexes in Firestore.
+      // For now, we'll fetch by Type and filter the rest client-side to avoid index hell during dev.
+
+      const querySnapshot = await getDocs(q);
+      const results = [];
+
+      querySnapshot.forEach(doc => {
+        const data = doc.data();
+        let matches = true;
+
+        // Zone Filter
+        if (alertItem.criteria.zone && data.zone !== alertItem.criteria.zone) matches = false;
+
+        // Price Filter
+        if (alertItem.criteria.minPrice > 0 && data.price < alertItem.criteria.minPrice) matches = false;
+        if (alertItem.criteria.maxPrice > 0 && data.price > alertItem.criteria.maxPrice) matches = false;
+
+        if (matches) {
+          results.push({ id: doc.id, ...data });
+        }
+      });
+
+      setMatches(prev => ({ ...prev, [alertItem.id]: results }));
+    } catch (error) {
+      console.error("Error finding matches:", error);
+    } finally {
+      setLoadingMatches(prev => ({ ...prev, [alertItem.id]: false }));
+    }
+  };
+
+  const handleCreate = async (e) => {
+    e.preventDefault();
+    setCreating(true);
+    try {
+      const cleanCriteria = {
+        type: criteria.type,
+        zone: criteria.zone,
+        minPrice: criteria.minPrice ? Number(criteria.minPrice) : 0,
+        maxPrice: criteria.maxPrice ? Number(criteria.maxPrice) : 0
+      };
+
+      await createAlert(user.uid, cleanCriteria, preferences);
+      setShowForm(false);
+      setCriteria({ type: 'Apartamento', minPrice: '', maxPrice: '', zone: 'Norte' }); // Reset
+      setPreferences({ email: true, push: true });
+      loadAlerts();
+    } catch (error) {
+      console.error("Error creating alert:", error);
+      alert('Error al crear la alerta');
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const handleDelete = async (alertItem) => {
+    if (!confirm('¿Estás seguro de eliminar esta alerta?')) return;
+    try {
+      await deleteAlert(user.uid, alertItem);
+      loadAlerts();
+    } catch (error) {
+      console.error("Error deleting alert:", error);
+    }
+  };
+
+  if (loading || !user) {
+    return <div className="loading">Cargando...</div>;
+  }
+
+  return (
+    <div className="page">
+      <Header />
+      <div className="alerts-page">
+        <div className="container">
+          <div className="header-section">
+            <div>
+              <h1>Mis Alertas</h1>
+              <p>Recibe notificaciones cuando publiquemos propiedades que te interesen.</p>
+            </div>
+            <button
+              className="btn-create"
+              onClick={() => setShowForm(!showForm)}
+            >
+              {showForm ? 'Cancelar' : '+ Nueva Alerta'}
+            </button>
+          </div>
+
+          {showForm && (
+            <div className="alert-form-card">
+              <h3>Crear Nueva Alerta</h3>
+              <form onSubmit={handleCreate}>
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label>Tipo de Propiedad</label>
+                    <select
+                      value={criteria.type}
+                      onChange={(e) => setCriteria({ ...criteria, type: e.target.value })}
                     >
-                        {showForm ? 'Cancelar' : '+ Nueva Alerta'}
-                    </button>
+                      <option value="Apartamento">Apartamento</option>
+                      <option value="Casa">Casa</option>
+                      <option value="Lote">Lote</option>
+                      <option value="Finca">Finca</option>
+                      <option value="Local">Local</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Zona</label>
+                    <select
+                      value={criteria.zone}
+                      onChange={(e) => setCriteria({ ...criteria, zone: e.target.value })}
+                    >
+                      <option value="Norte">Norte</option>
+                      <option value="Sur">Sur</option>
+                      <option value="Centro">Centro</option>
+                      <option value="Occidente">Occidente</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Precio Mínimo</label>
+                    <input
+                      type="number"
+                      placeholder="0"
+                      value={criteria.minPrice}
+                      onChange={(e) => setCriteria({ ...criteria, minPrice: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Precio Máximo</label>
+                    <input
+                      type="number"
+                      placeholder="Sin límite"
+                      value={criteria.maxPrice}
+                      onChange={(e) => setCriteria({ ...criteria, maxPrice: e.target.value })}
+                    />
+                  </div>
                 </div>
 
-                {showForm && (
-                    <div className="alert-form-card">
-                        <h3>Crear Nueva Alerta</h3>
-                        <form onSubmit={handleCreate}>
-                            <div className="form-grid">
-                                <div className="form-group">
-                                    <label>Tipo de Propiedad</label>
-                                    <select
-                                        value={criteria.type}
-                                        onChange={(e) => setCriteria({ ...criteria, type: e.target.value })}
-                                    >
-                                        <option value="Apartamento">Apartamento</option>
-                                        <option value="Casa">Casa</option>
-                                        <option value="Lote">Lote</option>
-                                        <option value="Local">Local</option>
-                                    </select>
-                                </div>
+                <div className="preferences-section">
+                  <h4>Notificaciones</h4>
+                  <div className="checkbox-group">
+                    <label className="checkbox-label">
+                      <input
+                        type="checkbox"
+                        checked={preferences.email}
+                        onChange={(e) => setPreferences({ ...preferences, email: e.target.checked })}
+                      />
+                      Enviar correo electrónico
+                    </label>
+                    <label className="checkbox-label">
+                      <input
+                        type="checkbox"
+                        checked={preferences.push}
+                        onChange={(e) => setPreferences({ ...preferences, push: e.target.checked })}
+                      />
+                      Notificación al celular
+                    </label>
+                  </div>
+                </div>
 
-                                <div className="form-group">
-                                    <label>Zona</label>
-                                    <select
-                                        value={criteria.zone}
-                                        onChange={(e) => setCriteria({ ...criteria, zone: e.target.value })}
-                                    >
-                                        <option value="Norte">Norte</option>
-                                        <option value="Sur">Sur</option>
-                                        <option value="Centro">Centro</option>
-                                        <option value="Occidente">Occidente</option>
-                                    </select>
-                                </div>
-
-                                <div className="form-group">
-                                    <label>Precio Mínimo</label>
-                                    <input
-                                        type="number"
-                                        placeholder="0"
-                                        value={criteria.minPrice}
-                                        onChange={(e) => setCriteria({ ...criteria, minPrice: e.target.value })}
-                                    />
-                                </div>
-
-                                <div className="form-group">
-                                    <label>Precio Máximo</label>
-                                    <input
-                                        type="number"
-                                        placeholder="Sin límite"
-                                        value={criteria.maxPrice}
-                                        onChange={(e) => setCriteria({ ...criteria, maxPrice: e.target.value })}
-                                    />
-                                </div>
-                            </div>
-                            <button type="submit" className="btn-save" disabled={creating}>
-                                {creating ? 'Creando...' : 'Guardar Alerta'}
-                            </button>
-                        </form>
-                    </div>
-                )}
-
-                {fetching ? (
-                    <div className="loading-grid">Cargando alertas...</div>
-                ) : alerts.length > 0 ? (
-                    <div className="alerts-grid">
-                        {alerts.map(alertItem => (
-                            <div key={alertItem.id} className="alert-card">
-                                <div className="alert-info">
-                                    <div className="alert-header">
-                                        <span className="alert-type">{alertItem.criteria.type}</span>
-                                        <span className="alert-zone">📍 {alertItem.criteria.zone}</span>
-                                    </div>
-                                    <div className="alert-price">
-                                        {alertItem.criteria.minPrice > 0 ? `$${alertItem.criteria.minPrice}` : '$0'} -
-                                        {alertItem.criteria.maxPrice > 0 ? `$${alertItem.criteria.maxPrice}` : ' Sin límite'}
-                                    </div>
-                                </div>
-                                <button
-                                    className="btn-delete"
-                                    onClick={() => handleDelete(alertItem)}
-                                >
-                                    Eliminar
-                                </button>
-                            </div>
-                        ))}
-                    </div>
-                ) : (
-                    !showForm && (
-                        <div className="empty-state">
-                            <div className="empty-icon">🔔</div>
-                            <h2>No tienes alertas activas</h2>
-                            <p>Crea una alerta para enterarte primero de las mejores oportunidades.</p>
-                        </div>
-                    )
-                )}
+                <button type="submit" className="btn-save" disabled={creating}>
+                  {creating ? 'Creando...' : 'Guardar Alerta'}
+                </button>
+              </form>
             </div>
+          )}
 
-            <style jsx>{`
+          {fetching ? (
+            <div className="loading-grid">Cargando alertas...</div>
+          ) : alerts.length > 0 ? (
+            <div className="alerts-grid">
+              {alerts.map(alertItem => (
+                <div key={alertItem.id} className="alert-wrapper">
+                  <div className="alert-card">
+                    <div className="alert-info">
+                      <div className="alert-header-row">
+                        <span className="alert-type">{alertItem.criteria.type}</span>
+                        <span className="alert-zone">📍 {alertItem.criteria.zone}</span>
+                      </div>
+                      <div className="alert-price">
+                        {alertItem.criteria.minPrice > 0 ? `$${alertItem.criteria.minPrice.toLocaleString()}` : '$0'} -
+                        {alertItem.criteria.maxPrice > 0 ? ` $${alertItem.criteria.maxPrice.toLocaleString()}` : ' Sin límite'}
+                      </div>
+                      <div className="alert-prefs">
+                        {alertItem.preferences?.email && <span title="Correo">📧</span>}
+                        {alertItem.preferences?.push && <span title="Push">📱</span>}
+                      </div>
+                    </div>
+                    <button
+                      className="btn-delete"
+                      onClick={() => handleDelete(alertItem)}
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+
+                  {/* Matches Section */}
+                  <div className="matches-section">
+                    <div className="matches-header">
+                      <h4>Inmuebles encontrados ({matches[alertItem.id]?.length || 0})</h4>
+                    </div>
+
+                    {loadingMatches[alertItem.id] ? (
+                      <div className="matches-loading">Buscando coincidencias...</div>
+                    ) : matches[alertItem.id]?.length > 0 ? (
+                      <div className="matches-scroll">
+                        {matches[alertItem.id].map(property => (
+                          <div key={property.id} className="mini-card-wrapper">
+                            <PropertyCard property={property} compact={true} />
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="no-matches">Aún no hay inmuebles exactos, pero te avisaremos cuando lleguen.</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            !showForm && (
+              <div className="empty-state">
+                <div className="empty-icon">🔔</div>
+                <h2>No tienes alertas activas</h2>
+                <p>Crea una alerta para enterarte primero de las mejores oportunidades.</p>
+              </div>
+            )
+          )}
+        </div>
+      </div>
+
+      <style jsx>{`
         .alerts-page {
           min-height: 100vh;
           background-color: #f8f9fa;
-          padding: 40px 0;
+          padding: 100px 0 40px 0;
         }
 
         .container {
-          max-width: 800px;
+          max-width: 900px;
           margin: 0 auto;
           padding: 0 20px;
         }
 
-        .header {
+        .header-section {
           display: flex;
           justify-content: space-between;
           align-items: center;
           margin-bottom: 32px;
         }
 
-        .header h1 {
+        .header-section h1 {
           font-size: 2rem;
           font-weight: 800;
           color: #111;
           margin: 0 0 8px 0;
         }
 
-        .header p {
+        .header-section p {
           color: #666;
           margin: 0;
         }
@@ -284,6 +394,34 @@ export default function AlertsPage() {
           background: white;
         }
 
+        .preferences-section {
+            margin-bottom: 24px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 12px;
+        }
+        .preferences-section h4 {
+            margin: 0 0 12px 0;
+            font-size: 1rem;
+            color: #333;
+        }
+        .checkbox-group {
+            display: flex;
+            gap: 24px;
+        }
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+        .checkbox-label input {
+            width: 18px;
+            height: 18px;
+            accent-color: #111;
+        }
+
         .btn-save {
           width: 100%;
           padding: 14px;
@@ -298,20 +436,26 @@ export default function AlertsPage() {
         .alerts-grid {
           display: flex;
           flex-direction: column;
-          gap: 16px;
+          gap: 24px;
+        }
+
+        .alert-wrapper {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            border: 1px solid rgba(0,0,0,0.03);
         }
 
         .alert-card {
-          background: white;
           padding: 24px;
-          border-radius: 16px;
           display: flex;
           justify-content: space-between;
           align-items: center;
-          box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+          border-bottom: 1px solid #f0f0f0;
         }
 
-        .alert-header {
+        .alert-header-row {
           display: flex;
           align-items: center;
           gap: 12px;
@@ -320,7 +464,7 @@ export default function AlertsPage() {
 
         .alert-type {
           font-weight: 700;
-          font-size: 1.1rem;
+          font-size: 1.2rem;
           color: #111;
         }
 
@@ -335,7 +479,14 @@ export default function AlertsPage() {
         .alert-price {
           color: #555;
           font-family: monospace;
-          font-size: 0.95rem;
+          font-size: 1rem;
+          margin-bottom: 8px;
+        }
+        
+        .alert-prefs {
+            display: flex;
+            gap: 8px;
+            font-size: 1.1rem;
         }
 
         .btn-delete {
@@ -351,6 +502,47 @@ export default function AlertsPage() {
 
         .btn-delete:hover {
           background: #fecaca;
+        }
+
+        /* Matches Section */
+        .matches-section {
+            padding: 20px 24px;
+            background: #fafafa;
+        }
+        .matches-header h4 {
+            margin: 0 0 16px 0;
+            font-size: 0.95rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+        .matches-scroll {
+            display: flex;
+            gap: 16px;
+            overflow-x: auto;
+            padding-bottom: 12px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .matches-scroll::-webkit-scrollbar {
+            height: 6px;
+        }
+        .matches-scroll::-webkit-scrollbar-thumb {
+            background: #ddd;
+            border-radius: 3px;
+        }
+        .mini-card-wrapper {
+            min-width: 280px;
+            width: 280px;
+        }
+        .no-matches {
+            color: #888;
+            font-style: italic;
+            font-size: 0.95rem;
+        }
+        .matches-loading {
+            color: #888;
+            font-size: 0.9rem;
         }
 
         .empty-state {
@@ -385,6 +577,6 @@ export default function AlertsPage() {
           color: #666;
         }
       `}</style>
-        </div>
-    );
+    </div>
+  );
 }

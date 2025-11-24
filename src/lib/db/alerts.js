@@ -6,15 +6,17 @@ import { v4 as uuidv4 } from 'uuid';
  * Creates a new alert for the user
  * @param {string} userId 
  * @param {Object} criteria - { type, minPrice, maxPrice, zone, etc. }
+ * @param {Object} preferences - { email: boolean, push: boolean }
  */
-export const createAlert = async (userId, criteria) => {
+export const createAlert = async (userId, criteria, preferences = { email: true, push: false }) => {
     if (!userId) return;
 
     const userRef = doc(db, 'users', userId);
     const newAlert = {
         id: uuidv4(),
         createdAt: new Date().toISOString(),
-        criteria: criteria
+        criteria: criteria,
+        preferences: preferences
     };
 
     await updateDoc(userRef, {
