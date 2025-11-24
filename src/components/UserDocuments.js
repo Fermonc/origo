@@ -1,16 +1,28 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { storage, db } from '@/lib/firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { doc, updateDoc, arrayUnion, getDoc } from 'firebase/firestore';
 
-export default function UserDocuments({ user }) {
-    const [uploading, setUploading] = useState(false);
-    const [documents, setDocuments] = useState([
-        { id: 1, name: 'Cédula de Ciudadanía', status: 'pending', file: null },
-        { id: 2, name: 'Certificado Laboral', status: 'pending', file: null },
-        { id: 3, name: 'Extractos Bancarios', status: 'uploaded', file: 'extractos_oct.pdf' },
-    ]);
+export default function UserDocuments({ user, profile }) {
+    const [uploading, setUploading] = useState({}); // Track uploading state per document type
+    const [documents, setDocuments] = useState([]);
 
-    const handleFileChange = (docId, e) => {
+    // Required document types
+    const docTypes = [
+        { id: 'cedula', name: 'Cédula de Ciudadanía' },
+        { id: 'laboral', name: 'Certificado Laboral' },
+        { id: 'bancario', name: 'Extractos Bancarios' }
+    ];
+
+    useEffect(() => {
+        if (profile?.documents) {
+            setDocuments(profile.documents);
+        }
+    }, [profile]);
+
+    const handleFileChange = async (typeId, e) => {
         const file = e.target.files[0];
         if (!file) return;
 
@@ -22,15 +34,57 @@ export default function UserDocuments({ user }) {
             return;
         }
 
-        // Simulate upload
-        setUploading(true);
-        setTimeout(() => {
-            setDocuments(prev => prev.map(doc =>
-                doc.id === docId ? { ...doc, status: 'uploaded', file: file.name } : doc
-            ));
-            setUploading(false);
-            alert(`Documento "${file.name}" subido correctamente (Simulación)`);
-        }, 1500);
+        setUploading(prev => ({ ...prev, [typeId]: true }));
+
+        try {
+            // 1. Upload to Firebase Storage
+            const storageRef = ref(storage, `documents/${user.uid}/${typeId}/${file.name}`);
+            await uploadBytes(storageRef, file);
+            const downloadURL = await getDownloadURL(storageRef);
+
+            // 2. Create document object
+            const newDoc = {
+                id: typeId,
+                name: docTypes.find(d => d.id === typeId)?.name || file.name,
+                fileName: file.name,
+                url: downloadURL,
+                uploadedAt: new Date().toISOString(),
+                status: 'uploaded'
+            };
+
+            // 3. Update Firestore
+            const userRef = doc(db, 'users', user.uid);
+
+            // We need to remove existing doc of same type if exists, then add new one
+            // Since arrayRemove requires exact object match, it's safer to read, filter, and update
+            // But for simplicity and atomicity, let's try a cleaner approach:
+            // We will store documents as an array. To update, we might need to filter client side and overwrite the array or use a map in Firestore.
+            // Given the structure is an array in the plan, let's stick to array.
+            // To avoid duplicates, we'll read the current docs from profile (or fetch fresh), filter out this type, and add the new one.
+
+            const currentDocs = profile?.documents || [];
+            const updatedDocs = currentDocs.filter(d => d.id !== typeId);
+            updatedDocs.push(newDoc);
+
+            await updateDoc(userRef, {
+                documents: updatedDocs
+            });
+
+            // Update local state immediately
+            setDocuments(updatedDocs);
+            alert('Documento subido correctamente.');
+
+        } catch (error) {
+            console.error("Error uploading document:", error);
+            alert('Error al subir el documento. Intenta de nuevo.');
+        } finally {
+            setUploading(prev => ({ ...prev, [typeId]: false }));
+        }
+    };
+
+    const getDocStatus = (typeId) => {
+        const doc = documents.find(d => d.id === typeId);
+        return doc ? { status: 'uploaded', fileName: doc.fileName, url: doc.url } : { status: 'pending' };
     };
 
     return (
@@ -45,31 +99,40 @@ export default function UserDocuments({ user }) {
             </div>
 
             <div className="documents-list">
-                {documents.map(doc => (
-                    <div key={doc.id} className="document-item">
-                        <div className="doc-info">
-                            <span className="doc-icon">{doc.status === 'uploaded' ? '✅' : '📄'}</span>
-                            <div>
-                                <h4>{doc.name}</h4>
-                                <p className={`status ${doc.status}`}>
-                                    {doc.status === 'uploaded' ? `Subido: ${doc.file}` : 'Pendiente'}
-                                </p>
+                {docTypes.map(type => {
+                    const { status, fileName, url } = getDocStatus(type.id);
+                    const isUploading = uploading[type.id];
+
+                    return (
+                        <div key={type.id} className="document-item">
+                            <div className="doc-info">
+                                <span className="doc-icon">{status === 'uploaded' ? '✅' : '📄'}</span>
+                                <div>
+                                    <h4>{type.name}</h4>
+                                    <p className={`status ${status}`}>
+                                        {status === 'uploaded' ? (
+                                            <a href={url} target="_blank" rel="noopener noreferrer" className="doc-link">
+                                                Subido: {fileName} (Ver)
+                                            </a>
+                                        ) : 'Pendiente'}
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="doc-actions">
+                                <label className={`btn-upload ${isUploading ? 'disabled' : ''}`}>
+                                    {isUploading ? 'Subiendo...' : (status === 'uploaded' ? 'Cambiar' : 'Subir')}
+                                    <input
+                                        type="file"
+                                        hidden
+                                        onChange={(e) => handleFileChange(type.id, e)}
+                                        disabled={isUploading}
+                                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                                    />
+                                </label>
                             </div>
                         </div>
-                        <div className="doc-actions">
-                            <label className={`btn-upload ${uploading ? 'disabled' : ''}`}>
-                                {uploading ? 'Subiendo...' : (doc.status === 'uploaded' ? 'Cambiar' : 'Subir')}
-                                <input
-                                    type="file"
-                                    hidden
-                                    onChange={(e) => handleFileChange(doc.id, e)}
-                                    disabled={uploading}
-                                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                                />
-                            </label>
-                        </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
 
             <style jsx>{`
@@ -128,6 +191,14 @@ export default function UserDocuments({ user }) {
         }
         .status.pending { color: #f59e0b; }
         .status.uploaded { color: #10b981; }
+        
+        .doc-link {
+            color: #10b981;
+            text-decoration: underline;
+        }
+        .doc-link:hover {
+            color: #059669;
+        }
 
         .btn-upload {
             padding: 8px 16px;

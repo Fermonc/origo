@@ -211,18 +211,6 @@ export default function ProfilePage() {
                       </div>
                     </div>
                     <button type="submit" className="btn-save" disabled={saving}>{saving ? 'Guardando...' : 'Guardar Cambios'}</button>
-                  </form>
-                </div>
-
-                <div className="settings-card">
-                  <h3>Documentación</h3>
-                  <UserDocuments user={user} />
-                </div>
-
-                <div className="settings-card danger-zone">
-                  <h3>Zona de Peligro</h3>
-                  <p>Estas acciones no se pueden deshacer. Se eliminarán permanentemente tus datos, favoritos y alertas.</p>
-                  <button className="btn-delete-account" onClick={handleDeleteAccount}>Eliminar Cuenta</button>
                 </div>
               </div>
             )}
