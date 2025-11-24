@@ -364,7 +364,12 @@ export default function Home() {
           border-radius: 24px;
           overflow: hidden;
           background: #f7f7f7;
-          transition: all 0.3s ease;
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .category-card:hover {
+          transform: translateY(-8px);
+          box-shadow: 0 20px 40px rgba(0,0,0,0.12);
         }
         .card-visual {
           height: 400px;
@@ -372,11 +377,15 @@ export default function Home() {
           background-position: center;
           position: relative;
           cursor: pointer;
+          transition: transform 0.5s ease;
+        }
+        .category-card:hover .card-visual {
+          transform: scale(1.05);
         }
         .card-overlay {
           position: absolute;
           inset: 0;
-          background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 50%, transparent 100%);
+          background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 40%, transparent 100%);
           display: flex;
           flex-direction: column;
           justify-content: flex-end;
@@ -384,48 +393,54 @@ export default function Home() {
           color: white;
         }
         .card-info h3 {
-          font-size: 1.8rem;
-          font-weight: 700;
+          font-size: 2rem;
+          font-weight: 800;
           margin-bottom: 8px;
           text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+          letter-spacing: -0.5px;
         }
         .card-info p {
-          font-size: 0.95rem;
-          opacity: 0.9;
+          font-size: 1rem;
+          opacity: 0.95;
           max-width: 90%;
+          font-weight: 500;
         }
         .card-toggle {
           position: absolute;
           top: 24px;
           right: 24px;
-          width: 40px;
-          height: 40px;
+          width: 44px;
+          height: 44px;
           border-radius: 50%;
-          background: rgba(255,255,255,0.2);
-          backdrop-filter: blur(4px);
-          border: none;
+          background: rgba(255,255,255,0.15);
+          backdrop-filter: blur(8px);
+          border: 1px solid rgba(255,255,255,0.2);
           color: white;
           font-size: 1.5rem;
           cursor: pointer;
           display: flex;
           align-items: center;
           justify-content: center;
-          transition: background 0.2s;
+          transition: all 0.2s;
+          z-index: 10;
         }
         .card-toggle:hover {
           background: rgba(255,255,255,0.3);
+          transform: scale(1.1);
         }
 
         .card-content {
           height: 0;
           overflow: hidden;
-          transition: height 0.4s ease;
+          transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          background: white;
         }
         .card-content.show {
           height: auto;
         }
         .content-inner {
           padding: 24px;
+          border-top: 1px solid rgba(0,0,0,0.05);
         }
         .props-list {
           display: flex;
@@ -435,23 +450,61 @@ export default function Home() {
         .view-all-link {
           display: block;
           text-align: center;
-          padding: 12px;
-          border: 1px solid #ddd;
-          border-radius: 12px;
+          padding: 14px;
+          background: #f9f9f9;
+          border-radius: 16px;
           text-decoration: none;
           color: #111;
-          font-weight: 600;
+          font-weight: 700;
           margin-top: 16px;
-          transition: background 0.2s;
+          transition: all 0.2s;
         }
         .view-all-link:hover {
-          background: #f0f0f0;
+          background: #eee;
+          transform: translateY(-2px);
         }
 
         @media (max-width: 768px) {
           .hero-title { font-size: 2.5rem; }
-          .categories-grid { grid-template-columns: 1fr; }
-          .card-visual { height: 300px; }
+          
+          /* Mobile Carousel */
+          .categories-grid {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            gap: 16px;
+            padding: 0 24px 40px 24px; /* Bottom padding for shadow */
+            margin: 0 -24px; /* Negative margin to allow full bleed scroll */
+            -webkit-overflow-scrolling: touch;
+          }
+          /* Hide scrollbar */
+          .categories-grid::-webkit-scrollbar {
+            display: none;
+          }
+          .categories-grid {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+          }
+          
+          .category-card {
+            min-width: 85%;
+            scroll-snap-align: center;
+            margin-right: 0;
+          }
+          /* Add spacer at the end */
+          .category-card:last-child {
+            margin-right: 24px;
+          }
+          
+          .card-visual { height: 450px; } /* Taller on mobile for impact */
+          
+          .section-header {
+            text-align: left;
+            margin-bottom: 32px;
+          }
+          .section-title {
+            font-size: 2rem;
+          }
         }
       `}</style>
     </div>
