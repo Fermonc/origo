@@ -41,7 +41,7 @@ export default function BottomNav() {
           </svg>
         </Link>
 
-        <Link href="/admin/dashboard" className={`nav-item ${isActive('/admin/dashboard') || isActive('/admin/login') ? 'active' : ''}`} aria-label="Perfil">
+        <Link href="/perfil" className={`nav-item ${isActive('/perfil') || isActive('/login') || isActive('/register') ? 'active' : ''}`} aria-label="Perfil">
           <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
             <circle cx="12" cy="7" r="4" />
