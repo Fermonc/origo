@@ -172,243 +172,184 @@ export default function ProfilePage() {
             </div>
             <button onClick={handleLogout} className="btn-logout">Cerrar Sesión</button>
           </div>
+          .container {max - width: 1000px; margin: 0 auto; padding: 20px; }
 
-          {/* Tabs Navigation */}
-          <div className="tabs-nav">
-            <button className={`tab-btn ${activeTab === 'account' ? 'active' : ''}`} onClick={() => setActiveTab('account')}>👤 Mi Cuenta</button>
-            <button className={`tab-btn ${activeTab === 'favorites' ? 'active' : ''}`} onClick={() => setActiveTab('favorites')}>❤️ Favoritos</button>
-            <button className={`tab-btn ${activeTab === 'alerts' ? 'active' : ''}`} onClick={() => setActiveTab('alerts')}>🔍 Buscando</button>
-            <button className={`tab-btn ${activeTab === 'documents' ? 'active' : ''}`} onClick={() => setActiveTab('documents')}>📂 Documentos</button>
-          </div>
+          .profile-header-card {
+            background: white;
+          padding: 32px;
+          border-radius: 24px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 32px;
+          box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+                }
+          .user-summary {display: flex; align-items: center; gap: 24px; }
 
-          {/* Tab Content */}
-          <div className="tab-content">
-            {activeTab === 'account' && (
-              <div className="account-settings">
-                <div className="settings-card">
-                  <h3>Información Personal</h3>
-                  <form onSubmit={handleSave}>
-                    <div className="form-group">
-                      <label>Teléfono de Contacto</label>
-                      <input
-                        type="tel"
-                        value={formData.phoneNumber}
-                        onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                        placeholder="+57 300 ..."
-                        className="input-premium"
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Preferencias</label>
-                      <div className="checkbox-group">
-                        <label className="checkbox-label">
-                          <input type="checkbox" checked={formData.preferences.notifications} onChange={(e) => setFormData({ ...formData, preferences: { ...formData.preferences, notifications: e.target.checked } })} />
-                          <span>Recibir notificaciones</span>
-                        </label>
-                        <label className="checkbox-label">
-                          <input type="checkbox" checked={formData.preferences.newsletter} onChange={(e) => setFormData({ ...formData, preferences: { ...formData.preferences, newsletter: e.target.checked } })} />
-                          <span>Suscribirse al newsletter</span>
-                        </label>
-                      </div>
-                    </div>
-                    <button type="submit" className="btn-save" disabled={saving}>{saving ? 'Guardando...' : 'Guardar Cambios'}</button>
-                  </form>
-                </div>
-                <div className="settings-card danger-zone">
-                  <h3>Zona de Peligro</h3>
-                  <p>Estas acciones no se pueden deshacer. Se eliminarán permanentemente tus datos, favoritos y alertas.</p>
-                  <button className="btn-delete-account" onClick={handleDeleteAccount}>Eliminar Cuenta</button>
-                </div>
-              </div>
-            )}
+          .avatar-wrapper {
+            position: relative;
+          cursor: pointer;
+          width: 80px;
+          height: 80px;
+                }
+          .avatar-large {
+            width: 100%;
+          height: 100%;
+          border-radius: 50%;
+          background: #111;
+          color: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 2.5rem;
+          font-weight: 700;
+          overflow: hidden;
+                }
+          .avatar-large img {width: 100%; height: 100%; object-fit: cover; }
 
-            {activeTab === 'favorites' && <UserFavorites user={user} />}
-            {activeTab === 'alerts' && <UserAlerts user={user} />}
-            {activeTab === 'documents' && <UserDocuments user={user} />}
-          </div>
-        </div>
-      </div>
-
-      <style jsx>{`
-                .page { min-height: 100vh; background: #f8f9fa; padding-top: 80px; }
-                .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
-                
-                .profile-header-card {
-                    background: white;
-                    padding: 32px;
-                    border-radius: 24px;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    margin-bottom: 32px;
-                    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+          .avatar-overlay {
+            position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
+          background: rgba(0,0,0,0.5);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          opacity: 0;
+          transition: opacity 0.2s;
                 }
-                .user-summary { display: flex; align-items: center; gap: 24px; }
-                
-                .avatar-wrapper {
-                    position: relative;
-                    cursor: pointer;
-                    width: 80px;
-                    height: 80px;
-                }
-                .avatar-large {
-                    width: 100%;
-                    height: 100%;
-                    border-radius: 50%;
-                    background: #111;
-                    color: white;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: 2.5rem;
-                    font-weight: 700;
-                    overflow: hidden;
-                }
-                .avatar-large img { width: 100%; height: 100%; object-fit: cover; }
-                
-                .avatar-overlay {
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    border-radius: 50%;
-                    background: rgba(0,0,0,0.5);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    opacity: 0;
-                    transition: opacity 0.2s;
-                }
-                .avatar-wrapper:hover .avatar-overlay { opacity: 1; }
-                .avatar-overlay span { font-size: 1.5rem; }
-                .avatar-loading {
-                    position: absolute;
-                    top: 0; left: 0; width: 100%; height: 100%;
-                    background: rgba(255,255,255,0.8);
-                    display: flex; align-items: center; justify-content: center;
-                    border-radius: 50%; color: #111; font-weight: bold;
+          .avatar-wrapper:hover .avatar-overlay {opacity: 1; }
+          .avatar-overlay span {font - size: 1.5rem; }
+          .avatar-loading {
+            position: absolute;
+          top: 0; left: 0; width: 100%; height: 100%;
+          background: rgba(255,255,255,0.8);
+          display: flex; align-items: center; justify-content: center;
+          border-radius: 50%; color: #111; font-weight: bold;
                 }
 
-                h1 { margin: 0 0 4px 0; font-size: 1.8rem; color: #111; font-weight: 800; }
-                p { margin: 0; color: #555; font-weight: 500; }
-                
-                .btn-logout {
-                    padding: 10px 20px;
-                    border: 1px solid #ddd;
-                    background: white;
-                    border-radius: 12px;
-                    color: #ef4444;
-                    font-weight: 600;
-                    cursor: pointer;
-                    transition: all 0.2s;
-                }
-                .btn-logout:hover { background: #fee2e2; border-color: #fee2e2; }
+          h1 {margin: 0 0 4px 0; font-size: 1.8rem; color: #111; font-weight: 800; }
+          p {margin: 0; color: #555; font-weight: 500; }
 
-                .tabs-nav {
-                    display: flex;
-                    gap: 12px;
-                    margin-bottom: 32px;
-                    overflow-x: auto;
-                    padding-bottom: 4px;
+          .btn-logout {
+            padding: 10px 20px;
+          border: 1px solid #ddd;
+          background: white;
+          border-radius: 12px;
+          color: #ef4444;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
                 }
-                .tab-btn {
-                    padding: 12px 24px;
-                    background: white;
-                    border: none;
-                    border-radius: 30px;
-                    color: #666;
-                    font-weight: 600;
-                    cursor: pointer;
-                    transition: all 0.2s;
-                    white-space: nowrap;
+          .btn-logout:hover {background: #fee2e2; border-color: #fee2e2; }
+
+          .tabs-nav {
+            display: flex;
+          gap: 12px;
+          margin-bottom: 32px;
+          overflow-x: auto;
+          padding-bottom: 4px;
                 }
-                .tab-btn.active {
-                    background: #111;
-                    color: white;
-                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+          .tab-btn {
+            padding: 12px 24px;
+          background: white;
+          border: none;
+          border-radius: 30px;
+          color: #666;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+          white-space: nowrap;
+                }
+          .tab-btn.active {
+            background: #111;
+          color: white;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
                 }
 
-                .settings-card {
-                    background: white;
-                    padding: 32px;
-                    border-radius: 20px;
-                    margin-bottom: 24px;
-                    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+          .settings-card {
+            background: white;
+          padding: 32px;
+          border-radius: 20px;
+          margin-bottom: 24px;
+          box-shadow: 0 4px 20px rgba(0,0,0,0.03);
                 }
-                .settings-card h3 { margin: 0 0 24px 0; font-size: 1.25rem; color: #111; font-weight: 700; }
-                
-                .form-group { margin-bottom: 24px; }
-                .form-group label { display: block; margin-bottom: 8px; font-weight: 700; font-size: 0.95rem; color: #111; }
-                
-                .input-premium {
-                    width: 100%;
-                    padding: 14px;
-                    border-radius: 12px;
-                    border: 1px solid #e0e0e0;
-                    background: #f9f9f9;
-                    font-size: 1rem;
-                    color: #111;
-                    transition: all 0.2s;
+          .settings-card h3 {margin: 0 0 24px 0; font-size: 1.25rem; color: #111; font-weight: 700; }
+
+          .form-group {margin - bottom: 24px; }
+          .form-group label {display: block; margin-bottom: 8px; font-weight: 700; font-size: 0.95rem; color: #111; }
+
+          .input-premium {
+            width: 100%;
+          padding: 14px;
+          border-radius: 12px;
+          border: 1px solid #e0e0e0;
+          background: #f9f9f9;
+          font-size: 1rem;
+          color: #111;
+          transition: all 0.2s;
                 }
-                .input-premium:focus {
-                    background: white;
-                    border-color: #111;
-                    box-shadow: 0 0 0 4px rgba(0,0,0,0.05);
-                    outline: none;
+          .input-premium:focus {
+            background: white;
+          border-color: #111;
+          box-shadow: 0 0 0 4px rgba(0,0,0,0.05);
+          outline: none;
                 }
-                
-                .checkbox-group { display: flex; flex-direction: column; gap: 16px; }
-                .checkbox-label { 
-                    display: flex; 
-                    align-items: center; 
-                    gap: 12px; 
-                    font-weight: 500; 
-                    cursor: pointer; 
-                    color: #333;
-                    padding: 8px 0;
+
+          .checkbox-group {display: flex; flex-direction: column; gap: 16px; }
+          .checkbox-label {
+            display: flex;
+          align-items: center;
+          gap: 12px;
+          font-weight: 500;
+          cursor: pointer;
+          color: #333;
+          padding: 8px 0;
                 }
-                .checkbox-label input {
-                    width: 20px;
-                    height: 20px;
-                    accent-color: #111;
+          .checkbox-label input {
+            width: 20px;
+          height: 20px;
+          accent-color: #111;
                 }
-                
-                .btn-save { 
-                    padding: 14px 32px; 
-                    background: #111; 
-                    color: white; 
-                    border: none; 
-                    border-radius: 12px; 
-                    font-weight: 600; 
-                    cursor: pointer; 
-                    font-size: 1rem;
-                    transition: background 0.2s;
+
+          .btn-save {
+            padding: 14px 32px;
+          background: #111;
+          color: white;
+          border: none;
+          border-radius: 12px;
+          font-weight: 600;
+          cursor: pointer;
+          font-size: 1rem;
+          transition: background 0.2s;
                 }
-                .btn-save:hover { background: #333; }
-                
-                .danger-zone { border: 1px solid #fee2e2; background: #fff5f5; }
-                .danger-zone h3 { color: #ef4444; }
-                .danger-zone p { color: #b91c1c; margin-bottom: 20px; }
-                .btn-delete-account { 
-                    padding: 12px 24px; 
-                    background: #ef4444; 
-                    color: white; 
-                    border: none; 
-                    border-radius: 12px; 
-                    font-weight: 600; 
-                    cursor: pointer; 
-                    transition: background 0.2s;
+          .btn-save:hover {background: #333; }
+
+          .danger-zone {border: 1px solid #fee2e2; background: #fff5f5; }
+          .danger-zone h3 {color: #ef4444; }
+          .danger-zone p {color: #b91c1c; margin-bottom: 20px; }
+          .btn-delete-account {
+            padding: 12px 24px;
+          background: #ef4444;
+          color: white;
+          border: none;
+          border-radius: 12px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: background 0.2s;
                 }
-                .btn-delete-account:hover { background: #dc2626; }
-                
-                .loading { display: flex; justify-content: center; align-items: center; height: 100vh; color: #666; }
-                
-                @media (max-width: 768px) {
-                    .profile-header-card { flex-direction: column; text-align: center; gap: 24px; }
-                    .user-summary { flex-direction: column; }
+          .btn-delete-account:hover {background: #dc2626; }
+
+          .loading {display: flex; justify-content: center; align-items: center; height: 100vh; color: #666; }
+
+          @media (max-width: 768px) {
+                    .profile - header - card {flex - direction: column; text-align: center; gap: 24px; }
+          .user-summary {flex - direction: column; }
                 }
             `}</style>
-    </div>
-  );
+      </div>
+      );
 }
