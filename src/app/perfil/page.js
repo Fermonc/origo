@@ -4,348 +4,242 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { getUserProfile, createOrUpdateUser } from '@/lib/db/users';
+import Header from '@/components/Header';
+import UserFavorites from '@/components/UserFavorites';
+import UserAlerts from '@/components/UserAlerts';
+import UserDocuments from '@/components/UserDocuments';
 
 export default function ProfilePage() {
-    const { user, loading, logout } = useAuth();
-    const router = useRouter();
-    const [profile, setProfile] = useState(null);
-    const [saving, setSaving] = useState(false);
-    const [formData, setFormData] = useState({
-        phoneNumber: '',
-        preferences: {
-            notifications: true,
-            newsletter: false
-        }
-    });
+  const { user, loading, logout } = useAuth();
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState('account'); // account, favorites, alerts, documents
+  const [profile, setProfile] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [formData, setFormData] = useState({
+    phoneNumber: '',
+    preferences: { notifications: true, newsletter: false }
+  });
 
-    useEffect(() => {
-        if (!loading && !user) {
-            router.push('/login');
-        } else if (user) {
-            loadProfile();
-        }
-    }, [user, loading, router]);
-
-    const loadProfile = async () => {
-        try {
-            const data = await getUserProfile(user.uid);
-            if (data) {
-                setProfile(data);
-                setFormData({
-                    phoneNumber: data.phoneNumber || '',
-                    preferences: {
-                        notifications: data.preferences?.notifications ?? true,
-                        newsletter: data.preferences?.newsletter ?? false
-                    }
-                });
-            }
-        } catch (error) {
-            console.error("Error loading profile:", error);
-        }
-    };
-
-    const handleSave = async (e) => {
-        e.preventDefault();
-        setSaving(true);
-        try {
-            await createOrUpdateUser(user, {
-                phoneNumber: formData.phoneNumber,
-                preferences: formData.preferences
-            });
-            alert('Perfil actualizado correctamente');
-            loadProfile(); // Reload to ensure sync
-        } catch (error) {
-            console.error("Error saving profile:", error);
-            alert('Error al guardar el perfil');
-        } finally {
-            setSaving(false);
-        }
-    };
-
-    const handleLogout = async () => {
-        try {
-            await logout();
-            router.push('/');
-        } catch (error) {
-            console.error("Logout error:", error);
-        }
-    };
-
-    if (loading || !user) {
-        return <div className="loading">Cargando...</div>;
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login');
+    } else if (user) {
+      loadProfile();
     }
+  }, [user, loading, router]);
 
-    return (
-        <div className="profile-page">
-            <div className="container">
-                <div className="profile-header">
-                    <h1>Mi Perfil</h1>
-                    <button onClick={handleLogout} className="btn-logout">
-                        Cerrar Sesión
-                    </button>
-                </div>
-
-                <div className="profile-grid">
-                    <div className="profile-card info-card">
-                        <div className="avatar-section">
-                            {user.photoURL ? (
-                                <img src={user.photoURL} alt={user.displayName} className="avatar" />
-                            ) : (
-                                <div className="avatar-placeholder">
-                                    {user.displayName ? user.displayName[0].toUpperCase() : 'U'}
-                                </div>
-                            )}
-                            <div className="user-info">
-                                <h2>{user.displayName || 'Usuario'}</h2>
-                                <p>{user.email}</p>
-                                <span className="role-badge">{profile?.role || 'Usuario'}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="profile-card form-card">
-                        <h3>Información Personal</h3>
-                        <form onSubmit={handleSave}>
-                            <div className="form-group">
-                                <label>Teléfono</label>
-                                <input
-                                    type="tel"
-                                    value={formData.phoneNumber}
-                                    onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                                    placeholder="+54 9 11 ..."
-                                />
-                            </div>
-
-                            <div className="form-section">
-                                <h4>Preferencias</h4>
-                                <div className="checkbox-group">
-                                    <label className="checkbox-label">
-                                        <input
-                                            type="checkbox"
-                                            checked={formData.preferences.notifications}
-                                            onChange={(e) => setFormData({
-                                                ...formData,
-                                                preferences: { ...formData.preferences, notifications: e.target.checked }
-                                            })}
-                                        />
-                                        Recibir notificaciones de alertas
-                                    </label>
-                                </div>
-                                <div className="checkbox-group">
-                                    <label className="checkbox-label">
-                                        <input
-                                            type="checkbox"
-                                            checked={formData.preferences.newsletter}
-                                            onChange={(e) => setFormData({
-                                                ...formData,
-                                                preferences: { ...formData.preferences, newsletter: e.target.checked }
-                                            })}
-                                        />
-                                        Suscribirse al newsletter
-                                    </label>
-                                </div>
-                            </div>
-
-                            <button type="submit" className="btn-save" disabled={saving}>
-                                {saving ? 'Guardando...' : 'Guardar Cambios'}
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-            <style jsx>{`
-        .profile-page {
-          min-height: 100vh;
-          background-color: #f8f9fa;
-          padding: 40px 0;
-        }
-
-        .container {
-          max-width: 1000px;
-          margin: 0 auto;
-          padding: 0 20px;
-        }
-
-        .profile-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 32px;
-        }
-
-        .profile-header h1 {
-          font-size: 2rem;
-          font-weight: 800;
-          color: #111;
-          margin: 0;
-        }
-
-        .btn-logout {
-          padding: 10px 20px;
-          background: white;
-          border: 1px solid #e0e0e0;
-          border-radius: 8px;
-          color: #ef4444;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-
-        .btn-logout:hover {
-          background: #fee2e2;
-          border-color: #fee2e2;
-        }
-
-        .profile-grid {
-          display: grid;
-          grid-template-columns: 1fr 2fr;
-          gap: 24px;
-        }
-
-        @media (max-width: 768px) {
-          .profile-grid {
-            grid-template-columns: 1fr;
+  const loadProfile = async () => {
+    try {
+      const data = await getUserProfile(user.uid);
+      if (data) {
+        setProfile(data);
+        setFormData({
+          phoneNumber: data.phoneNumber || '',
+          preferences: {
+            notifications: data.preferences?.notifications ?? true,
+            newsletter: data.preferences?.newsletter ?? false
           }
-        }
+        });
+      }
+    } catch (error) {
+      console.error("Error loading profile:", error);
+    }
+  };
 
-        .profile-card {
-          background: white;
-          border-radius: 20px;
-          padding: 32px;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.03);
-        }
+  const handleSave = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      await createOrUpdateUser(user, {
+        phoneNumber: formData.phoneNumber,
+        preferences: formData.preferences
+      });
+      alert('Perfil actualizado correctamente');
+      loadProfile();
+    } catch (error) {
+      console.error("Error saving profile:", error);
+      alert('Error al guardar el perfil');
+    } finally {
+      setSaving(false);
+    }
+  };
 
-        .avatar-section {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          text-align: center;
-        }
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push('/');
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
 
-        .avatar {
-          width: 120px;
-          height: 120px;
-          border-radius: 50%;
-          object-fit: cover;
-          margin-bottom: 16px;
-          border: 4px solid #f0f0f0;
-        }
+  if (loading || !user) return <div className="loading">Cargando...</div>;
 
-        .avatar-placeholder {
-          width: 120px;
-          height: 120px;
-          border-radius: 50%;
-          background: #111;
-          color: white;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 3rem;
-          font-weight: 700;
-          margin-bottom: 16px;
-        }
+  return (
+    <div className="page">
+      <Header />
+      <div className="profile-container">
+        <div className="container">
+          {/* Profile Header */}
+          <div className="profile-header-card">
+            <div className="user-summary">
+              <div className="avatar-large">
+                {user.photoURL ? <img src={user.photoURL} alt={user.displayName} /> : <span>{user.displayName?.[0]}</span>}
+              </div>
+              <div>
+                <h1>{user.displayName}</h1>
+                <p>{user.email}</p>
+              </div>
+            </div>
+            <button onClick={handleLogout} className="btn-logout">Cerrar Sesión</button>
+          </div>
 
-        .user-info h2 {
-          margin: 0 0 4px 0;
-          font-size: 1.25rem;
-        }
+          {/* Tabs Navigation */}
+          <div className="tabs-nav">
+            <button className={`tab-btn ${activeTab === 'account' ? 'active' : ''}`} onClick={() => setActiveTab('account')}>👤 Mi Cuenta</button>
+            <button className={`tab-btn ${activeTab === 'favorites' ? 'active' : ''}`} onClick={() => setActiveTab('favorites')}>❤️ Favoritos</button>
+            <button className={`tab-btn ${activeTab === 'alerts' ? 'active' : ''}`} onClick={() => setActiveTab('alerts')}>🔍 Buscando</button>
+            <button className={`tab-btn ${activeTab === 'documents' ? 'active' : ''}`} onClick={() => setActiveTab('documents')}>📂 Documentos</button>
+          </div>
 
-        .user-info p {
-          color: #666;
-          margin: 0 0 12px 0;
-          font-size: 0.9rem;
-        }
+          {/* Tab Content */}
+          <div className="tab-content">
+            {activeTab === 'account' && (
+              <div className="account-settings">
+                <div className="settings-card">
+                  <h3>Información Personal</h3>
+                  <form onSubmit={handleSave}>
+                    <div className="form-group">
+                      <label>Teléfono de Contacto</label>
+                      <input
+                        type="tel"
+                        value={formData.phoneNumber}
+                        onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                        placeholder="+57 300 ..."
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Preferencias</label>
+                      <div className="checkbox-group">
+                        <label><input type="checkbox" checked={formData.preferences.notifications} onChange={(e) => setFormData({ ...formData, preferences: { ...formData.preferences, notifications: e.target.checked } })} /> Recibir notificaciones</label>
+                        <label><input type="checkbox" checked={formData.preferences.newsletter} onChange={(e) => setFormData({ ...formData, preferences: { ...formData.preferences, newsletter: e.target.checked } })} /> Suscribirse al newsletter</label>
+                      </div>
+                    </div>
+                    <button type="submit" className="btn-save" disabled={saving}>{saving ? 'Guardando...' : 'Guardar Cambios'}</button>
+                  </form>
+                </div>
+                <div className="settings-card danger-zone">
+                  <h3>Zona de Peligro</h3>
+                  <p>Estas acciones no se pueden deshacer.</p>
+                  <button className="btn-delete-account" onClick={() => alert('Funcionalidad de eliminar cuenta pendiente de implementación segura.')}>Eliminar Cuenta</button>
+                </div>
+              </div>
+            )}
 
-        .role-badge {
-          display: inline-block;
-          padding: 4px 12px;
-          background: #f0f0f0;
-          border-radius: 20px;
-          font-size: 0.8rem;
-          font-weight: 600;
-          color: #555;
-          text-transform: uppercase;
-        }
-
-        .form-card h3 {
-          margin: 0 0 24px 0;
-          font-size: 1.25rem;
-        }
-
-        .form-group {
-          margin-bottom: 24px;
-        }
-
-        .form-group label {
-          display: block;
-          margin-bottom: 8px;
-          font-weight: 500;
-          color: #333;
-        }
-
-        .form-group input {
-          width: 100%;
-          padding: 12px;
-          border-radius: 12px;
-          border: 1px solid #e0e0e0;
-          font-size: 1rem;
-        }
-
-        .form-section {
-          margin-bottom: 32px;
-          padding-top: 24px;
-          border-top: 1px solid #eee;
-        }
-
-        .form-section h4 {
-          margin: 0 0 16px 0;
-          font-size: 1rem;
-          color: #555;
-        }
-
-        .checkbox-group {
-          margin-bottom: 12px;
-        }
-
-        .checkbox-label {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          cursor: pointer;
-          color: #333;
-        }
-
-        .btn-save {
-          width: 100%;
-          padding: 14px;
-          background: #111;
-          color: white;
-          border: none;
-          border-radius: 12px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: background 0.2s;
-        }
-
-        .btn-save:hover {
-          background: #333;
-        }
-
-        .btn-save:disabled {
-          background: #ccc;
-          cursor: not-allowed;
-        }
-
-        .loading {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          height: 100vh;
-          font-size: 1.2rem;
-          color: #666;
-        }
-      `}</style>
+            {activeTab === 'favorites' && <UserFavorites user={user} />}
+            {activeTab === 'alerts' && <UserAlerts user={user} />}
+            {activeTab === 'documents' && <UserDocuments user={user} />}
+          </div>
         </div>
-    );
+      </div>
+
+      <style jsx>{`
+                .page { min-height: 100vh; background: #f8f9fa; padding-top: 80px; }
+                .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+                
+                .profile-header-card {
+                    background: white;
+                    padding: 32px;
+                    border-radius: 24px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 32px;
+                    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+                }
+                .user-summary { display: flex; align-items: center; gap: 24px; }
+                .avatar-large {
+                    width: 80px;
+                    height: 80px;
+                    border-radius: 50%;
+                    background: #111;
+                    color: white;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 2.5rem;
+                    font-weight: 700;
+                    overflow: hidden;
+                }
+                .avatar-large img { width: 100%; height: 100%; object-fit: cover; }
+                h1 { margin: 0 0 4px 0; font-size: 1.8rem; }
+                p { margin: 0; color: #666; }
+                
+                .btn-logout {
+                    padding: 10px 20px;
+                    border: 1px solid #ddd;
+                    background: white;
+                    border-radius: 12px;
+                    color: #ef4444;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                }
+                .btn-logout:hover { background: #fee2e2; border-color: #fee2e2; }
+
+                .tabs-nav {
+                    display: flex;
+                    gap: 12px;
+                    margin-bottom: 32px;
+                    overflow-x: auto;
+                    padding-bottom: 4px;
+                }
+                .tab-btn {
+                    padding: 12px 24px;
+                    background: white;
+                    border: none;
+                    border-radius: 30px;
+                    color: #666;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    white-space: nowrap;
+                }
+                .tab-btn.active {
+                    background: #111;
+                    color: white;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                }
+
+                .settings-card {
+                    background: white;
+                    padding: 32px;
+                    border-radius: 20px;
+                    margin-bottom: 24px;
+                    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+                }
+                .settings-card h3 { margin: 0 0 24px 0; font-size: 1.25rem; }
+                
+                .form-group { margin-bottom: 24px; }
+                .form-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem; }
+                .form-group input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; }
+                
+                .checkbox-group { display: flex; flex-direction: column; gap: 12px; }
+                .checkbox-group label { display: flex; align-items: center; gap: 10px; font-weight: 400; cursor: pointer; }
+                
+                .btn-save { padding: 12px 32px; background: #111; color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; }
+                
+                .danger-zone { border: 1px solid #fee2e2; }
+                .danger-zone h3 { color: #ef4444; }
+                .btn-delete-account { padding: 12px 24px; background: #fee2e2; color: #ef4444; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; }
+                
+                .loading { display: flex; justify-content: center; align-items: center; height: 100vh; color: #666; }
+                
+                @media (max-width: 768px) {
+                    .profile-header-card { flex-direction: column; text-align: center; gap: 24px; }
+                    .user-summary { flex-direction: column; }
+                }
+            `}</style>
+    </div>
+  );
 }

@@ -3,36 +3,57 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
 
 export default function Header() {
-    const [scrolled, setScrolled] = useState(false);
-    const pathname = usePathname();
+  const [scrolled, setScrolled] = useState(false);
+  const pathname = usePathname();
+  const { user, loading } = useAuth();
 
-    useEffect(() => {
-        const handleScroll = () => {
-            setScrolled(window.scrollY > 20);
-        };
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
-    const isActive = (path) => pathname === path;
+  const isActive = (path) => pathname === path;
 
-    return (
-        <>
-            <header className={`header ${scrolled ? 'scrolled' : ''}`}>
-                <div className="container header-content">
-                    <Link href="/" className="logo">Origo</Link>
-                    <nav className="nav desktop-only">
-                        <Link href="/propiedades" className={`nav-link ${isActive('/propiedades') ? 'active' : ''}`}>Propiedades</Link>
-                        <Link href="/mapa" className={`nav-link ${isActive('/mapa') ? 'active' : ''}`}>Mapa</Link>
-                        <Link href="/contacto" className={`nav-link ${isActive('/contacto') ? 'active' : ''}`}>Contacto</Link>
-                        <Link href="/admin/login" className="btn-login">Admin</Link>
-                    </nav>
+  return (
+    <>
+      <header className={`header ${scrolled ? 'scrolled' : ''}`}>
+        <div className="container header-content">
+          <Link href="/" className="logo">Origo</Link>
+          <nav className="nav desktop-only">
+            <Link href="/propiedades" className={`nav-link ${isActive('/propiedades') ? 'active' : ''}`}>Propiedades</Link>
+            <Link href="/mapa" className={`nav-link ${isActive('/mapa') ? 'active' : ''}`}>Mapa</Link>
+            <Link href="/contacto" className={`nav-link ${isActive('/contacto') ? 'active' : ''}`}>Contacto</Link>
+
+            {!loading && (
+              user ? (
+                <Link href="/perfil" className="user-profile-link">
+                  <div className="avatar-small">
+                    {user.photoURL ? (
+                      <img src={user.photoURL} alt="User" />
+                    ) : (
+                      <span>{user.displayName ? user.displayName[0].toUpperCase() : 'U'}</span>
+                    )}
+                  </div>
+                  <span className="user-name">{user.displayName?.split(' ')[0] || 'Perfil'}</span>
+                </Link>
+              ) : (
+                <div className="auth-buttons">
+                  <Link href="/login" className="btn-login-text">Ingresar</Link>
+                  <Link href="/register" className="btn-register">Registrarse</Link>
                 </div>
-            </header>
+              )
+            )}
+          </nav>
+        </div>
+      </header>
 
-            <style jsx>{`
+      <style jsx>{`
         .header {
           position: fixed;
           top: 0;
@@ -78,8 +99,20 @@ export default function Header() {
           color: #111;
           font-weight: 600;
         }
-        .btn-login {
-          padding: 8px 24px;
+        
+        .auth-buttons {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .btn-login-text {
+            color: #111;
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 0.95rem;
+        }
+        .btn-register {
+          padding: 8px 20px;
           background: #111;
           color: white;
           border-radius: 30px;
@@ -88,13 +121,51 @@ export default function Header() {
           font-weight: 600;
           transition: transform 0.2s, background 0.2s;
         }
-        .btn-login:hover {
+        .btn-register:hover {
           transform: scale(1.05);
           background: #000;
         }
+
+        .user-profile-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: #111;
+            padding: 4px 12px 4px 4px;
+            background: #f5f5f5;
+            border-radius: 30px;
+            transition: background 0.2s;
+        }
+        .user-profile-link:hover {
+            background: #e0e0e0;
+        }
+        .avatar-small {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #111;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            overflow: hidden;
+        }
+        .avatar-small img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .user-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
         .desktop-only { display: none; }
         @media (min-width: 768px) { .desktop-only { display: flex; } }
       `}</style>
-        </>
-    );
+    </>
+  );
 }
