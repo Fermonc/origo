@@ -211,6 +211,7 @@ export default function ProfilePage() {
                       </div>
                     </div>
                     <button type="submit" className="btn-save" disabled={saving}>{saving ? 'Guardando...' : 'Guardar Cambios'}</button>
+                  </form>
                 </div>
               </div>
             )}
