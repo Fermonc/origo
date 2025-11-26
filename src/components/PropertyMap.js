@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import SkeletonCard from './SkeletonCard';
+
 
 const PropertyMapClient = dynamic(() => import('./PropertyMapClient'), {
     ssr: false,

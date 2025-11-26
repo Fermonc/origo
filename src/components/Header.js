@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import Image from 'next/image';
+
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -35,7 +37,13 @@ export default function Header() {
                 <Link href="/perfil" className="user-profile-link">
                   <div className="avatar-small">
                     {user.photoURL ? (
-                      <img src={user.photoURL} alt="User" />
+                      <Image
+                        src={user.photoURL}
+                        alt="User"
+                        width={32}
+                        height={32}
+                        style={{ objectFit: 'cover' }}
+                      />
                     ) : (
                       <span>{user.displayName ? user.displayName[0].toUpperCase() : 'U'}</span>
                     )}

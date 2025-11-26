@@ -1,0 +1,26 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Helper function
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    // Profile Images
+    match /profile_images/{userId} {
+      allow read: if true; // Public read for profile avatars
+      allow write: if isOwner(userId);
+    }
+
+    // User Documents (Strictly Private)
+    match /documents/{userId}/{allPaths=**} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // Property Images
+    match /properties/{allPaths=**} {
+      allow read: if true;
+      allow write: if false; // Admin only
+    }
+  }
+}

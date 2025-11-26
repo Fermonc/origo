@@ -114,64 +114,7 @@ export default function PropertiesPage() {
           padding-top: 80px; /* Space for fixed header */
         }
 
-        /* Header Styles (Consistent with Home) */
-        .header {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          z-index: 100;
-          padding: 20px 0;
-          transition: all 0.3s ease;
-          background: rgba(255, 255, 255, 0.8);
-          backdrop-filter: blur(12px);
-          border-bottom: 1px solid rgba(0,0,0,0.05);
-        }
-        .header.scrolled {
-          padding: 12px 0;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-        }
-        .header-content {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-        .logo {
-          font-size: 1.8rem;
-          font-weight: 800;
-          letter-spacing: -1px;
-          color: #111;
-          text-decoration: none;
-        }
-        .nav {
-          display: flex;
-          gap: 32px;
-          align-items: center;
-        }
-        .nav-link {
-          color: #666;
-          font-weight: 500;
-          text-decoration: none;
-          transition: color 0.2s;
-        }
-        .nav-link:hover, .nav-link.active {
-          color: #111;
-        }
-        .btn-login {
-          padding: 8px 20px;
-          background: #111;
-          color: white;
-          border-radius: 20px;
-          text-decoration: none;
-          font-size: 0.9rem;
-          font-weight: 600;
-          transition: transform 0.2s;
-        }
-        .btn-login:hover {
-          transform: scale(1.05);
-        }
-        .desktop-only { display: none; }
-        @media (min-width: 768px) { .desktop-only { display: flex; } }
+
 
         /* Page Content */
         .main-content {
@@ -227,9 +170,10 @@ export default function PropertiesPage() {
           transition: all 0.2s;
         }
         .search-input:focus {
-          background: #fff;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-          border-color: #ddd;
+          background: white;
+          border-color: #111;
+          box-shadow: 0 0 0 4px rgba(0,0,0,0.05);
+          outline: none;
         }
         .filter-select {
           padding: 12px 24px;
@@ -242,8 +186,9 @@ export default function PropertiesPage() {
           transition: all 0.2s;
         }
         .filter-select:focus {
-          background: #fff;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+          background: white;
+          border-color: #111;
+          box-shadow: 0 0 0 4px rgba(0,0,0,0.05);
         }
 
         /* Grid */

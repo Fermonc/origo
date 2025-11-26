@@ -138,7 +138,12 @@ export default function ProfilePage() {
     }
   };
 
-  if (loading || !user) return <div className="loading">Cargando...</div>;
+  if (loading || !user) return (
+    <div className="loading">
+      <div className="spinner"></div>
+    </div>
+  );
+
 
   return (
     <div className="page">
@@ -406,7 +411,18 @@ export default function ProfilePage() {
         }
         .btn-delete-account:hover { background: #dc2626; }
         
-        .loading { display: flex; justify-content: center; align-items: center; height: 100vh; color: #666; }
+        .loading { display: flex; justify-content: center; align-items: center; height: 100vh; background: #f8f9fa; }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #eee;
+            border-top-color: #111;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
         
         @media (max-width: 768px) {
             .profile-header-card { flex-direction: column; text-align: center; gap: 24px; }
