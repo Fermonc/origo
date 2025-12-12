@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "origo-1629f"
+  },
+  "targets": {
+    "origo-1629f": {
+      "hosting": {
+        "default": [
+          "origo-1629f"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

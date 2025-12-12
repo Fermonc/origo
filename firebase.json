@@ -1,5 +1,6 @@
 {
     "hosting": {
+        "target": "default",
         "source": ".",
         "ignore": [
             "firebase.json",
@@ -15,5 +16,11 @@
                 "function": "ssr"
             }
         ]
+    },
+    "firestore": {
+        "rules": "firestore.rules"
+    },
+    "storage": {
+        "rules": "storage.rules"
     }
 }
