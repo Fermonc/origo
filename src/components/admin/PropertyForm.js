@@ -1,23 +1,37 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { storage } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import Image from 'next/image';
+import dynamic from 'next/dynamic';
+
+// Dynamically import map component to avoid SSR issues with Leaflet
+const LocationPicker = dynamic(() => import('./LocationPicker'), {
+    ssr: false,
+    loading: () => <div className="map-loading">Cargando mapa...</div>
+});
 
 export default function PropertyForm({ initialData = {}, onSubmit, loading }) {
     const [formData, setFormData] = useState({
         title: initialData.title || '',
         price: initialData.price || '',
-        location: initialData.location || '',
+        location: initialData.location || '', // Text address/city
+        coordinates: initialData.coordinates || { lat: 6.1387, lng: -75.434 }, // Default Rionegro
         type: initialData.type || 'Lote',
+        status: initialData.status || 'Disponible',
         area: initialData.area || '',
         bedrooms: initialData.bedrooms || '',
         bathrooms: initialData.bathrooms || '',
+        parking: initialData.parking || '',
         stratum: initialData.stratum || '',
+        administration: initialData.administration || '',
+        yearBuilt: initialData.yearBuilt || '',
+        access: initialData.access || 'Pavimentado',
+        topography: initialData.topography || 'Plano',
         description: initialData.description || '',
         features: initialData.features || [],
-        images: initialData.images || []
+        images: initialData.images || [],
+        videoUrl: initialData.videoUrl || ''
     });
 
     const [newImages, setNewImages] = useState([]);
@@ -28,6 +42,10 @@ export default function PropertyForm({ initialData = {}, onSubmit, loading }) {
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleCoordinatesChange = (coords) => {
+        setFormData(prev => ({ ...prev, coordinates: coords }));
     };
 
     const handleFeatureAdd = (e) => {
@@ -83,15 +101,15 @@ export default function PropertyForm({ initialData = {}, onSubmit, loading }) {
             // Combine existing and new images
             const finalImages = [...formData.images, ...uploadedImageUrls];
 
-            // Submit form data
+            // Submit form data with numbers converted
             await onSubmit({
                 ...formData,
                 images: finalImages,
-                price: formData.price, // Ensure string or number consistency as needed
-                area: Number(formData.area),
-                bedrooms: Number(formData.bedrooms),
-                bathrooms: Number(formData.bathrooms),
-                stratum: Number(formData.stratum),
+                area: Number(formData.area) || 0,
+                bedrooms: Number(formData.bedrooms) || 0,
+                bathrooms: Number(formData.bathrooms) || 0,
+                parking: Number(formData.parking) || 0,
+                stratum: Number(formData.stratum) || 0,
                 updatedAt: new Date().toISOString()
             });
 
@@ -106,11 +124,12 @@ export default function PropertyForm({ initialData = {}, onSubmit, loading }) {
     return (
         <form onSubmit={handleSubmit} className="property-form">
             <div className="form-grid">
-                {/* Basic Info */}
+
+                {/* Section 1: Basic Info */}
                 <div className="form-section">
-                    <h3>Información Básica</h3>
-                    <div className="input-group">
-                        <label>Título de la Propiedad</label>
+                    <h3>Información Principal</h3>
+                    <div className="input-group full-width">
+                        <label>Título del Inmueble</label>
                         <input
                             type="text"
                             name="title"
@@ -118,14 +137,15 @@ export default function PropertyForm({ initialData = {}, onSubmit, loading }) {
                             onChange={handleChange}
                             required
                             placeholder="Ej: Hermosa Finca en Llanogrande"
+                            className="input-lg"
                         />
                     </div>
 
-                    <div className="row">
+                    <div className="row three-cols">
                         <div className="input-group">
-                            <label>Precio</label>
+                            <label>Precio (COP)</label>
                             <input
-                                type="text"
+                                type="text" // Keep as text to allow formatting if we add it later
                                 name="price"
                                 value={formData.price}
                                 onChange={handleChange}
@@ -134,7 +154,35 @@ export default function PropertyForm({ initialData = {}, onSubmit, loading }) {
                             />
                         </div>
                         <div className="input-group">
-                            <label>Ubicación (Municipio/Vereda)</label>
+                            <label>Estado</label>
+                            <select name="status" value={formData.status} onChange={handleChange}>
+                                <option value="Disponible">Disponible</option>
+                                <option value="Reservado">Reservado</option>
+                                <option value="Vendido">Vendido</option>
+                                <option value="Arrendado">Arrendado</option>
+                            </select>
+                        </div>
+                        <div className="input-group">
+                            <label>Tipo de Inmueble</label>
+                            <select name="type" value={formData.type} onChange={handleChange}>
+                                <option value="Lote">Lote</option>
+                                <option value="Finca">Finca</option>
+                                <option value="Casa Campestre">Casa Campestre</option>
+                                <option value="Casa">Casa Urbana</option>
+                                <option value="Apartamento">Apartamento</option>
+                                <option value="Local">Local Comercial</option>
+                                <option value="Bodega">Bodega</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Section 2: Location */}
+                <div className="form-section">
+                    <h3>Ubicación</h3>
+                    <div className="row">
+                        <div className="input-group">
+                            <label>Ubicación General (Municipio / Vereda)</label>
                             <input
                                 type="text"
                                 name="location"
@@ -145,136 +193,164 @@ export default function PropertyForm({ initialData = {}, onSubmit, loading }) {
                             />
                         </div>
                     </div>
-
-                    <div className="row">
-                        <div className="input-group">
-                            <label>Tipo de Inmueble</label>
-                            <select name="type" value={formData.type} onChange={handleChange}>
-                                <option value="Lote">Lote</option>
-                                <option value="Finca">Finca</option>
-                                <option value="Local">Local</option>
-                                <option value="Casa">Casa</option>
-                                <option value="Apartamento">Apartamento</option>
-                            </select>
-                        </div>
-                        <div className="input-group">
-                            <label>Estrato</label>
-                            <input
-                                type="number"
-                                name="stratum"
-                                value={formData.stratum}
-                                onChange={handleChange}
-                                min="0"
-                                max="6"
-                            />
+                    <div className="input-group map-container">
+                        <label>Mapa (Arrastra el marcador para fijar la ubicación exacta)</label>
+                        <LocationPicker
+                            position={formData.coordinates}
+                            onPositionChange={handleCoordinatesChange}
+                        />
+                        <div className="coordinates-display">
+                            Lat: {formData.coordinates?.lat?.toFixed(5)}, Lng: {formData.coordinates?.lng?.toFixed(5)}
                         </div>
                     </div>
                 </div>
 
-                {/* Details */}
+                {/* Section 3: Details */}
                 <div className="form-section">
-                    <h3>Detalles</h3>
-                    <div className="row">
+                    <h3>Detalles y Características</h3>
+                    <div className="row four-cols">
                         <div className="input-group">
                             <label>Área (m²)</label>
-                            <input
-                                type="number"
-                                name="area"
-                                value={formData.area}
-                                onChange={handleChange}
-                                required
-                            />
+                            <input type="number" name="area" value={formData.area} onChange={handleChange} required />
                         </div>
                         <div className="input-group">
                             <label>Habitaciones</label>
-                            <input
-                                type="number"
-                                name="bedrooms"
-                                value={formData.bedrooms}
-                                onChange={handleChange}
-                            />
+                            <input type="number" name="bedrooms" value={formData.bedrooms} onChange={handleChange} />
                         </div>
                         <div className="input-group">
                             <label>Baños</label>
-                            <input
-                                type="number"
-                                name="bathrooms"
-                                value={formData.bathrooms}
-                                onChange={handleChange}
-                            />
+                            <input type="number" name="bathrooms" value={formData.bathrooms} onChange={handleChange} />
+                        </div>
+                        <div className="input-group">
+                            <label>Parqueaderos</label>
+                            <input type="number" name="parking" value={formData.parking} onChange={handleChange} />
+                        </div>
+                    </div>
+
+                    <div className="row four-cols">
+                        <div className="input-group">
+                            <label>Estrato</label>
+                            <select name="stratum" value={formData.stratum} onChange={handleChange}>
+                                <option value="">Seleccionar...</option>
+                                {[1, 2, 3, 4, 5, 6].map(n => <option key={n} value={n}>{n}</option>)}
+                            </select>
+                        </div>
+                        <div className="input-group">
+                            <label>Admin ($)</label>
+                            <input type="text" name="administration" value={formData.administration} onChange={handleChange} placeholder="Cuota mensual" />
+                        </div>
+                        <div className="input-group">
+                            <label>Año Construcción</label>
+                            <input type="number" name="yearBuilt" value={formData.yearBuilt} onChange={handleChange} placeholder="Ej: 2020" />
+                        </div>
+                    </div>
+
+                    <div className="row">
+                        <div className="input-group">
+                            <label>Acceso</label>
+                            <select name="access" value={formData.access} onChange={handleChange}>
+                                <option value="Pavimentado">Pavimentado</option>
+                                <option value="Destapado">Destapado (Tierra)</option>
+                                <option value="Mixto">Mixto</option>
+                                <option value="Rieles">Placa Huella / Rieles</option>
+                            </select>
+                        </div>
+                        <div className="input-group">
+                            <label>Topografía</label>
+                            <select name="topography" value={formData.topography} onChange={handleChange}>
+                                <option value="Plano">Plano</option>
+                                <option value="Inclinado">Inclinado (Pendiente)</option>
+                                <option value="Mixto">Mixto / Ondulado</option>
+                                <option value="Quebrado">Quebrado</option>
+                            </select>
                         </div>
                     </div>
 
                     <div className="input-group">
-                        <label>Descripción</label>
+                        <label>Características Adicionales (Amenities)</label>
+                        <div className="feature-input-container">
+                            <input
+                                type="text"
+                                value={featureInput}
+                                onChange={(e) => setFeatureInput(e.target.value)}
+                                placeholder="Ej: Piscina, Vigilancia 24h, Chimenea..."
+                                onKeyDown={(e) => e.key === 'Enter' && handleFeatureAdd(e)}
+                            />
+                            <button type="button" onClick={handleFeatureAdd} className="btn-add">Agregar</button>
+                        </div>
+                        <div className="features-list">
+                            {formData.features.map((feature, index) => (
+                                <span key={index} className="feature-tag">
+                                    {feature}
+                                    <button type="button" onClick={() => handleFeatureRemove(index)}>×</button>
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="input-group">
+                        <label>Descripción Detallada</label>
                         <textarea
                             name="description"
                             value={formData.description}
                             onChange={handleChange}
-                            rows="5"
+                            rows="6"
                             required
+                            placeholder="Describe los detalles que hacen única a esta propiedad..."
                         ></textarea>
                     </div>
                 </div>
 
-                {/* Features */}
+                {/* Section 4: Multimedia */}
                 <div className="form-section">
-                    <h3>Características</h3>
-                    <div className="feature-input-container">
+                    <h3>Multimedia</h3>
+                    <div className="input-group">
+                        <label>Imágenes (Selecciona varias)</label>
+                        <div className="file-drop-area" onClick={() => fileInputRef.current?.click()}>
+                            <p>Haz clic para seleccionar fotos</p>
+                            <input
+                                type="file"
+                                multiple
+                                accept="image/*"
+                                onChange={handleImageSelect}
+                                ref={fileInputRef}
+                                className="hidden-file-input"
+                            />
+                        </div>
+
+                        <div className="images-preview">
+                            {formData.images.map((url, index) => (
+                                <div key={`existing-${index}`} className="image-preview-item">
+                                    <img src={url} alt={`Propiedad ${index}`} />
+                                    <button type="button" onClick={() => handleRemoveExistingImage(index)} className="btn-remove-img">×</button>
+                                </div>
+                            ))}
+                            {newImages.map((file, index) => (
+                                <div key={`new-${index}`} className="image-preview-item new">
+                                    <img src={URL.createObjectURL(file)} alt={`Nueva ${index}`} />
+                                    <button type="button" onClick={() => handleRemoveNewImage(index)} className="btn-remove-img">×</button>
+                                    <span className="img-label">Nueva</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="input-group">
+                        <label>Video URL (YouTube/Vimeo)</label>
                         <input
-                            type="text"
-                            value={featureInput}
-                            onChange={(e) => setFeatureInput(e.target.value)}
-                            placeholder="Agregar característica (ej: Vista panorámica)"
-                            onKeyDown={(e) => e.key === 'Enter' && handleFeatureAdd(e)}
+                            type="url"
+                            name="videoUrl"
+                            value={formData.videoUrl}
+                            onChange={handleChange}
+                            placeholder="https://youtube.com/..."
                         />
-                        <button type="button" onClick={handleFeatureAdd} className="btn-add">Agregar</button>
-                    </div>
-                    <div className="features-list">
-                        {formData.features.map((feature, index) => (
-                            <span key={index} className="feature-tag">
-                                {feature}
-                                <button type="button" onClick={() => handleFeatureRemove(index)}>×</button>
-                            </span>
-                        ))}
                     </div>
                 </div>
 
-                {/* Images */}
-                <div className="form-section">
-                    <h3>Imágenes</h3>
-                    <input
-                        type="file"
-                        multiple
-                        accept="image/*"
-                        onChange={handleImageSelect}
-                        ref={fileInputRef}
-                        className="file-input"
-                    />
-
-                    <div className="images-preview">
-                        {/* Existing Images */}
-                        {formData.images.map((url, index) => (
-                            <div key={`existing-${index}`} className="image-preview-item">
-                                <img src={url} alt={`Propiedad ${index}`} />
-                                <button type="button" onClick={() => handleRemoveExistingImage(index)} className="btn-remove-img">×</button>
-                                <span className="img-label">Guardada</span>
-                            </div>
-                        ))}
-
-                        {/* New Images */}
-                        {newImages.map((file, index) => (
-                            <div key={`new-${index}`} className="image-preview-item new">
-                                <img src={URL.createObjectURL(file)} alt={`Nueva ${index}`} />
-                                <button type="button" onClick={() => handleRemoveNewImage(index)} className="btn-remove-img">×</button>
-                                <span className="img-label">Nueva</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
             </div>
 
-            <div className="form-actions">
+            <div className="form-actions sticky-actions">
+                <button type="button" className="btn-cancel" onClick={() => window.history.back()}>Cancelar</button>
                 <button type="submit" className="btn btn-primary btn-large" disabled={loading || uploading}>
                     {uploading ? 'Subiendo imágenes...' : loading ? 'Guardando...' : 'Guardar Propiedad'}
                 </button>
@@ -282,55 +358,75 @@ export default function PropertyForm({ initialData = {}, onSubmit, loading }) {
 
             <style jsx>{`
         .property-form {
-          background: white;
-          padding: 2rem;
-          border-radius: 12px;
-          box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+          max-width: 1000px;
+          margin: 0 auto;
+          padding-bottom: 80px;
         }
 
         .form-section {
+          background: white;
+          padding: 2rem;
+          border-radius: 16px;
+          box-shadow: 0 4px 20px rgba(0,0,0,0.03);
           margin-bottom: 2rem;
-          padding-bottom: 2rem;
-          border-bottom: 1px solid var(--color-border);
-        }
-
-        .form-section:last-child {
-          border-bottom: none;
+          border: 1px solid rgba(0,0,0,0.05);
         }
 
         .form-section h3 {
           margin-bottom: 1.5rem;
-          color: var(--color-primary);
-          font-size: 1.2rem;
+          color: #111;
+          font-size: 1.25rem;
+          font-weight: 700;
+          border-bottom: 2px solid #f0f0f0;
+          padding-bottom: 0.5rem;
         }
 
         .input-group {
-          margin-bottom: 1rem;
+          margin-bottom: 1.25rem;
         }
 
         .input-group label {
           display: block;
           margin-bottom: 0.5rem;
-          font-weight: 500;
-          color: var(--color-text-main);
+          font-weight: 600;
+          color: #333;
+          font-size: 0.95rem;
         }
 
         .input-group input,
         .input-group select,
         .input-group textarea {
           width: 100%;
-          padding: 0.75rem;
-          border: 1px solid var(--color-border);
-          border-radius: 8px;
+          padding: 0.875rem;
+          border: 1px solid #e0e0e0;
+          border-radius: 10px;
           font-size: 1rem;
           font-family: inherit;
+          transition: all 0.2s;
+          background: #fcfcfc;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus,
+        .input-group textarea:focus {
+          border-color: #111;
+          background: white;
+          outline: none;
+          box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
+        }
+
+        .input-lg {
+            font-size: 1.2rem !important;
+            font-weight: 600;
         }
 
         .row {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-          gap: 1rem;
+          gap: 1.5rem;
         }
+        
+        .three-cols { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+        .four-cols { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
 
         .feature-input-container {
           display: flex;
@@ -338,60 +434,78 @@ export default function PropertyForm({ initialData = {}, onSubmit, loading }) {
           margin-bottom: 1rem;
         }
 
-        .feature-input-container input {
-          flex: 1;
-          padding: 0.75rem;
-          border: 1px solid var(--color-border);
-          border-radius: 8px;
-        }
-
         .btn-add {
           padding: 0 1.5rem;
-          background: var(--color-secondary);
+          background: #333;
           color: white;
           border: none;
-          border-radius: 8px;
+          border-radius: 10px;
           cursor: pointer;
+          font-weight: 600;
         }
 
         .features-list {
           display: flex;
           flex-wrap: wrap;
-          gap: 0.5rem;
+          gap: 0.75rem;
         }
 
         .feature-tag {
-          background: var(--color-bg);
-          padding: 0.25rem 0.75rem;
-          border-radius: 20px;
+          background: #f0f0f0;
+          padding: 0.5rem 1rem;
+          border-radius: 30px;
           display: flex;
           align-items: center;
-          gap: 0.5rem;
+          gap: 0.75rem;
           font-size: 0.9rem;
+          font-weight: 500;
+          color: #333;
         }
 
         .feature-tag button {
-          background: none;
+          background: #e5e5e5;
           border: none;
-          color: #ef4444;
-          font-weight: bold;
+          color: #666;
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
           cursor: pointer;
-          font-size: 1.1rem;
+          font-size: 1rem;
+          line-height: 1;
         }
+        .feature-tag button:hover { background: #ffcccc; color: #d32f2f; }
+
+        .file-drop-area {
+            border: 2px dashed #ccc;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #fafafa;
+        }
+        .file-drop-area:hover {
+            border-color: #111;
+            background: #f0f0f0;
+        }
+        .hidden-file-input { display: none; }
 
         .images-preview {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+          grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
           gap: 1rem;
-          margin-top: 1rem;
+          margin-top: 1.5rem;
         }
 
         .image-preview-item {
           position: relative;
           aspect-ratio: 1;
-          border-radius: 8px;
+          border-radius: 12px;
           overflow: hidden;
-          border: 1px solid var(--color-border);
+          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
         .image-preview-item img {
@@ -402,48 +516,99 @@ export default function PropertyForm({ initialData = {}, onSubmit, loading }) {
 
         .btn-remove-img {
           position: absolute;
-          top: 5px;
-          right: 5px;
-          background: rgba(255, 0, 0, 0.8);
+          top: 6px;
+          right: 6px;
+          background: rgba(0,0,0,0.6);
           color: white;
           border: none;
-          width: 24px;
-          height: 24px;
+          width: 28px;
+          height: 28px;
           border-radius: 50%;
           cursor: pointer;
           display: flex;
           align-items: center;
           justify-content: center;
+          transition: background 0.2s;
         }
+        .btn-remove-img:hover { background: rgba(220, 38, 38, 0.9); }
 
         .img-label {
           position: absolute;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          background: rgba(0,0,0,0.6);
+          bottom: 0; left: 0; right: 0;
+          background: rgba(59, 130, 246, 0.9);
           color: white;
           font-size: 0.7rem;
           text-align: center;
-          padding: 2px;
+          padding: 3px;
+          font-weight: 600;
         }
 
-        .form-actions {
-          margin-top: 2rem;
-          text-align: right;
+        .sticky-actions {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            background: rgba(255,255,255,0.95);
         }
 
-        .btn-large {
-          width: 100%;
-          padding: 1rem;
-          font-size: 1.1rem;
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: #111;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+        }
+        .btn-primary:disabled {
+            background: #888;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-cancel {
+            background: transparent;
+            color: #666;
+            border: 1px solid #ddd;
+        }
+        .btn-cancel:hover { background: #f5f5f5; color: #333; }
+
+        .map-loading {
+            height: 400px;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #888;
+            border-radius: 12px;
+        }
+        
+        .coordinates-display {
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            color: #666;
+            font-family: monospace;
         }
 
-        @media (min-width: 768px) {
-          .btn-large {
-            width: auto;
-            padding: 0.75rem 3rem;
-          }
+        @media (max-width: 768px) {
+            .row { grid-template-columns: 1fr; }
+            .sticky-actions { padding: 1rem; }
+            .btn-large { width: 100%; }
         }
       `}</style>
         </form>

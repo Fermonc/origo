@@ -11,21 +11,53 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
+    // Helper to check role
+    function hasRole(role) {
+      return isAuthenticated() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == role;
+    }
+
+    function isAdmin() {
+      return hasRole('admin');
+    }
+
     // Users collection
     match /users/{userId} {
       allow read, write: if isOwner(userId);
+      // Admin might need to read users to see owner info
+      allow read: if isAdmin();
+    }
+    
+    // Alerts (subcollection)
+    match /users/{userId}/alerts/{alertId} {
+        allow read, write: if isOwner(userId);
     }
 
     // Properties collection
     match /properties/{propertyId} {
       allow read: if true; // Public read
-      allow write: if false; // Only admin via Console for now
+      
+      // Admin: Full Access
+      allow write: if isAdmin();
+
+      // Seller: Create if seller
+      allow create: if hasRole('seller');
+
+      // Seller: Update/Delete ONLY their own
+      allow update, delete: if hasRole('seller') && resource.data.userId == request.auth.uid;
     }
     
-    // Alerts collection (if stored at root, though currently it seems they are in users?)
-    // Checking code, alerts are in 'users/{userId}/alerts' or root?
-    // Let's assume root for now based on previous knowledge, but wait, 
-    // src/lib/db/alerts.js uses `collection(db, 'users', userId, 'alerts')`?
-    // No, let's check alerts.js to be sure.
+    // Messages collection (Contact form)
+    match /messages/{messageId} {
+        // Public can create messages
+        allow create: if true;
+        // Only authenticated (admin) can read/update/delete
+        allow read, update, delete: if isAdmin();
+    }
+
+    // Notifications collection
+    match /notifications/{notificationId} {
+        allow read: if isAuthenticated(); // Users read their own notifications
+        allow write: if true; // API (Matchmaker) needs to write. 
+    }
   }
 }

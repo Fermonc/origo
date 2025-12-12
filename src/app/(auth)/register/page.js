@@ -9,134 +9,162 @@ import { useAuth } from '@/context/AuthContext';
 import { createOrUpdateUser } from '@/lib/db/users';
 
 export default function RegisterPage() {
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
-    const router = useRouter();
-    const { googleLogin } = useAuth();
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
+  const [isSeller, setIsSeller] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const { googleLogin } = useAuth();
 
-    const handleRegister = async (e) => {
-        e.preventDefault();
-        setError('');
-        setLoading(true);
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
 
-        try {
-            // 1. Create Auth User
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
+    try {
+      // 1. Create Auth User
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
 
-            // 2. Update Profile (Display Name)
-            await updateProfile(user, {
-                displayName: name
-            });
+      // 2. Update Profile (Display Name)
+      await updateProfile(user, {
+        displayName: name
+      });
 
-            // 3. Create Firestore Document (Explicitly here to ensure name is saved)
-            await createOrUpdateUser(user, { displayName: name });
+      // 3. Create Firestore Document
+      await createOrUpdateUser(user, {
+        displayName: name,
+        phoneNumber: phone,
+        role: isSeller ? 'seller' : 'buyer'
+      });
 
-            router.push('/perfil');
-        } catch (err) {
-            console.error(err);
-            if (err.code === 'auth/email-already-in-use') {
-                setError('Este correo ya está registrado.');
-            } else if (err.code === 'auth/weak-password') {
-                setError('La contraseña debe tener al menos 6 caracteres.');
-            } else {
-                setError('Error al registrarse. Intenta nuevamente.');
-            }
-        } finally {
-            setLoading(false);
-        }
-    };
+      const nextRoute = isSeller ? '/admin/dashboard' : '/perfil';
+      router.push(nextRoute);
+    } catch (err) {
+      console.error(err);
+      if (err.code === 'auth/email-already-in-use') {
+        setError('Este correo ya está registrado.');
+      } else if (err.code === 'auth/weak-password') {
+        setError('La contraseña debe tener al menos 6 caracteres.');
+      } else {
+        setError('Error al registrarse. Intenta nuevamente.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const handleGoogleLogin = async () => {
-        setError('');
-        try {
-            await googleLogin();
-            router.push('/perfil');
-        } catch (err) {
-            console.error(err);
-            setError('Error al registrarse con Google.');
-        }
-    };
+  const handleGoogleLogin = async () => {
+    setError('');
+    try {
+      await googleLogin();
+      router.push('/perfil');
+    } catch (err) {
+      console.error(err);
+      setError('Error al registrarse con Google.');
+    }
+  };
 
-    return (
-        <div className="auth-page">
-            <div className="auth-container">
-                <div className="auth-card">
-                    <div className="logo-area">
-                        <Link href="/" className="logo-link">
-                            <h1>Origo</h1>
-                        </Link>
-                        <p>Crea tu cuenta</p>
-                    </div>
+  return (
+    <div className="auth-page">
+      <div className="auth-container">
+        <div className="auth-card">
+          <div className="logo-area">
+            <Link href="/" className="logo-link">
+              <h1>Origo</h1>
+            </Link>
+            <p>Crea tu cuenta</p>
+          </div>
 
-                    {error && <div className="error-message">{error}</div>}
+          {error && <div className="error-message">{error}</div>}
 
-                    <form onSubmit={handleRegister}>
-                        <div className="form-group">
-                            <label>Nombre Completo</label>
-                            <input
-                                type="text"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                placeholder="Juan Pérez"
-                                required
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label>Email</label>
-                            <input
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                placeholder="tu@email.com"
-                                required
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label>Contraseña</label>
-                            <input
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder="••••••"
-                                required
-                                minLength={6}
-                            />
-                        </div>
-
-                        <button type="submit" className="btn-primary" disabled={loading}>
-                            {loading ? 'Creando cuenta...' : 'Registrarse'}
-                        </button>
-                    </form>
-
-                    <div className="divider">
-                        <span>O continúa con</span>
-                    </div>
-
-                    <button onClick={handleGoogleLogin} className="btn-google">
-                        <svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
-                            <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
-                                <path fill="#4285F4" d="M -3.264 51.509 C -3.264 50.719 -3.334 49.969 -3.454 49.239 L -14.754 49.239 L -14.754 53.749 L -8.284 53.749 C -8.574 55.229 -9.424 56.479 -10.684 57.329 L -10.684 60.329 L -6.824 60.329 C -4.564 58.239 -3.264 55.159 -3.264 51.509 Z" />
-                                <path fill="#34A853" d="M -14.754 63.239 C -11.514 63.239 -8.804 62.159 -6.824 60.329 L -10.684 57.329 C -11.764 58.049 -13.134 58.489 -14.754 58.489 C -17.884 58.489 -20.534 56.379 -21.484 53.529 L -25.464 53.529 L -25.464 56.619 C -23.494 60.539 -19.444 63.239 -14.754 63.239 Z" />
-                                <path fill="#FBBC05" d="M -21.484 53.529 C -21.734 52.809 -21.864 52.039 -21.864 51.239 C -21.864 50.439 -21.734 49.669 -21.484 48.949 L -21.484 45.859 L -25.464 45.859 C -26.284 47.479 -26.754 49.299 -26.754 51.239 C -26.754 53.179 -26.284 54.999 -25.464 56.619 L -21.484 53.529 Z" />
-                                <path fill="#EA4335" d="M -14.754 43.989 C -12.984 43.989 -11.404 44.599 -10.154 45.789 L -6.734 42.369 C -8.804 40.429 -11.514 39.239 -14.754 39.239 C -19.444 39.239 -23.494 41.939 -25.464 45.859 L -21.484 48.949 C -20.534 46.099 -17.884 43.989 -14.754 43.989 Z" />
-                            </g>
-                        </svg>
-                        Google
-                    </button>
-
-                    <div className="auth-footer">
-                        <p>¿Ya tienes cuenta? <Link href="/login">Inicia Sesión</Link></p>
-                    </div>
-                </div>
+          <form onSubmit={handleRegister}>
+            <div className="form-group">
+              <label>Nombre Completo</label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Juan Pérez"
+                required
+              />
             </div>
 
-            <style jsx>{`
+            <div className="form-group">
+              <label>Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="tu@email.com"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Teléfono</label>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="300 123 4567"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Contraseña</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••"
+                required
+                minLength={6}
+              />
+            </div>
+
+            <div className="checkbox-group">
+              <input
+                type="checkbox"
+                id="isSeller"
+                checked={isSeller}
+                onChange={(e) => setIsSeller(e.target.checked)}
+              />
+              <label htmlFor="isSeller">Quiero vender propiedades</label>
+            </div>
+
+            <button type="submit" className="btn-primary" disabled={loading}>
+              {loading ? 'Creando cuenta...' : 'Registrarse'}
+            </button>
+          </form>
+
+          <div className="divider">
+            <span>O continúa con</span>
+          </div>
+
+          <button onClick={handleGoogleLogin} className="btn-google">
+            <svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
+              <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
+                <path fill="#4285F4" d="M -3.264 51.509 C -3.264 50.719 -3.334 49.969 -3.454 49.239 L -14.754 49.239 L -14.754 53.749 L -8.284 53.749 C -8.574 55.229 -9.424 56.479 -10.684 57.329 L -10.684 60.329 L -6.824 60.329 C -4.564 58.239 -3.264 55.159 -3.264 51.509 Z" />
+                <path fill="#34A853" d="M -14.754 63.239 C -11.514 63.239 -8.804 62.159 -6.824 60.329 L -10.684 57.329 C -11.764 58.049 -13.134 58.489 -14.754 58.489 C -17.884 58.489 -20.534 56.379 -21.484 53.529 L -25.464 53.529 L -25.464 56.619 C -23.494 60.539 -19.444 63.239 -14.754 63.239 Z" />
+                <path fill="#FBBC05" d="M -21.484 53.529 C -21.734 52.809 -21.864 52.039 -21.864 51.239 C -21.864 50.439 -21.734 49.669 -21.484 48.949 L -21.484 45.859 L -25.464 45.859 C -26.284 47.479 -26.754 49.299 -26.754 51.239 C -26.754 53.179 -26.284 54.999 -25.464 56.619 L -21.484 53.529 Z" />
+                <path fill="#EA4335" d="M -14.754 43.989 C -12.984 43.989 -11.404 44.599 -10.154 45.789 L -6.734 42.369 C -8.804 40.429 -11.514 39.239 -14.754 39.239 C -19.444 39.239 -23.494 41.939 -25.464 45.859 L -21.484 48.949 C -20.534 46.099 -17.884 43.989 -14.754 43.989 Z" />
+              </g>
+            </svg>
+            Google
+          </button>
+
+          <div className="auth-footer">
+            <p>¿Ya tienes cuenta? <Link href="/login">Inicia Sesión</Link></p>
+          </div>
+        </div>
+      </div>
+
+      <style jsx>{`
         .auth-page {
           min-height: 100vh;
           display: flex;
@@ -205,8 +233,22 @@ export default function RegisterPage() {
         }
 
         .form-group input:focus {
-          border-color: #111;
-          box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
+            box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+        .checkbox-group input {
+            width: auto;
+        }
+        .checkbox-group label {
+            font-weight: 500;
+            color: #333;
+            cursor: pointer;
         }
 
         .btn-primary {
@@ -300,6 +342,6 @@ export default function RegisterPage() {
           text-decoration: underline;
         }
       `}</style>
-        </div>
-    );
+    </div>
+  );
 }

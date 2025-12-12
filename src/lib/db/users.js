@@ -26,7 +26,8 @@ export const createOrUpdateUser = async (user, additionalData = {}) => {
         await setDoc(userRef, {
             ...userData,
             createdAt: new Date().toISOString(),
-            role: 'user', // Default role
+            role: additionalData.role || 'buyer', // Default to buyer, but allow override
+            phoneNumber: additionalData.phoneNumber || '',
             favorites: [], // Initialize favorites
             alerts: []     // Initialize alerts
         });

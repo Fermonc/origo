@@ -75,7 +75,12 @@ function isMatch(property, criteria) {
     }
 
     // 3. Price Match
-    const price = Number(property.price);
+    let price = property.priceNumber;
+    if (price === undefined || price === null || isNaN(price)) {
+        // Fallback to parsing string if priceNumber not present
+        price = Number(String(property.price).replace(/[^0-9]/g, ''));
+    }
+
     if (criteria.minPrice && price < criteria.minPrice) return false;
     if (criteria.maxPrice && criteria.maxPrice > 0 && price > criteria.maxPrice) return false;
 

@@ -17,8 +17,6 @@ export const AuthContextProvider = ({ children }) => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
                 setUser(user);
-                // Ensure user exists in DB on every auth state change (or at least login)
-                // We do it here to catch session restoration too
                 try {
                     await createOrUpdateUser(user);
                 } catch (error) {
@@ -53,9 +51,12 @@ export const AuthContextProvider = ({ children }) => {
         }
     };
 
+    // Removed the inline "Cargando..." div. 
+    // The loading state should be handled by the consuming components (pages) rather than blocking the entire app.
+    // This allows for skeleton loading states or specialized loading screens per route.
     return (
         <AuthContext.Provider value={{ user, loading, googleLogin, logout }}>
-            {loading ? <div>Cargando...</div> : children}
+            {children}
         </AuthContext.Provider>
     );
 };

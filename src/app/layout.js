@@ -1,5 +1,5 @@
 import './globals.css';
-import { AuthContextProvider } from '@/context/AuthContext';
+import { Providers } from './providers';
 import BottomNav from '@/components/BottomNav';
 import Footer from '@/components/Footer';
 
@@ -83,13 +83,13 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body>
-        <AuthContextProvider>
+        <Providers>
           <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
             {children}
             <Footer />
           </div>
           <BottomNav />
-        </AuthContextProvider>
+        </Providers>
       </body>
     </html>
   );

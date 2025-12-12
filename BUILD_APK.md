@@ -19,10 +19,14 @@ Necesitas tener instalado **Android Studio** en tu computadora.
 3.  **Generar el APK**:
     *   En el menú superior, ve a **Build** > **Build Bundle(s) / APK(s)** > **Build APK(s)**.
     *   Espera a que termine el proceso.
-    *   Verás una notificación "APK(s) generated successfully". Haz clic en **"locate"** para abrir la carpeta donde está el archivo `.apk`.
+    *   Verás una notificación "APK(s) generated successfully". Haz clic en **"locate"** para abrir la carpeta.
+    *   **Si no ves la notificación:** Navega manualmente en tu explorador de archivos a:
+        `Documents\Origo\android\app\build\outputs\apk\debug\app-debug.apk`
 
 4.  **Instalar en tu Celular**:
-    *   Copia ese archivo `.apk` a tu celular y ábrelo para instalarlo.
+    *   Copia el archivo `app-debug.apk` a tu celular (por USB, WhatsApp, Drive, etc.).
+    *   Al abrirlo, te pedirá permiso para "Instalar aplicaciones desconocidas". Acéptalo.
+    *   ¡Listo! Tendrás la app instalada.
 
 ## Alternativa Rápida (PWA)
 Si no quieres instalar Android Studio, puedes instalar la app directamente desde el navegador de tu celular:

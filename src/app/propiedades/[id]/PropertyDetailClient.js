@@ -234,6 +234,39 @@ export default function PropertyDetailClient({ id }) {
                     </div>
                   )}
                 </div>
+
+                <div className="extra-details-grid">
+                  {property.yearBuilt && (
+                    <div className="detail-item">
+                      <span className="detail-label">Año de construcción</span>
+                      <span className="detail-value">{property.yearBuilt}</span>
+                    </div>
+                  )}
+                  {property.estrato && (
+                    <div className="detail-item">
+                      <span className="detail-label">Estrato</span>
+                      <span className="detail-value">{property.estrato}</span>
+                    </div>
+                  )}
+                  {property.administration && (
+                    <div className="detail-item">
+                      <span className="detail-label">Administración</span>
+                      <span className="detail-value">{formatPrice(property.administration)}</span>
+                    </div>
+                  )}
+                  {property.access && (
+                    <div className="detail-item">
+                      <span className="detail-label">Acceso</span>
+                      <span className="detail-value">{property.access}</span>
+                    </div>
+                  )}
+                  {property.topography && (
+                    <div className="detail-item">
+                      <span className="detail-label">Topografía</span>
+                      <span className="detail-value">{property.topography}</span>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <hr className="divider" />
@@ -260,6 +293,23 @@ export default function PropertyDetailClient({ id }) {
                   ))}
                 </ul>
               </section>
+
+              {property.videoUrl && (
+                <>
+                  <hr className="divider" />
+                  <section className="section">
+                    <h2>Video Recorrido</h2>
+                    <div className="video-container">
+                      <iframe
+                        src={property.videoUrl.replace("watch?v=", "embed/")}
+                        title="Video de la propiedad"
+                        allowFullScreen
+                        style={{ width: '100%', height: '100%', border: 'none' }}
+                      ></iframe>
+                    </div>
+                  </section>
+                </>
+              )}
 
               <hr className="divider" />
 
@@ -374,10 +424,10 @@ export default function PropertyDetailClient({ id }) {
             </section>
           )}
         </div>
-      </main>
+      </main >
 
       {/* Mobile Sticky Bottom Bar */}
-      <div className="mobile-sticky-bar">
+      < div className="mobile-sticky-bar" >
         <div className="bar-content">
           <div className="bar-price">
             <span className="label">Precio</span>
@@ -391,7 +441,7 @@ export default function PropertyDetailClient({ id }) {
             Contactar
           </a>
         </div>
-      </div>
+      </div >
 
       <style jsx>{`
         /* --- Global & Layout --- */
@@ -643,6 +693,45 @@ export default function PropertyDetailClient({ id }) {
           background: #eee;
         }
 
+        .extra-details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 16px;
+            margin-top: 24px;
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 12px;
+        }
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+        .detail-label {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+        .detail-value {
+            font-weight: 600;
+            color: #0f172a;
+        }
+        
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 */
+            height: 0;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
         /* --- Sidebar / Sticky Card --- */
         .sidebar-column {
           display: none;
@@ -818,6 +907,6 @@ export default function PropertyDetailClient({ id }) {
           scroll-snap-align: start;
         }
       `}</style>
-    </div>
+    </div >
   );
 }
