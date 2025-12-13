@@ -60,8 +60,20 @@ export default function RegisterPage() {
   const handleGoogleLogin = async () => {
     setError('');
     try {
-      await googleLogin();
-      router.push('/perfil');
+      const user = await googleLogin();
+
+      if (isSeller) {
+        await createOrUpdateUser(user, {
+          role: 'seller'
+        });
+        router.push('/admin/dashboard');
+      } else {
+        // Check if user already has a role to avoid overwriting existing sellers who accidentally login here?
+        // For now, standard behavior: just profile or dashboard depending on role?
+        // Simpler: Just redirect to profile, but if they are ALREADY a seller, maybe dashboard?
+        // Let's stick to the request: if 'isSeller' is checked, make them seller and go to dashboard.
+        router.push('/perfil');
+      }
     } catch (err) {
       console.error(err);
       setError('Error al registrarse con Google.');

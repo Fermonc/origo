@@ -128,7 +128,7 @@ export default function AdminDashboard() {
           {/* Dashboard Header */}
           <div className="dashboard-header">
             <div>
-              <h1 className="page-title">Panel de Control</h1>
+              <h1 className="page-title">{isAdmin ? 'Panel de Administración' : 'Mi Gestión Inmobiliaria'}</h1>
               <p className="page-subtitle">Bienvenido, {user.email}</p>
             </div>
             <div className="header-actions">
@@ -192,8 +192,16 @@ export default function AdminDashboard() {
           ) : filteredProperties.length === 0 ? (
             <div className="empty-state">
               <div className="empty-icon">📂</div>
-              <h3>No hay propiedades en esta categoría</h3>
-              {filter !== 'all' && <button onClick={() => setFilter('all')} className="btn-link">Ver todas</button>}
+              <h3>{isAdmin ? 'No hay propiedades en esta categoría' : '¡Aún no has publicado ninguna propiedad!'}</h3>
+              <p>{!isAdmin && 'Comienza a vender hoy mismo. Es rápido y sencillo.'}</p>
+
+              {!isAdmin ? (
+                <Link href="/admin/propiedades/nueva" className="btn-primary" style={{ marginTop: '20px', display: 'inline-block' }}>
+                  Publicar mi primera propiedad
+                </Link>
+              ) : (
+                filter !== 'all' && <button onClick={() => setFilter('all')} className="btn-link">Ver todas</button>
+              )}
             </div>
           ) : (
             <div className="properties-grid">
