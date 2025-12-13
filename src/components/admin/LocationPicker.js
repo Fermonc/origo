@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -50,6 +50,17 @@ function MapEvents({ setPosition }) {
     return null;
 }
 
+// Helper to update map view when props change
+function MapUpdater({ center }) {
+    const map = useMap();
+    useEffect(() => {
+        if (center) {
+            map.setView(center, map.getZoom()); // Keep current zoom
+        }
+    }, [center, map]);
+    return null;
+}
+
 export default function LocationPicker({ position, onPositionChange }) {
     // Default to Rionegro/Llanogrande center if no position
     const defaultCenter = { lat: 6.1387, lng: -75.434 };
@@ -68,6 +79,7 @@ export default function LocationPicker({ position, onPositionChange }) {
                 />
                 <DraggableMarker position={center} setPosition={handleSetPosition} />
                 <MapEvents setPosition={handleSetPosition} />
+                <MapUpdater center={center} />
             </MapContainer>
         </div>
     );

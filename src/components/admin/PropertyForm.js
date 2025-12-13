@@ -37,6 +37,7 @@ export default function PropertyForm({ initialData = {}, onSubmit, loading }) {
     const [newImages, setNewImages] = useState([]);
     const [uploading, setUploading] = useState(false);
     const [featureInput, setFeatureInput] = useState('');
+    const [searchingLocation, setSearchingLocation] = useState(false);
     const fileInputRef = useRef(null);
 
     const handleChange = (e) => {
@@ -48,27 +49,52 @@ export default function PropertyForm({ initialData = {}, onSubmit, loading }) {
         setFormData(prev => ({ ...prev, coordinates: coords }));
 
         // Auto-fetch city/address from coordinates using OpenStreetMap Nominatim
+        // But only if we are NOT currently searching via text to avoid loop
+        if (!searchingLocation) {
+            try {
+                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${coords.lat}&lon=${coords.lon || coords.lng}&zoom=14`);
+                const data = await response.json();
+
+                if (data && data.address) {
+                    const city = data.address.city || data.address.town || data.address.village || data.address.municipality || '';
+                    const neighborhood = data.address.suburb || data.address.neighbourhood || '';
+                    const state = data.address.state || '';
+
+                    let locationString = city;
+                    if (neighborhood) locationString += `, ${neighborhood}`;
+                    if (state) locationString += `, ${state}`;
+
+                    setFormData(prev => ({ ...prev, location: locationString }));
+                }
+            } catch (error) {
+                console.error("Geocoding error:", error);
+            }
+        }
+    };
+
+    const handleLocationSearch = async () => {
+        if (!formData.location) return;
+        setSearchingLocation(true);
         try {
-            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${coords.lat}&lon=${coords.lon || coords.lng}&zoom=14`);
+            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(formData.location)}`);
             const data = await response.json();
 
-            if (data && data.address) {
-                const city = data.address.city || data.address.town || data.address.village || data.address.municipality || '';
-                const neighborhood = data.address.suburb || data.address.neighbourhood || '';
-                const state = data.address.state || '';
-
-                let locationString = city;
-                if (neighborhood) locationString += `, ${neighborhood}`;
-                if (state) locationString += `, ${state}`;
-
-                // Only update location if it's currently empty to avoid overwriting user edits?
-                // Or maybe we show a button to "Use Map Location"?
-                // User requirement: "Make coherent". So we should probably suggest it.
-                // For now, let's update it if it seems automatic or if user hasn't typed much.
-                setFormData(prev => ({ ...prev, location: locationString }));
+            if (data && data.length > 0) {
+                const result = data[0];
+                const newCoords = {
+                    lat: parseFloat(result.lat),
+                    lng: parseFloat(result.lon)
+                };
+                setFormData(prev => ({ ...prev, coordinates: newCoords }));
+                // Note: We don't update 'location' text here because the user just typed it
+            } else {
+                alert('No se encontró la ubicación. Intenta ser más específico (ej: "Rionegro, Antioquia").');
             }
         } catch (error) {
-            console.error("Geocoding error:", error);
+            console.error("Search error:", error);
+            alert("Error al buscar la ubicación.");
+        } finally {
+            setSearchingLocation(false);
         }
     };
 
@@ -219,14 +245,22 @@ export default function PropertyForm({ initialData = {}, onSubmit, loading }) {
                     <div className="row">
                         <div className="input-group">
                             <label>Ubicación (Texto)</label>
-                            <input
-                                type="text"
-                                name="location"
-                                value={formData.location}
-                                onChange={handleChange}
-                                required
-                                placeholder="Se llenará automáticamente al usar el mapa..."
-                            />
+                            <div className="location-search-container">
+                                <input
+                                    type="text"
+                                    name="location"
+                                    value={formData.location}
+                                    onChange={handleChange}
+                                    onBlur={handleLocationSearch}
+                                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleLocationSearch())}
+                                    required
+                                    placeholder="Escribe ciudad o dirección y presiona Enter..."
+                                />
+                                <button type="button" onClick={handleLocationSearch} className="btn-search-map" disabled={searchingLocation}>
+                                    {searchingLocation ? '...' : '🔍'}
+                                </button>
+                            </div>
+                            <small className="help-text">Escribe la ubicación y presiona Enter para centrar el mapa.</small>
                         </div>
                     </div>
                 </div>
@@ -503,6 +537,22 @@ export default function PropertyForm({ initialData = {}, onSubmit, loading }) {
           line-height: 1;
         }
         .feature-tag button:hover { background: #ffcccc; color: #d32f2f; }
+
+        .location-search-container {
+            display: flex;
+            gap: 10px;
+        }
+        .btn-search-map {
+            padding: 0 15px;
+            background: #eee;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+        .btn-search-map:hover {
+            background: #e0e0e0;
+        }
 
         .file-drop-area {
             border: 2px dashed #ccc;

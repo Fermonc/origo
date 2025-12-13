@@ -87,7 +87,12 @@ function isMatch(property, criteria) {
     // 3. Price Match
     let price = property.priceNumber;
     if (price === undefined || price === null || isNaN(price)) {
-        price = Number(String(property.price).replace(/[^0-9]/g, ''));
+        // Fallback if priceNumber is missing (legacy properties or error)
+        try {
+             price = Number(String(property.price || '0').replace(/[^0-9]/g, ''));
+        } catch (e) {
+             price = 0;
+        }
     }
 
     if (criteria.minPrice && price < Number(criteria.minPrice)) return false;
