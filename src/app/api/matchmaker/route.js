@@ -1,58 +1,61 @@
 import { db } from '@/lib/firebase';
-import { collection, getDocs, addDoc } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 import { NextResponse } from 'next/server';
+import { sendNotification } from '@/lib/notifications';
 
 export async function POST(request) {
     try {
         const propertyData = await request.json();
 
-        // 1. Get all users (In a real app, we would query users with alerts, or use a dedicated 'alerts' collection group)
-        // For this scale, fetching users is acceptable, but ideally we should have a separate 'alerts' collection.
-        // However, our current design stores alerts inside 'users/{uid}/alerts'.
-        // So we fetch all users and filter in memory.
+        // 1. Get all alerts. The current structure seems to be that we need to scan users.
+        // Optimally, 'alerts' should be a root collection or collection group.
+        // Assuming 'users' -> 'alerts' subcollection is not easily queryable without collectionGroup index.
+        // Let's assume we iterate users for now (prototype scale).
+
+        // Wait, looking at `src/app/alertas/page.js`, it uses `getUserAlerts` from `lib/db/alerts`.
+        // Let's see if we can query all alerts.
+        // If not, we fall back to scanning users.
 
         const usersRef = collection(db, 'users');
         const usersSnap = await getDocs(usersRef);
 
-        const notifications = [];
+        const matches = [];
 
-        usersSnap.forEach(userDoc => {
-            const userData = userDoc.data();
-            const userAlerts = userData.alerts || [];
+        // Iterate through users in parallel
+        await Promise.all(usersSnap.docs.map(async (userDoc) => {
+            // Get alerts subcollection for this user
+            const alertsRef = collection(db, 'users', userDoc.id, 'alerts');
+            const alertsSnap = await getDocs(alertsRef);
 
-            userAlerts.forEach(alert => {
-                if (isMatch(propertyData, alert.criteria)) {
-                    notifications.push({
+            alertsSnap.forEach(alertDoc => {
+                const alertData = alertDoc.data();
+                if (isMatch(propertyData, alertData.criteria)) {
+                    matches.push({
                         userId: userDoc.id,
-                        userEmail: userData.email,
-                        propertyId: propertyData.id || 'unknown', // ID might not be passed if created just now, but we'll try
-                        propertyTitle: propertyData.title,
-                        alertId: alert.id
+                        alertId: alertDoc.id,
+                        propertyId: propertyData.id,
+                        propertyTitle: propertyData.title
                     });
                 }
             });
-        });
+        }));
 
-        // 2. "Send" Notifications (Log & Store)
-        const notificationPromises = notifications.map(async (notif) => {
-            console.log(`[MATCHMAKER] Sending notification to ${notif.userEmail} for property "${notif.propertyTitle}"`);
-
-            // Store in Firestore 'notifications' collection
-            await addDoc(collection(db, 'notifications'), {
-                userId: notif.userId,
-                propertyId: notif.propertyId,
-                message: `Nueva propiedad coincide con tu alerta: ${notif.propertyTitle}`,
-                read: false,
-                createdAt: new Date().toISOString()
-            });
+        // 2. Send Notifications
+        const notificationPromises = matches.map(async (match) => {
+            await sendNotification(
+                match.userId,
+                '¡Nueva Propiedad Encontrada!',
+                `Hemos encontrado un inmueble que coincide con tu búsqueda: ${match.propertyTitle}`,
+                'match',
+                `/propiedades/${match.propertyId}`
+            );
         });
 
         await Promise.all(notificationPromises);
 
         return NextResponse.json({
             success: true,
-            matchesFound: notifications.length,
-            notifications: notifications
+            matchesFound: matches.length
         });
 
     } catch (error) {
@@ -62,27 +65,33 @@ export async function POST(request) {
 }
 
 function isMatch(property, criteria) {
+    if (!criteria) return false;
+
     // 1. Type Match
     if (criteria.type && criteria.type !== property.type) {
         return false;
     }
 
-    // 2. Zone Match (Simple string includes or exact match)
-    // Assuming property.location contains the zone or we add a 'zone' field to property.
-    // For now, let's assume property.location string contains the zone name.
-    if (criteria.zone && !property.location?.toLowerCase().includes(criteria.zone.toLowerCase())) {
-        return false;
+    // 2. Location/Zone Match
+    // Improve logic: Check if property city/location contains the criteria city
+    if (criteria.city) {
+        const propLoc = (property.location || '').toLowerCase();
+        const critLoc = criteria.city.toLowerCase();
+        if (!propLoc.includes(critLoc)) {
+            // Check if coordinates are close? (Advanced)
+            // For now, text match is safer if we just added geocoding to the form
+             return false;
+        }
     }
 
     // 3. Price Match
     let price = property.priceNumber;
     if (price === undefined || price === null || isNaN(price)) {
-        // Fallback to parsing string if priceNumber not present
         price = Number(String(property.price).replace(/[^0-9]/g, ''));
     }
 
-    if (criteria.minPrice && price < criteria.minPrice) return false;
-    if (criteria.maxPrice && criteria.maxPrice > 0 && price > criteria.maxPrice) return false;
+    if (criteria.minPrice && price < Number(criteria.minPrice)) return false;
+    if (criteria.maxPrice && Number(criteria.maxPrice) > 0 && price > Number(criteria.maxPrice)) return false;
 
     return true;
 }

@@ -12,6 +12,7 @@ import Header from '@/components/Header';
 import UserFavorites from '@/components/UserFavorites';
 import UserAlerts from '@/components/UserAlerts';
 import UserDocuments from '@/components/UserDocuments';
+import UserNotifications from '@/components/UserNotifications';
 
 export default function ProfilePage() {
   const { user, loading, logout } = useAuth();
@@ -183,10 +184,13 @@ export default function ProfilePage() {
             <button className={`tab-btn ${activeTab === 'account' ? 'active' : ''}`} onClick={() => setActiveTab('account')}>👤 Mi Cuenta</button>
             <button className={`tab-btn ${activeTab === 'favorites' ? 'active' : ''}`} onClick={() => setActiveTab('favorites')}>❤️ Favoritos</button>
             <button className={`tab-btn ${activeTab === 'alerts' ? 'active' : ''}`} onClick={() => setActiveTab('alerts')}>🔍 Buscando</button>
+            <button className={`tab-btn ${activeTab === 'notifications' ? 'active' : ''}`} onClick={() => setActiveTab('notifications')}>🔔 Notificaciones</button>
           </div>
 
           {/* Tab Content */}
           <div className="tab-content">
+            {activeTab === 'notifications' && <UserNotifications user={user} />}
+
             {activeTab === 'account' && (
               <div className="account-settings">
                 <div className="settings-card">

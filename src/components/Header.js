@@ -5,20 +5,42 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import Image from 'next/image';
+import { db } from '@/lib/firebase';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
 
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
   const pathname = usePathname();
   const { user, loading } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+      // Force scrolled state (white background) if not on home page
+      if (pathname !== '/') {
+        setScrolled(true);
+      } else {
+        setScrolled(window.scrollY > 20);
+      }
     };
+
+    // Initial check
+    handleScroll();
+
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [pathname]);
+
+  useEffect(() => {
+      if (user) {
+          const q = query(collection(db, 'users', user.uid, 'notifications'), where('read', '==', false));
+          const unsubscribe = onSnapshot(q, (snapshot) => {
+              setUnreadNotifications(snapshot.size);
+          });
+          return () => unsubscribe();
+      }
+  }, [user]);
 
   const isActive = (path) => pathname === path;
 
@@ -31,6 +53,10 @@ export default function Header() {
             <Link href="/propiedades" className={`nav-link ${isActive('/propiedades') ? 'active' : ''}`}>Propiedades</Link>
             <Link href="/mapa" className={`nav-link ${isActive('/mapa') ? 'active' : ''}`}>Mapa</Link>
             <Link href="/contacto" className={`nav-link ${isActive('/contacto') ? 'active' : ''}`}>Contacto</Link>
+
+            {user && (
+              <Link href="/vender" className="btn-publish">Publicar</Link>
+            )}
 
             {!loading && (
               user ? (
@@ -47,6 +73,7 @@ export default function Header() {
                     ) : (
                       <span>{user.displayName ? user.displayName[0].toUpperCase() : 'U'}</span>
                     )}
+                    {unreadNotifications > 0 && <span className="notification-dot"></span>}
                   </div>
                   <span className="user-name">{user.displayName?.split(' ')[0] || 'Perfil'}</span>
                 </Link>
@@ -134,6 +161,21 @@ export default function Header() {
           background: #000;
         }
 
+        .btn-publish {
+            padding: 8px 16px;
+            border: 2px solid #111;
+            border-radius: 30px;
+            color: #111;
+            font-weight: 700;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .btn-publish:hover {
+            background: #111;
+            color: white;
+        }
+
         .user-profile-link {
             display: flex;
             align-items: center;
@@ -160,6 +202,17 @@ export default function Header() {
             font-weight: 700;
             font-size: 0.9rem;
             overflow: hidden;
+            position: relative;
+        }
+        .notification-dot {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 8px;
+            height: 8px;
+            background-color: #ef4444;
+            border-radius: 50%;
+            border: 1px solid white;
         }
         .avatar-small img {
             width: 100%;

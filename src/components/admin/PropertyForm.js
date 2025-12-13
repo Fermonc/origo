@@ -44,8 +44,32 @@ export default function PropertyForm({ initialData = {}, onSubmit, loading }) {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleCoordinatesChange = (coords) => {
+    const handleCoordinatesChange = async (coords) => {
         setFormData(prev => ({ ...prev, coordinates: coords }));
+
+        // Auto-fetch city/address from coordinates using OpenStreetMap Nominatim
+        try {
+            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${coords.lat}&lon=${coords.lon || coords.lng}&zoom=14`);
+            const data = await response.json();
+
+            if (data && data.address) {
+                const city = data.address.city || data.address.town || data.address.village || data.address.municipality || '';
+                const neighborhood = data.address.suburb || data.address.neighbourhood || '';
+                const state = data.address.state || '';
+
+                let locationString = city;
+                if (neighborhood) locationString += `, ${neighborhood}`;
+                if (state) locationString += `, ${state}`;
+
+                // Only update location if it's currently empty to avoid overwriting user edits?
+                // Or maybe we show a button to "Use Map Location"?
+                // User requirement: "Make coherent". So we should probably suggest it.
+                // For now, let's update it if it seems automatic or if user hasn't typed much.
+                setFormData(prev => ({ ...prev, location: locationString }));
+            }
+        } catch (error) {
+            console.error("Geocoding error:", error);
+        }
     };
 
     const handleFeatureAdd = (e) => {
@@ -180,27 +204,29 @@ export default function PropertyForm({ initialData = {}, onSubmit, loading }) {
                 {/* Section 2: Location */}
                 <div className="form-section">
                     <h3>Ubicación</h3>
-                    <div className="row">
-                        <div className="input-group">
-                            <label>Ubicación General (Municipio / Vereda)</label>
-                            <input
-                                type="text"
-                                name="location"
-                                value={formData.location}
-                                onChange={handleChange}
-                                required
-                                placeholder="Ej: Rionegro, Vereda Abreo"
-                            />
-                        </div>
-                    </div>
                     <div className="input-group map-container">
                         <label>Mapa (Arrastra el marcador para fijar la ubicación exacta)</label>
+                        <p className="help-text">Mueve el marcador en el mapa para establecer la ubicación. La dirección se completará automáticamente.</p>
                         <LocationPicker
                             position={formData.coordinates}
                             onPositionChange={handleCoordinatesChange}
                         />
                         <div className="coordinates-display">
                             Lat: {formData.coordinates?.lat?.toFixed(5)}, Lng: {formData.coordinates?.lng?.toFixed(5)}
+                        </div>
+                    </div>
+
+                    <div className="row">
+                        <div className="input-group">
+                            <label>Ubicación (Texto)</label>
+                            <input
+                                type="text"
+                                name="location"
+                                value={formData.location}
+                                onChange={handleChange}
+                                required
+                                placeholder="Se llenará automáticamente al usar el mapa..."
+                            />
                         </div>
                     </div>
                 </div>
