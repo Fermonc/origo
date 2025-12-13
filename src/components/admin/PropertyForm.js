@@ -136,6 +136,16 @@ export default function PropertyForm({ initialData = {}, onSubmit, loading }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Geo-validation: If text location is present but coords are default (Rionegro), ask confirmation or try to search
+        const isDefaultCoords = formData.coordinates.lat === 6.1387 && formData.coordinates.lng === -75.434;
+        const hasLocationText = formData.location && formData.location.trim() !== '';
+
+        if (hasLocationText && isDefaultCoords) {
+             const proceed = confirm(`Estás a punto de guardar la propiedad en "${formData.location}" pero el mapa sigue en la ubicación por defecto (Rionegro). \n\n¿Deseas guardar de todos modos? \n(Haz clic en Cancelar para ajustar el mapa)`);
+             if (!proceed) return;
+        }
+
         setUploading(true);
 
         try {

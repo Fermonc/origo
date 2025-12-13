@@ -50,6 +50,7 @@ export default function Header() {
         <div className="container header-content">
           <Link href="/" className="logo">Origo</Link>
           <nav className="nav desktop-only">
+            <Link href="/" className={`nav-link ${isActive('/') ? 'active' : ''}`}>Inicio</Link>
             <Link href="/propiedades" className={`nav-link ${isActive('/propiedades') ? 'active' : ''}`}>Propiedades</Link>
             <Link href="/mapa" className={`nav-link ${isActive('/mapa') ? 'active' : ''}`}>Mapa</Link>
             <Link href="/contacto" className={`nav-link ${isActive('/contacto') ? 'active' : ''}`}>Contacto</Link>
