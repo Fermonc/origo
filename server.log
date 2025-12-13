@@ -1,0 +1,28 @@
+
+> origo-web@0.1.0 dev
+> next dev -p 3005
+
+   ▲ Next.js 16.0.7 (Turbopack)
+   - Local:         http://localhost:3005
+   - Network:       http://192.168.0.2:3005
+
+ ✓ Starting...
+ ✓ Ready in 1093ms
+ ○ Compiling /propiedades ...
+ ⨯ Error [FirebaseError]: Firebase: Error (auth/invalid-api-key).
+    at module evaluation (src/lib/firebase.js:18:28)
+    at module evaluation (src/context/AuthContext.js:5:1)
+    at module evaluation (src/components/PropertyCard.js:6:1)
+    at module evaluation (src/app/propiedades/page.js:4:1)
+  16 | export const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+  17 |
+> 18 | export const auth = getAuth(app);
+     |                            ^
+  19 | export const db = getFirestore(app);
+  20 | export const storage = getStorage(app);
+  21 | {
+  code: 'auth/invalid-api-key',
+  customData: [Object],
+  digest: '3540197586'
+}
+ GET /propiedades 500 in 8.2s (compile: 6.1s, render: 2.0s)

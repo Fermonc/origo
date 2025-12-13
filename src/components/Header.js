@@ -101,11 +101,11 @@ export default function Header() {
           background: transparent;
         }
         .header.scrolled {
-          background: rgba(255, 255, 255, 0.95);
+          background: rgba(255, 255, 255, 0.98) !important;
           backdrop-filter: blur(12px);
           padding: 12px 0;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-          border-bottom: 1px solid rgba(0,0,0,0.05);
+          box-shadow: 0 4px 25px rgba(0,0,0,0.08) !important;
+          border-bottom: 1px solid rgba(0,0,0,0.1);
         }
         .header-content {
           display: flex;
@@ -119,18 +119,32 @@ export default function Header() {
           color: #111;
           text-decoration: none;
         }
+        /* Force dark text when scrolled to prevent white-on-white in dark mode systems */
+        .header.scrolled .logo {
+          color: #000 !important;
+        }
+
         .nav {
           display: flex;
           gap: 32px;
           align-items: center;
         }
         .nav-link {
-          color: #666;
+          color: #444;
           font-weight: 500;
           text-decoration: none;
           transition: color 0.2s;
           font-size: 0.95rem;
         }
+        /* Force dark text when scrolled */
+        .header.scrolled .nav-link {
+          color: #333 !important;
+        }
+        .header.scrolled .nav-link:hover,
+        .header.scrolled .nav-link.active {
+          color: #000 !important;
+        }
+
         .nav-link:hover, .nav-link.active {
           color: #111;
           font-weight: 600;
@@ -146,6 +160,9 @@ export default function Header() {
             font-weight: 600;
             text-decoration: none;
             font-size: 0.95rem;
+        }
+        .header.scrolled .btn-login-text {
+            color: #000 !important;
         }
         .btn-register {
           padding: 8px 20px;
