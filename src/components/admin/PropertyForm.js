@@ -37,6 +37,7 @@ export default function PropertyForm({ initialData = {}, onSubmit, loading }) {
     const [newImages, setNewImages] = useState([]);
     const [uploading, setUploading] = useState(false);
     const [featureInput, setFeatureInput] = useState('');
+    const [searchingLocation, setSearchingLocation] = useState(false);
     const fileInputRef = useRef(null);
 
     const handleChange = (e) => {
@@ -44,8 +45,57 @@ export default function PropertyForm({ initialData = {}, onSubmit, loading }) {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleCoordinatesChange = (coords) => {
+    const handleCoordinatesChange = async (coords) => {
         setFormData(prev => ({ ...prev, coordinates: coords }));
+
+        // Auto-fetch city/address from coordinates using OpenStreetMap Nominatim
+        // But only if we are NOT currently searching via text to avoid loop
+        if (!searchingLocation) {
+            try {
+                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${coords.lat}&lon=${coords.lon || coords.lng}&zoom=14`);
+                const data = await response.json();
+
+                if (data && data.address) {
+                    const city = data.address.city || data.address.town || data.address.village || data.address.municipality || '';
+                    const neighborhood = data.address.suburb || data.address.neighbourhood || '';
+                    const state = data.address.state || '';
+
+                    let locationString = city;
+                    if (neighborhood) locationString += `, ${neighborhood}`;
+                    if (state) locationString += `, ${state}`;
+
+                    setFormData(prev => ({ ...prev, location: locationString }));
+                }
+            } catch (error) {
+                console.error("Geocoding error:", error);
+            }
+        }
+    };
+
+    const handleLocationSearch = async () => {
+        if (!formData.location) return;
+        setSearchingLocation(true);
+        try {
+            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(formData.location)}`);
+            const data = await response.json();
+
+            if (data && data.length > 0) {
+                const result = data[0];
+                const newCoords = {
+                    lat: parseFloat(result.lat),
+                    lng: parseFloat(result.lon)
+                };
+                setFormData(prev => ({ ...prev, coordinates: newCoords }));
+                // Note: We don't update 'location' text here because the user just typed it
+            } else {
+                alert('No se encontró la ubicación. Intenta ser más específico (ej: "Rionegro, Antioquia").');
+            }
+        } catch (error) {
+            console.error("Search error:", error);
+            alert("Error al buscar la ubicación.");
+        } finally {
+            setSearchingLocation(false);
+        }
     };
 
     const handleFeatureAdd = (e) => {
@@ -180,27 +230,37 @@ export default function PropertyForm({ initialData = {}, onSubmit, loading }) {
                 {/* Section 2: Location */}
                 <div className="form-section">
                     <h3>Ubicación</h3>
-                    <div className="row">
-                        <div className="input-group">
-                            <label>Ubicación General (Municipio / Vereda)</label>
-                            <input
-                                type="text"
-                                name="location"
-                                value={formData.location}
-                                onChange={handleChange}
-                                required
-                                placeholder="Ej: Rionegro, Vereda Abreo"
-                            />
-                        </div>
-                    </div>
                     <div className="input-group map-container">
                         <label>Mapa (Arrastra el marcador para fijar la ubicación exacta)</label>
+                        <p className="help-text">Mueve el marcador en el mapa para establecer la ubicación. La dirección se completará automáticamente.</p>
                         <LocationPicker
                             position={formData.coordinates}
                             onPositionChange={handleCoordinatesChange}
                         />
                         <div className="coordinates-display">
                             Lat: {formData.coordinates?.lat?.toFixed(5)}, Lng: {formData.coordinates?.lng?.toFixed(5)}
+                        </div>
+                    </div>
+
+                    <div className="row">
+                        <div className="input-group">
+                            <label>Ubicación (Texto)</label>
+                            <div className="location-search-container">
+                                <input
+                                    type="text"
+                                    name="location"
+                                    value={formData.location}
+                                    onChange={handleChange}
+                                    onBlur={handleLocationSearch}
+                                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleLocationSearch())}
+                                    required
+                                    placeholder="Escribe ciudad o dirección y presiona Enter..."
+                                />
+                                <button type="button" onClick={handleLocationSearch} className="btn-search-map" disabled={searchingLocation}>
+                                    {searchingLocation ? '...' : '🔍'}
+                                </button>
+                            </div>
+                            <small className="help-text">Escribe la ubicación y presiona Enter para centrar el mapa.</small>
                         </div>
                     </div>
                 </div>
@@ -477,6 +537,22 @@ export default function PropertyForm({ initialData = {}, onSubmit, loading }) {
           line-height: 1;
         }
         .feature-tag button:hover { background: #ffcccc; color: #d32f2f; }
+
+        .location-search-container {
+            display: flex;
+            gap: 10px;
+        }
+        .btn-search-map {
+            padding: 0 15px;
+            background: #eee;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+        .btn-search-map:hover {
+            background: #e0e0e0;
+        }
 
         .file-drop-area {
             border: 2px dashed #ccc;
