@@ -14,8 +14,15 @@ export function useFcmToken(user) {
                 try {
                     const permission = await Notification.requestPermission();
                     if (permission === 'granted') {
+                        // Try to get VAPID key from env, or fallback safely
+                        const vapidKey = process.env.NEXT_PUBLIC_VAPID_KEY;
+                        if (!vapidKey) {
+                            console.warn("FCM VAPID key not found in environment variables. Push notifications will not work.");
+                            return;
+                        }
+
                         const token = await getToken(messaging, {
-                            vapidKey: 'YOUR_VAPID_KEY_HERE' // This would need to be provided by the user or fetched from env
+                            vapidKey: vapidKey
                         });
 
                         if (token) {
