@@ -1,0 +1,26 @@
+
+> origo-web@0.1.0 dev
+> next dev -p 3006
+
+   ▲ Next.js 16.0.7 (Turbopack)
+   - Local:         http://localhost:3006
+   - Network:       http://192.168.0.2:3006
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 980ms
+ ○ Compiling / ...
+ GET / 200 in 6.1s (compile: 5.5s, render: 651ms)
+ GET / 200 in 92ms (compile: 5ms, render: 87ms)
+ GET / 200 in 426ms (compile: 99ms, render: 327ms)
+ GET /propiedades 200 in 937ms (compile: 883ms, render: 54ms)
+ GET / 200 in 100ms (compile: 5ms, render: 95ms)
+ GET / 200 in 93ms (compile: 5ms, render: 87ms)
+ GET /propiedades 200 in 32ms (compile: 6ms, render: 26ms)
+ GET / 200 in 93ms (compile: 4ms, render: 89ms)
+ GET / 200 in 101ms (compile: 6ms, render: 95ms)
+ GET /propiedades 200 in 31ms (compile: 4ms, render: 26ms)
+ GET / 200 in 80ms (compile: 4ms, render: 76ms)
+ GET / 200 in 106ms (compile: 4ms, render: 102ms)
+ GET /propiedades 200 in 144ms (compile: 3ms, render: 141ms)
+ GET / 200 in 81ms (compile: 3ms, render: 78ms)

@@ -1,6 +1,6 @@
 export default function SkeletonCard() {
     return (
-        <div className="skeleton-card">
+        <div className="skeleton-card" role="status" aria-label="Cargando propiedad...">
             <div className="skeleton-image"></div>
             <div className="skeleton-content">
                 <div className="skeleton-text title"></div>
@@ -17,23 +17,23 @@ export default function SkeletonCard() {
           background: white;
           border-radius: 12px;
           overflow: hidden;
-          border: 1px solid var(--color-border);
+          border: 1px solid #eee;
           box-shadow: 0 4px 20px rgba(0,0,0,0.05);
         }
 
         .skeleton-image {
           width: 100%;
           height: 250px;
-          background-color: #e0e0e0;
+          background-color: #f0f0f0;
           animation: pulse 1.5s infinite;
         }
 
         .skeleton-content {
-          padding: var(--space-md);
+          padding: 1rem;
         }
 
         .skeleton-text {
-          background-color: #e0e0e0;
+          background-color: #f0f0f0;
           border-radius: 4px;
           margin-bottom: 0.5rem;
           animation: pulse 1.5s infinite;

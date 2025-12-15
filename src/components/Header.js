@@ -5,20 +5,42 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import Image from 'next/image';
+import { db } from '@/lib/firebase';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
 
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
   const pathname = usePathname();
   const { user, loading } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+      // Force scrolled state (white background) if not on home page
+      if (pathname !== '/') {
+        setScrolled(true);
+      } else {
+        setScrolled(window.scrollY > 20);
+      }
     };
+
+    // Initial check
+    handleScroll();
+
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [pathname]);
+
+  useEffect(() => {
+      if (user) {
+          const q = query(collection(db, 'users', user.uid, 'notifications'), where('read', '==', false));
+          const unsubscribe = onSnapshot(q, (snapshot) => {
+              setUnreadNotifications(snapshot.size);
+          });
+          return () => unsubscribe();
+      }
+  }, [user]);
 
   const isActive = (path) => pathname === path;
 
@@ -28,9 +50,14 @@ export default function Header() {
         <div className="container header-content">
           <Link href="/" className="logo">Origo</Link>
           <nav className="nav desktop-only">
+            <Link href="/" className={`nav-link ${isActive('/') ? 'active' : ''}`}>Inicio</Link>
             <Link href="/propiedades" className={`nav-link ${isActive('/propiedades') ? 'active' : ''}`}>Propiedades</Link>
             <Link href="/mapa" className={`nav-link ${isActive('/mapa') ? 'active' : ''}`}>Mapa</Link>
             <Link href="/contacto" className={`nav-link ${isActive('/contacto') ? 'active' : ''}`}>Contacto</Link>
+
+            {user && (
+              <Link href="/vender" className="btn-publish">Publicar</Link>
+            )}
 
             {!loading && (
               user ? (
@@ -47,6 +74,7 @@ export default function Header() {
                     ) : (
                       <span>{user.displayName ? user.displayName[0].toUpperCase() : 'U'}</span>
                     )}
+                    {unreadNotifications > 0 && <span className="notification-dot"></span>}
                   </div>
                   <span className="user-name">{user.displayName?.split(' ')[0] || 'Perfil'}</span>
                 </Link>
@@ -73,11 +101,11 @@ export default function Header() {
           background: transparent;
         }
         .header.scrolled {
-          background: rgba(255, 255, 255, 0.9);
+          background: rgba(255, 255, 255, 0.98) !important;
           backdrop-filter: blur(12px);
           padding: 12px 0;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-          border-bottom: 1px solid rgba(0,0,0,0.05);
+          box-shadow: 0 4px 25px rgba(0,0,0,0.08) !important;
+          border-bottom: 1px solid rgba(0,0,0,0.1);
         }
         .header-content {
           display: flex;
@@ -91,18 +119,32 @@ export default function Header() {
           color: #111;
           text-decoration: none;
         }
+        /* Force dark text when scrolled to prevent white-on-white in dark mode systems */
+        .header.scrolled .logo {
+          color: #000 !important;
+        }
+
         .nav {
           display: flex;
           gap: 32px;
           align-items: center;
         }
         .nav-link {
-          color: #666;
+          color: #444;
           font-weight: 500;
           text-decoration: none;
           transition: color 0.2s;
           font-size: 0.95rem;
         }
+        /* Force dark text when scrolled */
+        .header.scrolled .nav-link {
+          color: #333 !important;
+        }
+        .header.scrolled .nav-link:hover,
+        .header.scrolled .nav-link.active {
+          color: #000 !important;
+        }
+
         .nav-link:hover, .nav-link.active {
           color: #111;
           font-weight: 600;
@@ -119,6 +161,9 @@ export default function Header() {
             text-decoration: none;
             font-size: 0.95rem;
         }
+        .header.scrolled .btn-login-text {
+            color: #000 !important;
+        }
         .btn-register {
           padding: 8px 20px;
           background: #111;
@@ -132,6 +177,21 @@ export default function Header() {
         .btn-register:hover {
           transform: scale(1.05);
           background: #000;
+        }
+
+        .btn-publish {
+            padding: 8px 16px;
+            border: 2px solid #111;
+            border-radius: 30px;
+            color: #111;
+            font-weight: 700;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .btn-publish:hover {
+            background: #111;
+            color: white;
         }
 
         .user-profile-link {
@@ -160,6 +220,17 @@ export default function Header() {
             font-weight: 700;
             font-size: 0.9rem;
             overflow: hidden;
+            position: relative;
+        }
+        .notification-dot {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 8px;
+            height: 8px;
+            background-color: #ef4444;
+            border-radius: 50%;
+            border: 1px solid white;
         }
         .avatar-small img {
             width: 100%;
