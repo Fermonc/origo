@@ -6,11 +6,12 @@ import { db } from '@/lib/firebase';
 import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
 import PropertyCard from '@/components/PropertyCard';
 import Header from '@/components/Header';
+import SkeletonCard from '@/components/SkeletonCard';
 import dynamic from 'next/dynamic';
 
 const HomeMapPreview = dynamic(() => import('@/components/HomeMapPreview'), {
   ssr: false,
-  loading: () => <div style={{ height: '450px', background: '#f0f0f0', margin: '40px 0' }}></div>
+  loading: () => <div className="map-loading" role="status" aria-label="Cargando mapa"></div>
 });
 
 export default function Home() {
@@ -24,7 +25,6 @@ export default function Home() {
   useEffect(() => {
     const fetchProperties = async () => {
       try {
-        // Fetch a larger batch of properties to populate all tabs
         const q = query(collection(db, 'properties'), orderBy('createdAt', 'desc'), limit(50));
         const querySnapshot = await getDocs(q);
         const props = [];
@@ -57,10 +57,10 @@ export default function Home() {
     <div className="page">
       <Header />
 
-      <main>
+      <main id="main-content">
         {/* Hero Section */}
-        <section className="hero">
-          <div className="hero-bg">
+        <section className="hero" aria-label="Bienvenida">
+          <div className="hero-bg" aria-hidden="true">
             <div className="overlay"></div>
           </div>
 
@@ -73,21 +73,27 @@ export default function Home() {
 
             {/* Premium Search Bar */}
             <div className="search-wrapper">
-              <div className="search-bar">
-                <div className="search-icon">
+              <div className="search-bar" role="search">
+                <div className="search-icon" aria-hidden="true">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <circle cx="11" cy="11" r="8"></circle>
                     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                   </svg>
                 </div>
+                <label htmlFor="hero-search" className="sr-only">Buscar propiedades</label>
                 <input
+                  id="hero-search"
                   type="text"
                   placeholder="¿Qué estás buscando? (Ej. Rionegro, Lote...)"
                   className="search-input"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
-                <Link href={`/propiedades?search=${searchTerm}`} className="search-btn">
+                <Link
+                    href={`/propiedades?search=${searchTerm}`}
+                    className="search-btn"
+                    aria-label="Buscar propiedades"
+                >
                   Buscar
                 </Link>
               </div>
@@ -96,10 +102,12 @@ export default function Home() {
         </section>
 
         {/* Map Preview Section */}
-        <HomeMapPreview />
+        <section aria-label="Mapa de propiedades">
+             <HomeMapPreview />
+        </section>
 
         {/* Categories / Properties Section */}
-        <section className="categories-section">
+        <section className="categories-section" id="properties-section">
           <div className="container">
             <div className="section-header">
               <h2 className="section-title">Explora por Categoría</h2>
@@ -108,10 +116,13 @@ export default function Home() {
 
             {/* Tabs */}
             <div className="tabs-container">
-              <div className="tabs-scroll">
+              <div className="tabs-scroll" role="tablist" aria-label="Categorías de propiedades">
                 {tabs.map((tab) => (
                   <button
                     key={tab}
+                    role="tab"
+                    aria-selected={activeTab === tab}
+                    aria-controls="properties-grid"
                     className={`tab-btn ${activeTab === tab ? 'active' : ''}`}
                     onClick={() => setActiveTab(tab)}
                   >
@@ -122,12 +133,13 @@ export default function Home() {
             </div>
 
             {/* Properties Grid */}
-            <div className="properties-grid">
+            <div id="properties-grid" className="properties-grid" role="region" aria-live="polite">
               {loading ? (
-                <div className="loading-state">
-                  <div className="spinner"></div>
-                  <p>Cargando propiedades...</p>
-                </div>
+                Array.from({ length: 6 }).map((_, i) => (
+                    <div key={i} className="skeleton-wrapper">
+                        <SkeletonCard />
+                    </div>
+                ))
               ) : filteredProps.length > 0 ? (
                 filteredProps.map(property => (
                   <div key={property.id} className="prop-card-wrapper">
@@ -137,7 +149,11 @@ export default function Home() {
               ) : (
                 <div className="empty-state">
                   <p>No encontramos propiedades en esta categoría por el momento.</p>
-                  <button onClick={() => setActiveTab('Destacados')} className="btn-reset">
+                  <button
+                    onClick={() => setActiveTab('Destacados')}
+                    className="btn-reset"
+                    aria-label="Ver todas las propiedades destacadas"
+                  >
                     Ver todas las propiedades
                   </button>
                 </div>
@@ -146,7 +162,7 @@ export default function Home() {
 
             <div className="view-more-container">
               <Link href="/propiedades" className="btn-view-more">
-                Ver Catálogo Completo →
+                Ver Catálogo Completo <span aria-hidden="true">→</span>
               </Link>
             </div>
           </div>
@@ -164,7 +180,19 @@ export default function Home() {
         .container {
           max-width: 1200px;
           margin: 0 auto;
-          padding: 0 24px;
+          padding: 0 1.5rem; /* 24px */
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
         }
 
         /* Hero Section */
@@ -197,25 +225,25 @@ export default function Home() {
           position: relative;
           text-align: center;
           max-width: 800px;
-          padding-top: 60px;
+          padding-top: 3.75rem; /* 60px */
         }
         .hero-title {
           font-size: 3.5rem;
           font-weight: 800;
           line-height: 1.1;
-          margin-bottom: 24px;
+          margin-bottom: 1.5rem; /* 24px */
           letter-spacing: -1.5px;
           color: #111;
         }
         .highlight {
           background: linear-gradient(120deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.05) 100%);
-          padding: 0 10px;
+          padding: 0 0.625rem; /* 10px */
           border-radius: 8px;
         }
         .hero-subtitle {
           font-size: 1.25rem;
           color: #555;
-          margin-bottom: 48px;
+          margin-bottom: 3rem; /* 48px */
           font-weight: 400;
         }
 
@@ -226,7 +254,7 @@ export default function Home() {
         }
         .search-bar {
           background: white;
-          padding: 8px;
+          padding: 0.5rem; /* 8px */
           border-radius: 50px;
           display: flex;
           align-items: center;
@@ -239,7 +267,7 @@ export default function Home() {
           box-shadow: 0 12px 40px rgba(0,0,0,0.15);
         }
         .search-icon {
-          padding: 0 16px;
+          padding: 0 1rem; /* 16px */
           color: #999;
         }
         .search-input {
@@ -253,7 +281,7 @@ export default function Home() {
         .search-btn {
           background: #111;
           color: white;
-          padding: 12px 32px;
+          padding: 0.75rem 2rem; /* 12px 32px */
           border-radius: 40px;
           text-decoration: none;
           font-weight: 600;
@@ -262,20 +290,24 @@ export default function Home() {
         .search-btn:hover {
           background: #333;
         }
+        .search-btn:focus-visible {
+            outline: 3px solid #333;
+            outline-offset: 2px;
+        }
 
         /* Categories Section */
         .categories-section {
-          padding: 80px 0;
+          padding: 5rem 0; /* 80px */
           background: #fff;
         }
         .section-header {
           text-align: center;
-          margin-bottom: 40px;
+          margin-bottom: 2.5rem; /* 40px */
         }
         .section-title {
           font-size: 2.5rem;
           font-weight: 700;
-          margin-bottom: 16px;
+          margin-bottom: 1rem; /* 16px */
           letter-spacing: -1px;
         }
         .section-desc {
@@ -287,21 +319,21 @@ export default function Home() {
         .tabs-container {
           display: flex;
           justify-content: center;
-          margin-bottom: 40px;
+          margin-bottom: 2.5rem; /* 40px */
         }
         .tabs-scroll {
           display: flex;
-          gap: 12px;
+          gap: 0.75rem; /* 12px */
           overflow-x: auto;
-          padding: 8px;
+          padding: 0.5rem; /* 8px */
           -webkit-overflow-scrolling: touch;
-          scrollbar-width: none; /* Firefox */
+          scrollbar-width: none;
         }
         .tabs-scroll::-webkit-scrollbar {
-          display: none; /* Chrome/Safari */
+          display: none;
         }
         .tab-btn {
-          padding: 12px 24px;
+          padding: 0.75rem 1.5rem; /* 12px 24px */
           border-radius: 30px;
           border: 1px solid #eee;
           background: white;
@@ -311,11 +343,16 @@ export default function Home() {
           cursor: pointer;
           white-space: nowrap;
           transition: all 0.2s ease;
+          min-height: 44px; /* A11y */
         }
         .tab-btn:hover {
           background: #f9f9f9;
           border-color: #ddd;
           color: #333;
+        }
+        .tab-btn:focus-visible {
+            outline: 3px solid #111;
+            outline-offset: 2px;
         }
         .tab-btn.active {
           background: #111;
@@ -328,7 +365,7 @@ export default function Home() {
         .properties-grid {
           display: grid;
           grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-          gap: 32px;
+          gap: 2rem; /* 32px */
           min-height: 400px;
         }
         
@@ -338,7 +375,7 @@ export default function Home() {
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 60px;
+            padding: 3.75rem; /* 60px */
             color: #666;
         }
         .spinner {
@@ -348,36 +385,51 @@ export default function Home() {
             border-top-color: #111;
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-bottom: 16px;
+            margin-bottom: 1rem;
         }
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
 
+        .map-loading {
+            height: 450px;
+            background: #f0f0f0;
+            margin: 40px 0;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+
         .empty-state {
             grid-column: 1 / -1;
             text-align: center;
-            padding: 60px;
+            padding: 3.75rem; /* 60px */
             background: #f9f9f9;
             border-radius: 24px;
         }
         .btn-reset {
-            margin-top: 16px;
-            padding: 10px 20px;
+            margin-top: 1rem;
+            padding: 0.75rem 1.5rem;
             background: #111;
             color: white;
             border: none;
             border-radius: 8px;
             cursor: pointer;
+            font-weight: 600;
         }
+        .btn-reset:hover { background: #333; }
+        .btn-reset:focus-visible { outline: 3px solid #333; outline-offset: 2px; }
         
         .view-more-container {
-            margin-top: 60px;
+            margin-top: 3.75rem; /* 60px */
             display: flex;
             justify-content: center;
         }
         .btn-view-more {
-            padding: 14px 32px;
+            padding: 0.875rem 2rem; /* 14px 32px */
             background: white;
             border: 1px solid #111;
             color: #111;
@@ -389,6 +441,10 @@ export default function Home() {
         .btn-view-more:hover {
             background: #111;
             color: white;
+        }
+        .btn-view-more:focus-visible {
+            outline: 3px solid #111;
+            outline-offset: 2px;
         }
 
         @media (max-width: 768px) {

@@ -26,3 +26,4 @@
   digest: '3540197586'
 }
  GET /propiedades 500 in 8.2s (compile: 6.1s, render: 2.0s)
+   Reload env: .env.local
