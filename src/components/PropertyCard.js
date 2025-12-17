@@ -53,6 +53,7 @@ export default function PropertyCard({ property }) {
             className={`btn-favorite ${isFavorite ? 'active' : ''}`}
             onClick={handleToggleFavorite}
             disabled={loadingFav}
+            aria-label={isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos'}
           >
             <svg
               width="20"
@@ -126,8 +127,8 @@ export default function PropertyCard({ property }) {
             background: rgba(255,255,255,0.9);
             backdrop-filter: blur(4px);
             border: none;
-            width: 36px;
-            height: 36px;
+            width: 44px; /* A11y min target */
+            height: 44px; /* A11y min target */
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -136,7 +137,7 @@ export default function PropertyCard({ property }) {
             z-index: 2;
             transition: all 0.2s;
             color: #666;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
           }
           .btn-favorite:hover {
             transform: scale(1.1);

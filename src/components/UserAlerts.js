@@ -9,7 +9,7 @@ import dynamic from 'next/dynamic';
 
 const RadiusMapPicker = dynamic(() => import('./admin/RadiusMapPicker'), {
     ssr: false,
-    loading: () => <div style={{height: '300px', background: '#eee'}}>Cargando mapa...</div>
+    loading: () => <div style={{ height: '300px', background: '#eee' }}>Cargando mapa...</div>
 });
 
 export default function UserAlerts({ user }) {
@@ -63,10 +63,13 @@ export default function UserAlerts({ user }) {
         setLoadingMatches(prev => ({ ...prev, [alertItem.id]: true }));
         try {
             // Client-side matching is limited. We'll do a basic query and filter manually.
+            // Estrategia de ahorro aplicada: Limit Matches Preview
+            // Solo mostramos una vista previa de 5 propiedades. Si el usuario quiere ver más,
+            // debería ir a la búsqueda completa. Esto reduce lecturas de 20 a 5 por alerta.
             let q = query(
                 collection(db, 'properties'),
                 where('type', '==', alertItem.criteria.type),
-                limit(20)
+                limit(5)
             );
 
             const querySnapshot = await getDocs(q);
@@ -78,13 +81,13 @@ export default function UserAlerts({ user }) {
 
                 // Price
                 if (alertItem.criteria.minPrice > 0) {
-                     // Parse price if string
-                     const pPrice = Number(data.price) || 0;
-                     if (pPrice < alertItem.criteria.minPrice) matches = false;
+                    // Parse price if string
+                    const pPrice = Number(data.price) || 0;
+                    if (pPrice < alertItem.criteria.minPrice) matches = false;
                 }
                 if (alertItem.criteria.maxPrice > 0) {
-                     const pPrice = Number(data.price) || 0;
-                     if (pPrice > alertItem.criteria.maxPrice) matches = false;
+                    const pPrice = Number(data.price) || 0;
+                    if (pPrice > alertItem.criteria.maxPrice) matches = false;
                 }
 
                 // Rooms/Baths
@@ -164,20 +167,20 @@ export default function UserAlerts({ user }) {
     // Haversine formula
     function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
         var R = 6371; // Radius of the earth in km
-        var dLat = deg2rad(lat2-lat1);  // deg2rad below
-        var dLon = deg2rad(lon2-lon1);
+        var dLat = deg2rad(lat2 - lat1);  // deg2rad below
+        var dLon = deg2rad(lon2 - lon1);
         var a =
-            Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
             Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
-            Math.sin(dLon/2) * Math.sin(dLon/2)
+            Math.sin(dLon / 2) * Math.sin(dLon / 2)
             ;
-        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         var d = R * c; // Distance in km
         return d;
     }
 
     function deg2rad(deg) {
-        return deg * (Math.PI/180)
+        return deg * (Math.PI / 180)
     }
 
     return (
@@ -243,8 +246,8 @@ export default function UserAlerts({ user }) {
                             <RadiusMapPicker
                                 center={criteria.mapCenter}
                                 radius={criteria.radius}
-                                onCenterChange={(c) => setCriteria({...criteria, mapCenter: c})}
-                                onRadiusChange={(r) => setCriteria({...criteria, radius: r})}
+                                onCenterChange={(c) => setCriteria({ ...criteria, mapCenter: c })}
+                                onRadiusChange={(r) => setCriteria({ ...criteria, radius: r })}
                             />
                         </div>
 

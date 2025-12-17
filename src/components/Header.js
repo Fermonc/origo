@@ -33,13 +33,13 @@ export default function Header() {
   }, [pathname]);
 
   useEffect(() => {
-      if (user) {
-          const q = query(collection(db, 'users', user.uid, 'notifications'), where('read', '==', false));
-          const unsubscribe = onSnapshot(q, (snapshot) => {
-              setUnreadNotifications(snapshot.size);
-          });
-          return () => unsubscribe();
-      }
+    if (user) {
+      const q = query(collection(db, 'users', user.uid, 'notifications'), where('read', '==', false));
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        setUnreadNotifications(snapshot.size);
+      });
+      return () => unsubscribe();
+    }
   }, [user]);
 
   const isActive = (path) => pathname === path;
@@ -95,7 +95,7 @@ export default function Header() {
           top: 0;
           left: 0;
           width: 100%;
-          z-index: 100;
+          z-index: var(--z-header);
           padding: 20px 0;
           transition: all 0.3s ease;
           background: transparent;

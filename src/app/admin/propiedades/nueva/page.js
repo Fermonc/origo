@@ -27,9 +27,15 @@ export default function NewPropertyPage() {
       // Add metadata
       const dataToSave = {
         ...propertyData,
+        // Estrategia de ahorro aplicada: Denormalización
+        // Guardamos el nombre y foto del usuario en la propiedad para NO tener que leer
+        // la colección 'users' cada vez que mostramos la tarjeta de la propiedad.
         createdAt: new Date().toISOString(),
         createdBy: user.email,
-        priceNumber: Number(propertyData.price.replace(/[^0-9]/g, '')) || 0 // Store numeric price for sorting/filtering if needed
+        publisherName: user.displayName || 'Usuario Origo',
+        publisherPhoto: user.photoURL || null,
+        userId: user.uid, // Aseguramos el ID para reglas de seguridad
+        priceNumber: Number(propertyData.price.replace(/[^0-9]/g, '')) || 0
       };
 
       // Save to Firestore

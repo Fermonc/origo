@@ -3,22 +3,25 @@
 import { useState, useEffect } from 'react';
 import PropertyCard from '@/components/PropertyCard';
 import { db } from '@/lib/firebase';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
-import Link from 'next/link';
-import SkeletonCard from '@/components/SkeletonCard';
+import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
+import { Suspense } from 'react';
 
-import Header from '@/components/Header';
+import { usePropertyFilters } from '@/hooks/usePropertyFilters';
 
-export default function PropertiesPage() {
+// Inner component that uses search params
+function PropertiesContent() {
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filterType, setFilterType] = useState('Todos');
-  const [searchTerm, setSearchTerm] = useState('');
+
+  // Use Custom Hook for all filtering & URL sync
+  const { filters, updateFilters, filteredProperties } = usePropertyFilters(properties);
 
   useEffect(() => {
     const fetchProperties = async () => {
       try {
-        const q = query(collection(db, 'properties'), orderBy('createdAt', 'desc'));
+        // Estrategia de ahorro aplicada: Limitación de Lista
+        // Limitamos a 50 propiedades iniciales para prevenir getAll.
+        const q = query(collection(db, 'properties'), orderBy('createdAt', 'desc'), limit(50));
         const querySnapshot = await getDocs(q);
         const props = querySnapshot.docs.map(doc => ({
           id: doc.id,
@@ -35,15 +38,8 @@ export default function PropertiesPage() {
     fetchProperties();
   }, []);
 
-  const filteredProperties = properties.filter(prop => {
-    const matchesType = filterType === 'Todos' || prop.type === filterType;
-    const matchesSearch = prop.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      prop.location.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesType && matchesSearch;
-  });
-
   return (
-    <div className="page">
+    <div className="page page-offset-top">
       <Header />
 
       <main className="main-content">
@@ -60,19 +56,19 @@ export default function PropertiesPage() {
               <input
                 type="text"
                 placeholder="Buscar por ubicación o nombre..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                value={filters.search}
+                onChange={(e) => updateFilters({ search: e.target.value })}
                 className="search-input"
               />
             </div>
 
             <div className="filter-box">
               <select
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value)}
+                value={filters.type}
+                onChange={(e) => updateFilters({ type: e.target.value })}
                 className="filter-select"
               >
-                <option value="Todos">Todos los tipos</option>
+                <option value="all">Todos los tipos</option>
                 <option value="Finca">Finca</option>
                 <option value="Lote">Lote</option>
                 <option value="Local">Local</option>
@@ -98,7 +94,7 @@ export default function PropertiesPage() {
             ) : (
               <div className="empty-state">
                 <p>No encontramos propiedades que coincidan con tu búsqueda.</p>
-                <button onClick={() => { setSearchTerm(''); setFilterType('Todos'); }} className="btn-reset">
+                <button onClick={() => updateFilters({ search: '', type: 'all' })} className="btn-reset">
                   Limpiar filtros
                 </button>
               </div>
@@ -111,10 +107,7 @@ export default function PropertiesPage() {
         .page {
           min-height: 100vh;
           background: #fff;
-          padding-top: 80px; /* Space for fixed header */
         }
-
-
 
         /* Page Content */
         .main-content {
@@ -215,5 +208,13 @@ export default function PropertiesPage() {
         }
       `}</style>
     </div>
+  );
+}
+
+export default function PropertiesPage() {
+  return (
+    <Suspense fallback={<div className="loading-screen"><div className="spinner"></div></div>}>
+      <PropertiesContent />
+    </Suspense>
   );
 }

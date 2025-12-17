@@ -38,6 +38,8 @@ export default function Footer() {
             <nav className="footer-nav">
               <Link href="/contacto">Sobre Nosotros</Link>
               <Link href="/contacto">Contáctanos</Link>
+              <Link href="/terminos">Términos y Condiciones</Link>
+              <Link href="/privacidad">Política de Privacidad</Link>
               <Link href="/admin/login">Acceso Admin</Link>
             </nav>
           </div>

@@ -3,7 +3,9 @@
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { db } from '@/lib/firebase';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
+
+import Header from '@/components/Header';
 
 // Dynamically import the map component to avoid SSR issues with Leaflet
 const InteractiveMap = dynamic(() => import('@/components/InteractiveMap'), {
@@ -32,7 +34,9 @@ export default function MapPage() {
     useEffect(() => {
         const fetchProperties = async () => {
             try {
-                const q = query(collection(db, 'properties'), orderBy('createdAt', 'desc'));
+                // Estrategia de ahorro aplicada: Límite en Mapa
+                // Limitamos a 100 propiedades para evitar leer toda la base de datos en una vista de mapa.
+                const q = query(collection(db, 'properties'), orderBy('createdAt', 'desc'), limit(100));
                 const querySnapshot = await getDocs(q);
 
                 const props = [];
@@ -67,6 +71,7 @@ export default function MapPage() {
 
     return (
         <div style={{ height: '100vh', width: '100vw', position: 'relative' }}>
+            <Header />
             <InteractiveMap properties={properties} />
 
             {/* Back button for mobile if needed, though BottomNav is present */}

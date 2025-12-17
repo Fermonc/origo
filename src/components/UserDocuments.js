@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { storage, db } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { doc, updateDoc, arrayUnion, getDoc } from 'firebase/firestore';
+import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
 
 export default function UserDocuments({ user, profile }) {
     const [uploading, setUploading] = useState({}); // Track uploading state per document type

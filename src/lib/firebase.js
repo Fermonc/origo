@@ -18,3 +18,20 @@ export const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getA
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
+
+// Estrategia de ahorro aplicada: Caché Agresivo (Offline Persistence)
+// Habilitamos la persistencia en disco para que las segundas cargas no consuman lecturas
+// y la app funcione offline.
+import { enableIndexedDbPersistence } from "firebase/firestore";
+
+if (typeof window !== "undefined") {
+    enableIndexedDbPersistence(db).catch((err) => {
+        if (err.code == 'failed-precondition') {
+            // Multiple tabs open, persistence can only be enabled in one tab at a a time.
+            console.warn("Persistence failed: Multiple tabs open");
+        } else if (err.code == 'unimplemented') {
+            // The current browser does not support all of the features required to enable persistence
+            console.warn("Persistence not supported by browser");
+        }
+    });
+}

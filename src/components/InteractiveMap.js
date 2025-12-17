@@ -9,37 +9,10 @@ import L from 'leaflet';
 import MapPopup from './MapPopup';
 import PropertyMapList from './PropertyMapList';
 import MapSidebar from './MapSidebar';
+import { LOCATIONS, INITIAL_MAP_CENTER } from '@/constants/locations';
+import { createCustomIcon } from '@/utils/mapIcons';
+import { usePropertyFilters } from '@/hooks/usePropertyFilters';
 
-// SVG Icons for Markers
-const icons = {
-  house: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M11.67 3.87L9.9 2.1 0 12h5v10h14V12h5l-9.9-9.9-1.77 1.77z"/></svg>`,
-  building: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/><path d="M7 7h2v2H7zm0 4h2v2H7zm0 4h2v2H7zM11 7h2v2h-2zm0 4h2v2h-2zm0 4h2v2h-2zM15 7h2v2h-2zm0 4h2v2h-2zm0 4h2v2h-2z"/></svg>`,
-  tree: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M10 21v-2H3V5h2v2h2V5h2v2h2V5h2v2h2V5h2v14h-7v2h6v2H10z"/></svg>`, // Simplified tree/nature
-  lot: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M3 5v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2zm12 4c0 1.66-1.34 3-3 3s-3-1.34-3-3 1.34-3 3-3 3 1.34 3 3zm-9 8c0-2 4-3.1 6-3.1s6 1.1 6 3.1v1H6v-1z"/></svg>` // Actually user icon but used for generic plot
-};
-
-const getIconForType = (type) => {
-  const t = type?.toLowerCase() || '';
-  if (t.includes('finca') || t.includes('lote')) return icons.tree;
-  if (t.includes('local') || t.includes('oficina')) return icons.building;
-  return icons.house;
-};
-
-const createCustomIcon = (type) => {
-  const iconSvg = getIconForType(type);
-  const colorClass = type?.toLowerCase().includes('lote') ? 'lote' :
-    type?.toLowerCase().includes('finca') ? 'finca' : 'casa';
-
-  return L.divIcon({
-    className: 'custom-marker-icon',
-    html: `<div class="marker-circle ${colorClass}">
-             ${iconSvg}
-           </div>`,
-    iconSize: [40, 40],
-    iconAnchor: [20, 40],
-    popupAnchor: [0, -40]
-  });
-};
 
 // Component to handle map view updates and events
 function MapController({ center, onBoundsChange }) {
@@ -64,116 +37,16 @@ function MapController({ center, onBoundsChange }) {
 }
 
 export default function InteractiveMap({ properties }) {
-  const [filters, setFilters] = useState({
-    type: 'all',
-    minPrice: '',
-    maxPrice: '',
-    city: '',
-    zone: '',
-    neighborhood: '',
-    bedrooms: 0,
-    bathrooms: 0,
-    amenities: []
-  });
+  // Use the custom hook for state and filtering
+  const { filters, updateFilters: setFilters, filteredProperties } = usePropertyFilters(properties);
 
   const [userLocation, setUserLocation] = useState(null);
-  const [mapCenter, setMapCenter] = useState([6.1551, -75.3737]); // Default: Rionegro
+  const [mapCenter, setMapCenter] = useState(INITIAL_MAP_CENTER); // Default: Rionegro
   const [visibleProperties, setVisibleProperties] = useState([]);
   const [showList, setShowList] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Default open on desktop
 
-  // Hierarchical Locations Configuration
-  const locations = [
-    {
-      name: 'Rionegro',
-      coords: [6.1551, -75.3737],
-      zones: [
-        { name: 'Centro', coords: [6.1530, -75.3740] },
-        { name: 'San Antonio', coords: [6.1333, -75.3833] },
-        { name: 'El Porvenir', coords: [6.1450, -75.3600] },
-        { name: 'Llanogrande', coords: [6.1167, -75.4167] },
-        { name: 'Gualanday', coords: [6.1100, -75.4200] }
-      ]
-    },
-    {
-      name: 'La Ceja',
-      coords: [6.0333, -75.4333],
-      zones: [
-        { name: 'Centro', coords: [6.0333, -75.4333] },
-        { name: 'Pontezuela', coords: [6.0500, -75.4200] }
-      ]
-    },
-    {
-      name: 'El Retiro',
-      coords: [6.0583, -75.5000],
-      zones: [
-        { name: 'Puro Cuero', coords: [6.0600, -75.5000] },
-        { name: 'Fizebad', coords: [6.0800, -75.4800] }
-      ]
-    },
-    {
-      name: 'Marinilla',
-      coords: [6.1750, -75.3333],
-      zones: [
-        { name: 'Centro', coords: [6.1750, -75.3333] }
-      ]
-    },
-    {
-      name: 'Cali',
-      coords: [3.4516, -76.5320],
-      zones: [
-        { name: 'Pance', coords: [3.3333, -76.5333] },
-        { name: 'Ciudad Jardín', coords: [3.3667, -76.5333] },
-        { name: 'Granada', coords: [3.4550, -76.5350] },
-        { name: 'El Peñón', coords: [3.4500, -76.5400] }
-      ]
-    }
-  ];
-
-  // Filter properties
-  const filteredProperties = useMemo(() => {
-    return properties.filter(p => {
-      // Type filter
-      if (filters.type !== 'all' && p.type !== filters.type) return false;
-
-      // Price filter
-      if (filters.minPrice || filters.maxPrice) {
-        // Extract numeric price from property string (e.g., "$ 1.200.000.000" -> 1200000000)
-        const price = parseInt(p.price.replace(/\D/g, ''));
-
-        if (filters.minPrice) {
-          let min = parseInt(filters.minPrice.replace(/\D/g, ''));
-          // Heuristic: If user types < 100,000, assume they mean millions. 
-          // E.g. "200" -> 200,000,000. "200000000" -> 200,000,000.
-          if (min < 100000) min = min * 1000000;
-          if (price < min) return false;
-        }
-
-        if (filters.maxPrice) {
-          let max = parseInt(filters.maxPrice.replace(/\D/g, ''));
-          if (max < 100000) max = max * 1000000;
-          if (price > max) return false;
-        }
-      }
-
-      // Bedrooms & Bathrooms
-      if (filters.bedrooms > 0 && (parseInt(p.bedrooms) || 0) < filters.bedrooms) return false;
-      if (filters.bathrooms > 0 && (parseInt(p.bathrooms) || 0) < filters.bathrooms) return false;
-
-      // Amenities (if data exists)
-      if (filters.amenities && filters.amenities.length > 0) {
-        // This assumes p.features or p.amenities exists. 
-        // If not, we skip this check or implement strictly if data is available.
-        // For now, lax check to avoid hiding everything if data is missing.
-        if (p.features) {
-          const hasAll = filters.amenities.every(a => p.features.includes(a));
-          if (!hasAll) return false;
-        }
-      }
-
-      return true;
-    });
-  }, [properties, filters]);
+  // Note: Previous filteredProperties useMemo block is removed because the hook provides it.
 
   const [mapBounds, setMapBounds] = useState(null);
 
@@ -220,9 +93,9 @@ export default function InteractiveMap({ properties }) {
     <div className="map-wrapper">
       {/* Sidebar */}
       <MapSidebar
-        locations={locations}
+        locations={LOCATIONS}
         filters={filters}
-        setFilters={setFilters}
+        setFilters={setFilters} // Hook handles partial updates
         onLocationSelect={handleLocationSelect}
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
@@ -362,7 +235,7 @@ export default function InteractiveMap({ properties }) {
       <style jsx>{`
         .map-wrapper {
           position: relative;
-          height: calc(100vh - 60px);
+          height: 100%;
           width: 100%;
           overflow: hidden;
         }

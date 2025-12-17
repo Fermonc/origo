@@ -1,5 +1,5 @@
 import { db } from '@/lib/firebase';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, collectionGroup, query, limit } from 'firebase/firestore';
 import { NextResponse } from 'next/server';
 import { sendNotification } from '@/lib/notifications';
 
@@ -7,36 +7,34 @@ export async function POST(request) {
     try {
         const propertyData = await request.json();
 
-        // 1. Get all alerts.
-        // We iterate through all users and their 'alerts' subcollection.
-        // NOTE: For production scale, this should use a Collection Group Query or a dedicated 'alerts' root collection.
-        // Given the prompt "maximum level possible", Collection Group is better, but requires Firestore Index.
-        // Since I cannot create Indexes via this agent, I will stick to iterating users for safety (as "testing app").
-        // OR: I can use collectionGroup('alerts') if no index is required for basic queries, but where clauses usually need it.
-        // Let's stick to iterating users which is robust for small-medium apps.
+        // 1. Get all alerts using Collection Group Query (Fix N+1)
+        // Estrategia de ahorro aplicada: Evitar N+1 y lecturas masivas de usuarios.
+        // En lugar de leer TODOS los usuarios (N) y luego sus alertas,
+        // leemos DIRECTAMENTE las alertas usando un collectionGroup query.
+        // Además, limitamos a 500 alertas activas para prevenir lecturas descontroladas.
 
-        const usersRef = collection(db, 'users');
-        const usersSnap = await getDocs(usersRef);
+        const { collectionGroup, getDocs, query, limit } = require('firebase/firestore');
+        const alertsRef = collectionGroup(db, 'alerts');
+        const q = query(alertsRef, limit(500));
+        const alertsSnap = await getDocs(q);
 
         const matches = [];
 
-        // Iterate through users in parallel
-        await Promise.all(usersSnap.docs.map(async (userDoc) => {
-            const alertsRef = collection(db, 'users', userDoc.id, 'alerts');
-            const alertsSnap = await getDocs(alertsRef);
+        alertsSnap.forEach(alertDoc => {
+            const alertData = alertDoc.data();
+            // Need to get the parent user ID. 
+            // In a subcollection, ref.parent.parent.id gives the User ID.
+            const userId = alertDoc.ref.parent.parent.id;
 
-            alertsSnap.forEach(alertDoc => {
-                const alertData = alertDoc.data();
-                if (isMatch(propertyData, alertData.criteria)) {
-                    matches.push({
-                        userId: userDoc.id,
-                        alertId: alertDoc.id,
-                        propertyId: propertyData.id,
-                        propertyTitle: propertyData.title
-                    });
-                }
-            });
-        }));
+            if (isMatch(propertyData, alertData.criteria)) {
+                matches.push({
+                    userId: userId,
+                    alertId: alertDoc.id,
+                    propertyId: propertyData.id,
+                    propertyTitle: propertyData.title
+                });
+            }
+        });
 
         // 2. Send Notifications
         const notificationPromises = matches.map(async (match) => {
@@ -75,9 +73,9 @@ function isMatch(property, criteria) {
     let price = property.priceNumber;
     if (price === undefined || price === null || isNaN(price)) {
         try {
-             price = Number(String(property.price || '0').replace(/[^0-9]/g, ''));
+            price = Number(String(property.price || '0').replace(/[^0-9]/g, ''));
         } catch (e) {
-             price = 0;
+            price = 0;
         }
     }
     if (criteria.minPrice > 0 && price < Number(criteria.minPrice)) return false;
@@ -112,18 +110,18 @@ function isMatch(property, criteria) {
 // Haversine formula
 function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
     var R = 6371; // Radius of the earth in km
-    var dLat = deg2rad(lat2-lat1);
-    var dLon = deg2rad(lon2-lon1);
+    var dLat = deg2rad(lat2 - lat1);
+    var dLon = deg2rad(lon2 - lon1);
     var a =
-        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
         Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
-        Math.sin(dLon/2) * Math.sin(dLon/2)
+        Math.sin(dLon / 2) * Math.sin(dLon / 2)
         ;
-    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     var d = R * c; // Distance in km
     return d;
 }
 
 function deg2rad(deg) {
-    return deg * (Math.PI/180)
+    return deg * (Math.PI / 180)
 }

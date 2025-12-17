@@ -38,7 +38,7 @@ export default function ContactPage() {
     };
 
     return (
-        <div className="page">
+        <div className="page page-offset-top">
             <Header />
 
             <main className="main-content">
@@ -142,7 +142,6 @@ export default function ContactPage() {
                 .page {
                     min-height: 100vh;
                     background: #fff;
-                    padding-top: 80px;
                 }
 
                 /* Content */

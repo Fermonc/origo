@@ -21,209 +21,15 @@
   --space-lg: 4rem;
   --space-xl: 8rem;
 
-  /* Typography */
-  --font-sans: system-ui, -apple-system, sans-serif;
-  --font-serif: Georgia, serif;
-}
+  /* Layout */
+  --header-height: 80px;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-bg: #111827;
-    --color-surface: #1F2937;
-    --color-text-main: #F9FAFB;
-    --color-text-muted: #D1D5DB;
-    /* Lighter grey for better readability */
-    --color-border: #374151;
-
-    /* Adjust brand colors for dark mode contrast */
-    --color-primary: #60A5FA;
-    /* Lighter Blue */
-    --color-secondary: #FB923C;
-    /* Lighter Orange */
-  }
-}
-
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-}
-
-/* Enable View Transitions */
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation-duration: 0.3s;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  color: var(--color-text-main);
-  background: var(--color-bg);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  padding-bottom: 70px;
-  /* Space for BottomNav on mobile */
-}
-
-/* Desktop Adjustments */
-@media (min-width: 768px) {
-  body {
-    padding-bottom: 0;
-  }
-}
-
-/* Utility to hide elements on mobile/desktop */
-.desktop-only {
-  display: none;
-}
-
-@media (min-width: 768px) {
-  .desktop-only {
-    display: block;
-  }
-
-  .mobile-only {
-    display: none;
-  }
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-/* Utilities */
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 var(--space-sm);
-}
-
-.btn {
-  display: inline-block;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 0.2s ease;
-  cursor: pointer;
-  border: none;
-}
-
-:root {
-  /* Brand Colors - Earthy & Premium */
-  --color-primary: #2C3E50;
-  /* Deep Blue/Grey */
-  --color-secondary: #E67E22;
-  /* Accent Terra */
-  --color-accent: #27AE60;
-  /* Nature Green */
-
-  /* Neutral Colors */
-  --color-bg: #F9FAFB;
-  --color-surface: #FFFFFF;
-  --color-text-main: #1F2937;
-  --color-text-muted: #6B7280;
-  --color-border: #E5E7EB;
-
-  /* Spacing */
-  --space-xs: 0.5rem;
-  --space-sm: 1rem;
-  --space-md: 2rem;
-  --space-lg: 4rem;
-  --space-xl: 8rem;
-
-  /* Typography */
-  --font-sans: system-ui, -apple-system, sans-serif;
-  --font-serif: Georgia, serif;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-bg: #111827;
-    --color-surface: #1F2937;
-    --color-text-main: #F9FAFB;
-    --color-text-muted: #D1D5DB;
-    /* Lighter grey for better readability */
-    --color-border: #374151;
-
-    /* Adjust brand colors for dark mode contrast */
-    --color-primary: #60A5FA;
-    /* Lighter Blue */
-    --color-secondary: #FB923C;
-    /* Lighter Orange */
-  }
-}
-
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-}
-
-/* Enable View Transitions */
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation-duration: 0.3s;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  color: var(--color-text-main);
-  background: var(--color-bg);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  padding-bottom: 70px;
-  /* Space for BottomNav on mobile */
-}
-
-/* Desktop Adjustments */
-@media (min-width: 768px) {
-  body {
-    padding-bottom: 0;
-  }
-}
-
-/* Utility to hide elements on mobile/desktop */
-.desktop-only {
-  display: none;
-}
-
-@media (min-width: 768px) {
-  .desktop-only {
-    display: block;
-  }
-
-  .mobile-only {
-    display: none;
-  }
-}
-
-:root {
-  /* Brand Colors - Earthy & Premium */
-  --color-primary: #2C3E50;
-  /* Deep Blue/Grey */
-  --color-secondary: #E67E22;
-  /* Accent Terra */
-  --color-accent: #27AE60;
-  /* Nature Green */
-
-  /* Neutral Colors */
-  --color-bg: #F9FAFB;
-  --color-surface: #FFFFFF;
-  --color-text-main: #1F2937;
-  --color-text-muted: #6B7280;
-  --color-border: #E5E7EB;
-
-  /* Spacing */
-  --space-xs: 0.5rem;
-  --space-sm: 1rem;
-  --space-md: 2rem;
-  --space-lg: 4rem;
-  --space-xl: 8rem;
+  /* Z-Index Layers */
+  --z-map: 1;
+  --z-sticky: 100;
+  --z-header: 1000;
+  --z-bottom-nav: 1100;
+  --z-modal: 2000;
 
   /* Typography */
   --font-sans: system-ui, -apple-system, sans-serif;
@@ -477,5 +283,10 @@ a {
 .leaflet-container {
     height: 100%;
     width: 100%;
-    z-index: 1;
+    z-index: var(--z-map);
+}
+
+/* Layout Utilities which compensate for fixed header */
+.page-offset-top {
+    padding-top: var(--header-height);
 }
