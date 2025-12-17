@@ -2,6 +2,7 @@
 import Header from '@/components/Header';
 import HomeClient from '@/components/HomeClient';
 import { getFeaturedProperties } from '@/lib/db/properties';
+import styles from './page.module.css';
 
 export const metadata = {
   title: 'Origo Inmobiliaria | Lotes, Fincas y Locales en el Oriente Antioqueño',
@@ -19,18 +20,9 @@ export default async function Home() {
   const initialProperties = await getFeaturedProperties(12);
 
   return (
-    <div className="page">
+    <div className={styles.page}>
       <Header />
       <HomeClient initialProperties={initialProperties} />
-
-      <style jsx>{`
-        .page {
-          min-height: 100vh;
-          background: #fff;
-          color: #111;
-          font-family: 'Inter', sans-serif;
-        }
-      `}</style>
     </div>
   );
 }
