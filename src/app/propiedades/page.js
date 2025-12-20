@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import PropertyCard from '@/components/PropertyCard';
+import Header from '@/components/Header';
+import SkeletonCard from '@/components/SkeletonCard';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
 import { Suspense } from 'react';
