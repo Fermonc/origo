@@ -10,9 +10,9 @@ import { collection, query, where, onSnapshot } from 'firebase/firestore';
 
 
 export default function Header() {
+  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(pathname !== '/');
   const [unreadNotifications, setUnreadNotifications] = useState(0);
-  const pathname = usePathname();
   const { user, loading } = useAuth();
 
   useEffect(() => {
