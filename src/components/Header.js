@@ -10,7 +10,7 @@ import { collection, query, where, onSnapshot } from 'firebase/firestore';
 
 
 export default function Header() {
-  const [scrolled, setScrolled] = useState(false);
+  const [scrolled, setScrolled] = useState(pathname !== '/');
   const [unreadNotifications, setUnreadNotifications] = useState(0);
   const pathname = usePathname();
   const { user, loading } = useAuth();
@@ -130,8 +130,8 @@ export default function Header() {
           align-items: center;
         }
         .nav-link {
-          color: #444;
-          font-weight: 500;
+          color: #111;
+          font-weight: 600;
           text-decoration: none;
           transition: color 0.2s;
           font-size: 0.95rem;
