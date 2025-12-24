@@ -49,6 +49,8 @@ export const metadata = {
   },
 };
 
+import Header from '@/components/Header';
+
 export default function RootLayout({ children }) {
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -84,6 +86,7 @@ export default function RootLayout({ children }) {
       </head>
       <body>
         <Providers>
+          <Header />
           <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
             {children}
             <Footer />

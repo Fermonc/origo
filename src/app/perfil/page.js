@@ -8,7 +8,6 @@ import { storage, db } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { updateProfile, deleteUser } from 'firebase/auth';
 import { doc, deleteDoc } from 'firebase/firestore';
-import Header from '@/components/Header';
 import UserFavorites from '@/components/UserFavorites';
 import UserAlerts from '@/components/UserAlerts';
 import UserDocuments from '@/components/UserDocuments';
@@ -148,7 +147,6 @@ export default function ProfilePage() {
 
   return (
     <div className="page">
-      <Header />
       <div className="profile-container">
         <div className="container">
           {/* Profile Header */}

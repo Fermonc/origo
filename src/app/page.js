@@ -1,5 +1,4 @@
 
-import Header from '@/components/Header';
 import HomeClient from '@/components/HomeClient';
 import { getFeaturedProperties } from '@/lib/db/properties';
 import styles from './page.module.css';
@@ -21,7 +20,6 @@ export default async function Home() {
 
   return (
     <div className={styles.page}>
-      <Header />
       <HomeClient initialProperties={initialProperties} />
     </div>
   );

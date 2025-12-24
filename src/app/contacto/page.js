@@ -4,7 +4,6 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { db } from '@/lib/firebase';
 import { collection, addDoc } from 'firebase/firestore';
-import Header from '@/components/Header';
 
 export default function ContactPage() {
     const [formData, setFormData] = useState({
@@ -39,8 +38,6 @@ export default function ContactPage() {
 
     return (
         <div className="page page-offset-top">
-            <Header />
-
             <main className="main-content">
                 <div className="container">
                     <div className="contact-grid">

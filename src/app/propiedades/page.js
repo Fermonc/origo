@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import PropertyCard from '@/components/PropertyCard';
-import Header from '@/components/Header';
 import SkeletonCard from '@/components/SkeletonCard';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
@@ -42,8 +41,6 @@ function PropertiesContent() {
 
   return (
     <div className="page page-offset-top">
-      <Header />
-
       <main className="main-content">
         <div className="container">
           <div className="page-header">

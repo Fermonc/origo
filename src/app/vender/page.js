@@ -7,7 +7,6 @@ import { useToast } from '@/context/ToastContext';
 import { db } from '@/lib/firebase';
 import { collection, addDoc } from 'firebase/firestore';
 import PropertyForm from '@/components/admin/PropertyForm'; // Reusing the form
-import Header from '@/components/Header';
 
 export default function VenderPage() {
   const { user, loading: authLoading } = useAuth();
@@ -91,15 +90,14 @@ export default function VenderPage() {
 
   return (
     <div className="page-wrapper">
-      <Header />
       <div className="container main-content">
         <div className="page-header">
-           <h1>Publicar Propiedad</h1>
-           <p>Completa la información para vender tu inmueble</p>
+          <h1>Publicar Propiedad</h1>
+          <p>Completa la información para vender tu inmueble</p>
         </div>
 
         <div className="form-wrapper">
-            <PropertyForm onSubmit={handleCreate} loading={saving} />
+          <PropertyForm onSubmit={handleCreate} loading={saving} />
         </div>
       </div>
 
