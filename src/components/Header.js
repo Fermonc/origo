@@ -7,7 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import Image from 'next/image';
 import { db } from '@/lib/firebase';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
-
+import styles from './Header.module.css';
 
 export default function Header() {
   const pathname = usePathname();
@@ -46,23 +46,23 @@ export default function Header() {
 
   return (
     <>
-      <header className={`header ${scrolled ? 'scrolled' : ''}`}>
-        <div className="container header-content">
-          <Link href="/" className="logo">Origo</Link>
-          <nav className="nav desktop-only">
-            <Link href="/" className={`nav-link ${isActive('/') ? 'active' : ''}`}>Inicio</Link>
-            <Link href="/propiedades" className={`nav-link ${isActive('/propiedades') ? 'active' : ''}`}>Propiedades</Link>
-            <Link href="/mapa" className={`nav-link ${isActive('/mapa') ? 'active' : ''}`}>Mapa</Link>
-            <Link href="/contacto" className={`nav-link ${isActive('/contacto') ? 'active' : ''}`}>Contacto</Link>
+      <header className={`${styles.header} ${scrolled ? styles.scrolled : ''}`}>
+        <div className={`container ${styles.headerContent}`}>
+          <Link href="/" className={`${styles.logo} ${scrolled ? styles.logoScrolled : ''}`}>Origo</Link>
+          <nav className={`${styles.nav} ${styles.desktopOnly}`}>
+            <Link href="/" className={`${styles.navLink} ${scrolled ? styles.navLinkScrolled : ''} ${isActive('/') ? styles.active : ''}`}>Inicio</Link>
+            <Link href="/propiedades" className={`${styles.navLink} ${scrolled ? styles.navLinkScrolled : ''} ${isActive('/propiedades') ? styles.active : ''}`}>Propiedades</Link>
+            <Link href="/mapa" className={`${styles.navLink} ${scrolled ? styles.navLinkScrolled : ''} ${isActive('/mapa') ? styles.active : ''}`}>Mapa</Link>
+            <Link href="/contacto" className={`${styles.navLink} ${scrolled ? styles.navLinkScrolled : ''} ${isActive('/contacto') ? styles.active : ''}`}>Contacto</Link>
 
             {user && (
-              <Link href="/vender" className="btn-publish">Publicar</Link>
+              <Link href="/vender" className={styles.btnPublish}>Publicar</Link>
             )}
 
             {!loading && (
               user ? (
-                <Link href="/perfil" className="user-profile-link">
-                  <div className="avatar-small">
+                <Link href="/perfil" className={styles.userProfileLink}>
+                  <div className={styles.avatarSmall}>
                     {user.photoURL ? (
                       <Image
                         src={user.photoURL}
@@ -74,22 +74,20 @@ export default function Header() {
                     ) : (
                       <span>{user.displayName ? user.displayName[0].toUpperCase() : 'U'}</span>
                     )}
-                    {unreadNotifications > 0 && <span className="notification-dot"></span>}
+                    {unreadNotifications > 0 && <span className={styles.notificationDot}></span>}
                   </div>
-                  <span className="user-name">{user.displayName?.split(' ')[0] || 'Perfil'}</span>
+                  <span className={styles.userName}>{user.displayName?.split(' ')[0] || 'Perfil'}</span>
                 </Link>
               ) : (
-                <div className="auth-buttons">
-                  <Link href="/login" className="btn-login-text">Ingresar</Link>
-                  <Link href="/register" className="btn-register">Registrarse</Link>
+                <div className={styles.authButtons}>
+                  <Link href="/login" className={`${styles.btnLoginText} ${scrolled ? styles.btnLoginTextScrolled : ''}`}>Ingresar</Link>
+                  <Link href="/register" className={styles.btnRegister}>Registrarse</Link>
                 </div>
               )
             )}
           </nav>
         </div>
       </header>
-
-
     </>
   );
 }
