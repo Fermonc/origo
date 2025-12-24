@@ -10,6 +10,7 @@ import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import styles from './Header.module.css';
 
 export default function Header() {
+  // Force rebuild hash v3
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(pathname !== '/');
   const [unreadNotifications, setUnreadNotifications] = useState(0);
