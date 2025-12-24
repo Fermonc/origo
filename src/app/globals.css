@@ -27,9 +27,10 @@
   /* Z-Index Layers */
   --z-map: 1;
   --z-sticky: 100;
-  --z-header: 1000;
   --z-bottom-nav: 1100;
   --z-modal: 2000;
+  --z-header: 3000;
+  /* Ensure header is always on top */
 
   /* Typography */
   --font-sans: system-ui, -apple-system, sans-serif;
@@ -281,12 +282,12 @@ a {
 
 /* Leaflet Map Styles */
 .leaflet-container {
-    height: 100%;
-    width: 100%;
-    z-index: var(--z-map);
+  height: 100%;
+  width: 100%;
+  z-index: var(--z-map);
 }
 
 /* Layout Utilities which compensate for fixed header */
 .page-offset-top {
-    padding-top: var(--header-height);
+  padding-top: var(--header-height);
 }
