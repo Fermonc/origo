@@ -28,7 +28,8 @@
     font-size: 1.8rem;
     font-weight: 800;
     letter-spacing: -1px;
-    color: var(--color-text-main);
+    color: #111;
+    /* Enforce dark color for legibility */
     text-decoration: none;
     transition: color 0.3s ease;
 }
@@ -44,7 +45,8 @@
 }
 
 .navLink {
-    color: var(--color-text-main);
+    color: #333;
+    /* Enforce dark color */
     font-weight: 500;
     text-decoration: none;
     transition: color 0.2s;
@@ -53,7 +55,7 @@
 }
 
 .navLinkScrolled {
-    color: var(--color-text-main);
+    color: #111;
 }
 
 /* Active state and hover */
@@ -82,7 +84,8 @@
 }
 
 .btnLoginText {
-    color: var(--color-text-main);
+    color: #333;
+    /* Enforce dark color */
     font-weight: 600;
     text-decoration: none;
     font-size: 0.95rem;
@@ -133,7 +136,8 @@
     align-items: center;
     gap: 10px;
     text-decoration: none;
-    color: var(--color-text-main);
+    color: #111;
+    /* Enforce dark color */
     padding: 4px 12px 4px 4px;
     background: var(--color-bg);
     border-radius: 30px;
