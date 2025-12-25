@@ -5,6 +5,7 @@ import Link from 'next/link';
 import PropertyCard from '@/components/PropertyCard';
 import SkeletonCard from '@/components/SkeletonCard';
 import dynamic from 'next/dynamic';
+import Image from 'next/image';
 import { getPropertiesByType } from '@/lib/db/properties';
 
 const HomeMapPreview = dynamic(() => import('@/components/HomeMapPreview'), {
@@ -76,6 +77,14 @@ export default function HomeClient({ initialProperties = [] }) {
       {/* Hero Section */}
       <section className="hero" aria-label="Bienvenida">
         <div className="hero-bg" aria-hidden="true">
+          <Image
+            src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=2000&q=80"
+            alt="Finca de lujo en el Oriente Antioqueño"
+            fill
+            priority
+            style={{ objectFit: 'cover' }}
+            sizes="100vw"
+          />
           <div className="overlay"></div>
         </div>
 
@@ -218,9 +227,6 @@ export default function HomeClient({ initialProperties = [] }) {
           left: 0;
           width: 100%;
           height: 100%;
-          background-image: url('https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=2000&q=80');
-          background-size: cover;
-          background-position: center;
           z-index: -1;
         }
         .overlay {
