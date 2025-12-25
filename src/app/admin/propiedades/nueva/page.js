@@ -89,17 +89,11 @@ export default function NewPropertyPage() {
 
   return (
     <div className="admin-page">
-      <header className="admin-header">
-        <div className="container header-container">
-          <Link href="/admin/dashboard" className="back-link">
-            ← Volver
-          </Link>
-          <h1>Nueva Propiedad</h1>
-          <div style={{ width: '60px' }}></div> {/* Spacer for centering */}
+      <main className="container main-content" style={{ paddingTop: '100px' }}>
+        <div className="admin-breadcrumb" style={{ marginBottom: '20px' }}>
+          <Link href="/admin/dashboard" className="back-link">← Volver</Link>
+          <h1 style={{ marginTop: '10px' }}>Nueva Propiedad</h1>
         </div>
-      </header>
-
-      <main className="container main-content">
         <PropertyForm onSubmit={handleCreate} loading={saving} />
       </main>
 

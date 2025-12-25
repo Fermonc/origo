@@ -91,18 +91,7 @@ export default function PropertyDetailClient({ id }) {
 
   return (
     <div className="page page-offset-top">
-      {/* Scroll Sticky Header moved to RootLayout */}
-
-      {/* Scroll Sticky Property Bar (optional, can replace Header behavior if desired) */}
-      <header className={`main-header ${showStickyNav ? 'scrolled' : ''}`}>
-        <div className="container header-content">
-          <span className="logo detail-title">{property.title}</span>
-          <div className="header-actions">
-            <button className="btn-icon">❤️</button>
-            <button className="btn-icon">🔗</button>
-          </div>
-        </div>
-      </header>
+      {/* Replaced with global Layout Header */}
 
       <main style={{ paddingBottom: '80px' }}>
         <ImageGallery images={images} title={property.title} />

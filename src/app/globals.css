@@ -289,5 +289,12 @@ a {
 
 /* Layout Utilities which compensate for fixed header */
 .page-offset-top {
-  padding-top: var(--header-height);
+  padding-top: 20px;
+  /* Minimal padding on mobile */
+}
+
+@media (min-width: 768px) {
+  .page-offset-top {
+    padding-top: var(--header-height);
+  }
 }

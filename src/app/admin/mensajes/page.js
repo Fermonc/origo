@@ -70,15 +70,11 @@ export default function MessagesPage() {
 
     return (
         <div className="admin-page">
-            <header className="admin-header">
-                <div className="container header-container">
+            <main className="container main-content" style={{ paddingTop: '100px' }}>
+                <div className="admin-breadcrumb">
                     <Link href="/admin/dashboard" className="back-link">← Volver al Panel</Link>
                     <h1>Mensajes y Leads</h1>
-                    <div style={{ width: '100px' }}></div>
                 </div>
-            </header>
-
-            <main className="container main-content">
                 {loadingData ? (
                     <div className="loading-grid">Cargando mensajes...</div>
                 ) : messages.length === 0 ? (

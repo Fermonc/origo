@@ -8,6 +8,15 @@
     padding: 20px 0;
     transition: all 0.3s ease;
     background: transparent;
+    display: none;
+    /* Hide on mobile by default for app feel */
+}
+
+@media (min-width: 768px) {
+    .header {
+        display: block;
+        /* Show on desktop only */
+    }
 }
 
 .scrolled {
