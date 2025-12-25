@@ -49,12 +49,31 @@ export const metadata = {
   },
 };
 
-// Removed navigation components for fresh reset
-// import BottomNav from '@/components/BottomNav';
-// import Header from '@/components/Header';
-
 export default function RootLayout({ children }) {
-  // ... jsonLd ...
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'RealEstateAgent',
+    name: 'Origo Inmobiliaria',
+    image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1200&q=80',
+    description: 'Agencia inmobiliaria especializada en venta de lotes, fincas y locales en el Oriente Antioqueño.',
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: 'Centro Empresarial',
+      addressLocality: 'Rionegro',
+      addressRegion: 'Antioquia',
+      postalCode: '054040',
+      addressCountry: 'CO'
+    },
+    geo: {
+      '@type': 'GeoCoordinates',
+      latitude: 6.1551,
+      longitude: -75.3737
+    },
+    url: 'https://origo-1629f.web.app/',
+    telephone: '+573001234567',
+    priceRange: '$$$'
+  };
+
   return (
     <html lang="es">
       <head>
