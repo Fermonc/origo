@@ -7,7 +7,6 @@ import { getUserAlerts, createAlert, deleteAlert } from '@/lib/db/alerts';
 import { db } from '@/lib/firebase';
 import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
 import PropertyCard from '@/components/PropertyCard';
-import Header from '@/components/Header';
 
 export default function AlertsPage() {
   const { user, loading } = useAuth();
@@ -137,7 +136,6 @@ export default function AlertsPage() {
 
   return (
     <div className="page">
-      <Header />
       <div className="alerts-page">
         <div className="container">
           <div className="header-section">

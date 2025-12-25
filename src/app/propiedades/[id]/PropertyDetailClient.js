@@ -9,7 +9,6 @@ import PropertyMap from '@/components/PropertyMap';
 import PropertyCard from '@/components/PropertyCard';
 import ImageGallery from '@/components/property/ImageGallery';
 import ContactSidebar from '@/components/property/ContactSidebar';
-import Header from '@/components/Header';
 import { formatPrice } from '@/utils/format';
 
 export default function PropertyDetailClient({ id }) {
@@ -92,8 +91,7 @@ export default function PropertyDetailClient({ id }) {
 
   return (
     <div className="page page-offset-top">
-      {/* Scroll Sticky Header */}
-      <Header />
+      {/* Scroll Sticky Header moved to RootLayout */}
 
       {/* Scroll Sticky Property Bar (optional, can replace Header behavior if desired) */}
       <header className={`main-header ${showStickyNav ? 'scrolled' : ''}`}>

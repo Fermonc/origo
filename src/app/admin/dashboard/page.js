@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import Header from '@/components/Header';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import { db } from '@/lib/firebase';
@@ -172,8 +171,6 @@ export default function AdminDashboard() {
 
   return (
     <div className="page">
-      <Header />
-
       <main className="main-content">
         <div className="container">
 
