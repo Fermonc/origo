@@ -49,13 +49,31 @@ export default function Header() {
     <>
       <header className={`${styles.header} ${scrolled ? styles.scrolled : ''}`}>
         <div className={`container ${styles.headerContent}`}>
-          <Link href="/" className={`${styles.logo} ${scrolled ? styles.logoScrolled : ''}`}>Origo</Link>
-          <nav className={`${styles.nav} ${styles.desktopOnly}`}>
-            <Link href="/" className={`${styles.navLink} ${scrolled ? styles.navLinkScrolled : ''} ${isActive('/') ? styles.active : ''}`}>Inicio</Link>
-            <Link href="/propiedades" className={`${styles.navLink} ${scrolled ? styles.navLinkScrolled : ''} ${isActive('/propiedades') ? styles.active : ''}`}>Propiedades</Link>
-            <Link href="/mapa" className={`${styles.navLink} ${scrolled ? styles.navLinkScrolled : ''} ${isActive('/mapa') ? styles.active : ''}`}>Mapa</Link>
-            <Link href="/contacto" className={`${styles.navLink} ${scrolled ? styles.navLinkScrolled : ''} ${isActive('/contacto') ? styles.active : ''}`}>Contacto</Link>
+          <div className={styles.leftSection}>
+            <Link href="/" className={`${styles.logo} ${scrolled ? styles.logoScrolled : ''}`}>
+              Origo<span>.</span>
+            </Link>
+          </div>
 
+          <nav className={`${styles.nav} ${styles.desktopOnly}`}>
+            <Link href="/" className={`${styles.navLink} ${isActive('/') ? styles.active : ''}`}>
+              Inicio
+            </Link>
+            <Link href="/servicios" className={`${styles.navLink} ${isActive('/servicios') ? styles.active : ''}`}>
+              Servicios
+            </Link>
+            <Link href="/nosotros" className={`${styles.navLink} ${isActive('/nosotros') ? styles.active : ''}`}>
+              Nosotros
+            </Link>
+            <Link href="/propiedades" className={`${styles.navLink} ${isActive('/propiedades') ? styles.active : ''}`}>
+              Propiedades
+            </Link>
+            <Link href="/contacto" className={`${styles.navLink} ${isActive('/contacto') ? styles.active : ''}`}>
+              Contacto
+            </Link>
+          </nav>
+
+          <div className={styles.rightSection}>
             {user && (
               <Link href="/vender" className={styles.btnPublish}>Publicar</Link>
             )}
@@ -81,12 +99,12 @@ export default function Header() {
                 </Link>
               ) : (
                 <div className={styles.authButtons}>
-                  <Link href="/login" className={`${styles.btnLoginText} ${scrolled ? styles.btnLoginTextScrolled : ''}`}>Ingresar</Link>
+                  <Link href="/login" className={styles.btnLoginText}>Ingresar</Link>
                   <Link href="/register" className={styles.btnRegister}>Registrarse</Link>
                 </div>
               )
             )}
-          </nav>
+          </div>
         </div>
       </header>
     </>
