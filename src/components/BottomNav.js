@@ -20,7 +20,7 @@ export default function BottomNav() {
       href: '/',
       label: 'Inicio',
       icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
           <polyline points="9 22 9 12 15 12 15 22" />
         </svg>
@@ -30,7 +30,7 @@ export default function BottomNav() {
       href: '/propiedades',
       label: 'Buscar',
       icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="11" cy="11" r="8" />
           <path d="m21 21-4.3-4.3" />
         </svg>
@@ -40,7 +40,7 @@ export default function BottomNav() {
       href: '/mapa',
       label: 'Mapa',
       icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21" />
           <line x1="9" y1="3" x2="9" y2="21" />
           <line x1="15" y1="6" x2="15" y2="21" />
@@ -51,7 +51,7 @@ export default function BottomNav() {
       href: '/perfil',
       label: 'Perfil',
       icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
           <circle cx="12" cy="7" r="4" />
         </svg>
@@ -80,7 +80,7 @@ export default function BottomNav() {
       <style jsx>{`
         .bottom-nav-container {
           position: fixed;
-          bottom: 20px;
+          bottom: 24px;
           left: 0;
           width: 100%;
           display: flex;
@@ -91,8 +91,6 @@ export default function BottomNav() {
 
         .bottom-nav {
           background: #FFFFFF;
-          backdrop-filter: blur(10px);
-          -webkit-backdrop-filter: blur(10px);
           border: 1px solid rgba(0, 0, 0, 0.2);
           border-radius: 40px;
           display: flex;
@@ -103,6 +101,8 @@ export default function BottomNav() {
           max-width: 400px;
           box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
           pointer-events: auto;
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
         }
 
         .nav-item {
@@ -112,7 +112,7 @@ export default function BottomNav() {
           justify-content: center;
           text-decoration: none;
           color: #000000;
-          opacity: 0.55;
+          opacity: 0.6;
           transition: all 0.2s ease;
           padding: 12px;
           border-radius: 20px;
@@ -147,7 +147,6 @@ export default function BottomNav() {
 
         .nav-item svg {
           stroke: #000000;
-          stroke-width: 2.2; /* Slightly thicker for better visibility */
         }
 
         /* Hide on desktop */

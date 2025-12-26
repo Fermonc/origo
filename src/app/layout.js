@@ -1,6 +1,7 @@
 import './globals.css';
 import { Providers } from './providers';
 import Header from '@/components/Header';
+import BottomNav from '@/components/BottomNav';
 import Footer from '@/components/Footer';
 
 export const viewport = {
@@ -86,6 +87,7 @@ export default function RootLayout({ children }) {
         <Providers>
           <Header />
           <main style={{ flex: 1 }}>{children}</main>
+          <BottomNav />
           <Footer />
         </Providers>
       </body>

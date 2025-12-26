@@ -74,7 +74,7 @@ body {
   color: var(--color-text-main);
   background: var(--color-bg);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  padding-bottom: 0;
+  padding-bottom: 110px;
 }
 
 /* Desktop Adjustments */
