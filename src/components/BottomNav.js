@@ -90,10 +90,10 @@ export default function BottomNav() {
         }
 
         .bottom-nav {
-          background: rgba(255, 255, 255, 0.85);
+          background: rgba(255, 255, 255, 0.98);
           backdrop-filter: blur(20px) saturate(180%);
           -webkit-backdrop-filter: blur(20px) saturate(180%);
-          border: 1px solid rgba(255, 255, 255, 0.4);
+          border: 1px solid rgba(0, 0, 0, 0.08);
           border-radius: 40px;
           display: flex;
           justify-content: space-around;
@@ -101,7 +101,7 @@ export default function BottomNav() {
           padding: 8px 12px;
           width: 90%;
           max-width: 400px;
-          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
           pointer-events: auto;
         }
 
