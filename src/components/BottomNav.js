@@ -90,10 +90,10 @@ export default function BottomNav() {
         }
 
         .bottom-nav {
-          background: rgba(255, 255, 255, 0.98);
-          backdrop-filter: blur(20px) saturate(180%);
-          -webkit-backdrop-filter: blur(20px) saturate(180%);
-          border: 1px solid rgba(0, 0, 0, 0.15);
+          background: #FFFFFF;
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          border: 1px solid rgba(0, 0, 0, 0.2);
           border-radius: 40px;
           display: flex;
           justify-content: space-around;
@@ -101,7 +101,7 @@ export default function BottomNav() {
           padding: 8px 12px;
           width: 90%;
           max-width: 400px;
-          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
           pointer-events: auto;
         }
 
@@ -111,9 +111,9 @@ export default function BottomNav() {
           align-items: center;
           justify-content: center;
           text-decoration: none;
-          color: #000;
-          opacity: 0.4;
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          color: #000000;
+          opacity: 0.55;
+          transition: all 0.2s ease;
           padding: 12px;
           border-radius: 20px;
           position: relative;
@@ -125,7 +125,7 @@ export default function BottomNav() {
           display: flex;
           align-items: center;
           justify-content: center;
-          transition: transform 0.3s ease;
+          transition: transform 0.2s ease;
         }
 
         .nav-item.active {
@@ -139,14 +139,15 @@ export default function BottomNav() {
         .active-dot {
           position: absolute;
           bottom: 8px;
-          width: 5px;
-          height: 5px;
-          background-color: #000;
+          width: 6px;
+          height: 6px;
+          background-color: #000000;
           border-radius: 50%;
         }
 
         .nav-item svg {
-          stroke: currentColor;
+          stroke: #000000;
+          stroke-width: 2.2; /* Slightly thicker for better visibility */
         }
 
         /* Hide on desktop */

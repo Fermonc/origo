@@ -59,12 +59,6 @@ export default function Header() {
             <Link href="/" className={`${styles.navLink} ${isActive('/') ? styles.active : ''}`}>
               Inicio
             </Link>
-            <Link href="/servicios" className={`${styles.navLink} ${isActive('/servicios') ? styles.active : ''}`}>
-              Servicios
-            </Link>
-            <Link href="/nosotros" className={`${styles.navLink} ${isActive('/nosotros') ? styles.active : ''}`}>
-              Nosotros
-            </Link>
             <Link href="/propiedades" className={`${styles.navLink} ${isActive('/propiedades') ? styles.active : ''}`}>
               Propiedades
             </Link>
