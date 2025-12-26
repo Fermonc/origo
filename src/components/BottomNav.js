@@ -7,7 +7,6 @@ export default function BottomNav() {
   const pathname = usePathname();
 
   // Hide on property detail pages to avoid overlap with the sticky contact bar
-  // Matches /propiedades/ followed by any character (indicating an ID)
   const isPropertyDetail = /^\/propiedades\/.+/.test(pathname);
 
   if (isPropertyDetail) {
@@ -16,49 +15,72 @@ export default function BottomNav() {
 
   const isActive = (path) => pathname === path;
 
+  const navItems = [
+    {
+      href: '/',
+      label: 'Inicio',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+          <polyline points="9 22 9 12 15 12 15 22" />
+        </svg>
+      )
+    },
+    {
+      href: '/propiedades',
+      label: 'Buscar',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.3-4.3" />
+        </svg>
+      )
+    },
+    {
+      href: '/mapa',
+      label: 'Mapa',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21" />
+          <line x1="9" y1="3" x2="9" y2="21" />
+          <line x1="15" y1="6" x2="15" y2="21" />
+        </svg>
+      )
+    },
+    {
+      href: '/perfil',
+      label: 'Perfil',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+          <circle cx="12" cy="7" r="4" />
+        </svg>
+      )
+    }
+  ];
+
   return (
     <nav className="bottom-nav-container">
       <div className="bottom-nav">
-        <Link href="/" className={`nav-item ${isActive('/') ? 'active' : ''}`} aria-label="Inicio">
-          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-            <polyline points="9 22 9 12 15 12 15 22" />
-          </svg>
-        </Link>
-
-        <Link href="/propiedades" className={`nav-item ${isActive('/propiedades') ? 'active' : ''}`} aria-label="Explorar">
-          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="11" cy="11" r="8" />
-            <path d="m21 21-4.3-4.3" />
-          </svg>
-        </Link>
-
-        <Link href="/mapa" className={`nav-item ${isActive('/mapa') ? 'active' : ''}`} aria-label="Mapa">
-          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21" />
-            <line x1="9" y1="3" x2="9" y2="21" />
-            <line x1="15" y1="6" x2="15" y2="21" />
-          </svg>
-        </Link>
-
-        <Link href="/perfil" className={`nav-item ${isActive('/perfil') || isActive('/login') || isActive('/register') ? 'active' : ''}`} aria-label="Perfil">
-          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-            <circle cx="12" cy="7" r="4" />
-          </svg>
-        </Link>
-
-        <Link href="/contacto" className={`nav-item ${isActive('/contacto') ? 'active' : ''}`} aria-label="Contacto">
-          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-          </svg>
-        </Link>
+        {navItems.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`nav-item ${isActive(item.href) ? 'active' : ''}`}
+            aria-label={item.label}
+          >
+            <div className="icon-wrapper">
+              {item.icon}
+            </div>
+            {isActive(item.href) && <span className="active-dot"></span>}
+          </Link>
+        ))}
       </div>
 
       <style jsx>{`
         .bottom-nav-container {
           position: fixed;
-          bottom: 24px;
+          bottom: 20px;
           left: 0;
           width: 100%;
           display: flex;
@@ -68,52 +90,62 @@ export default function BottomNav() {
         }
 
         .bottom-nav {
-          background: rgba(20, 20, 20, 0.85); /* Darker background for better contrast with white icons or lighter for dark icons? User wants premium. Let's go with a sleek dark glass or pure white glass. Let's stick to white glass but cleaner. */
-          background: rgba(255, 255, 255, 0.8);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          border: 1px solid rgba(255, 255, 255, 0.6);
-          border-radius: 30px;
+          background: rgba(255, 255, 255, 0.85);
+          backdrop-filter: blur(20px) saturate(180%);
+          -webkit-backdrop-filter: blur(20px) saturate(180%);
+          border: 1px solid rgba(255, 255, 255, 0.4);
+          border-radius: 40px;
           display: flex;
-          justify-content: space-between;
-          padding: 12px 24px;
-          width: auto;
-          gap: 24px;
-          box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1), 0 5px 15px rgba(0, 0, 0, 0.05);
+          justify-content: space-around;
+          align-items: center;
+          padding: 8px 12px;
+          width: 90%;
+          max-width: 400px;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
           pointer-events: auto;
         }
 
         .nav-item {
           display: flex;
+          flex-direction: column;
           align-items: center;
           justify-content: center;
           text-decoration: none;
-          color: #111; /* Changed from #999 to #111 for better visibility */
+          color: #666;
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          padding: 8px;
-          border-radius: 12px;
+          padding: 12px;
+          border-radius: 20px;
           position: relative;
+          min-width: 60px;
+          min-height: 60px;
         }
 
-        .nav-item:hover {
-          background: rgba(0, 0, 0, 0.03);
-          color: #000;
+        .icon-wrapper {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: transform 0.3s ease;
         }
 
         .nav-item.active {
-          color: #111; /* Strong black for active */
-          background: rgba(0, 0, 0, 0.05);
-          transform: translateY(-2px);
+          color: #111;
         }
-        
-        .nav-item.active svg {
-          stroke-width: 2.5;
-          filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+
+        .nav-item.active .icon-wrapper {
+          transform: translateY(-4px);
+        }
+
+        .active-dot {
+          position: absolute;
+          bottom: 8px;
+          width: 4px;
+          height: 4px;
+          background-color: #111;
+          border-radius: 50%;
         }
 
         .nav-item svg {
-          transition: all 0.3s ease;
-          stroke: #111; /* Force black stroke */
+          stroke: currentColor;
         }
 
         /* Hide on desktop */
