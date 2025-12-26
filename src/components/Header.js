@@ -68,6 +68,9 @@ export default function Header() {
             <Link href="/propiedades" className={`${styles.navLink} ${isActive('/propiedades') ? styles.active : ''}`}>
               Propiedades
             </Link>
+            <Link href="/mapa" className={`${styles.navLink} ${isActive('/mapa') ? styles.active : ''}`}>
+              Mapa
+            </Link>
             <Link href="/contacto" className={`${styles.navLink} ${isActive('/contacto') ? styles.active : ''}`}>
               Contacto
             </Link>
