@@ -1,9 +1,9 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 export default function BottomNav() {
+  const router = useRouter();
   const pathname = usePathname();
 
   // Hide on property detail pages to avoid overlap with the sticky contact bar
@@ -14,6 +14,12 @@ export default function BottomNav() {
   }
 
   const isActive = (path) => pathname === path;
+
+  const handleNavClick = (e, href) => {
+    e.preventDefault();
+    e.stopPropagation();
+    router.push(href);
+  };
 
   const navItems = [
     {
@@ -60,36 +66,27 @@ export default function BottomNav() {
   ];
 
   return (
-    <nav className="bottom-nav-container">
-      <div className="bottom-nav">
-        {navItems.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={`nav-item ${isActive(item.href) ? 'active' : ''}`}
-            aria-label={item.label}
-          >
-            <div className="icon-wrapper">
-              {item.icon}
-            </div>
-            {isActive(item.href) && <span className="active-dot"></span>}
-          </Link>
-        ))}
-      </div>
+    <div className="bottom-nav">
+      {navItems.map((item) => (
+        <button
+          key={item.href}
+          onClick={(e) => handleNavClick(e, item.href)}
+          className={`nav-item ${isActive(item.href) ? 'active' : ''}`}
+          aria-label={item.label}
+        >
+          <div className="icon-wrapper">
+            {item.icon}
+          </div>
+          {isActive(item.href) && <span className="active-dot"></span>}
+        </button>
+      ))}
 
       <style jsx>{`
-        .bottom-nav-container {
+        .bottom-nav {
           position: fixed;
           bottom: 24px;
-          left: 0;
-          width: 100%;
-          display: flex;
-          justify-content: center;
-          z-index: 5000;
-          pointer-events: none;
-        }
-
-        .bottom-nav {
+          left: 50%;
+          transform: translateX(-50%);
           background: #FFFFFF;
           border: 1px solid rgba(0, 0, 0, 0.2);
           border-radius: 40px;
@@ -100,9 +97,10 @@ export default function BottomNav() {
           width: 90%;
           max-width: 400px;
           box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-          pointer-events: auto;
+          z-index: 9999;
           backdrop-filter: blur(10px);
           -webkit-backdrop-filter: blur(10px);
+          pointer-events: auto !important;
         }
 
         .nav-item {
@@ -110,7 +108,8 @@ export default function BottomNav() {
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          text-decoration: none;
+          background: none;
+          border: none;
           color: #000000;
           opacity: 0.6;
           transition: all 0.2s ease;
@@ -119,6 +118,7 @@ export default function BottomNav() {
           position: relative;
           min-width: 60px;
           min-height: 60px;
+          cursor: pointer;
         }
 
         .icon-wrapper {
@@ -126,6 +126,7 @@ export default function BottomNav() {
           align-items: center;
           justify-content: center;
           transition: transform 0.2s ease;
+          pointer-events: none;
         }
 
         .nav-item.active {
@@ -143,6 +144,7 @@ export default function BottomNav() {
           height: 6px;
           background-color: #000000;
           border-radius: 50%;
+          pointer-events: none;
         }
 
         .nav-item svg {
@@ -151,11 +153,11 @@ export default function BottomNav() {
 
         /* Hide on desktop */
         @media (min-width: 768px) {
-          .bottom-nav-container {
+          .bottom-nav {
             display: none;
           }
         }
       `}</style>
-    </nav>
+    </div>
   );
 }

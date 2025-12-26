@@ -279,7 +279,7 @@ export default function InteractiveMap({ properties }) {
           .mobile-only { display: block; }
           
           .fab-container {
-            bottom: 90px;
+            bottom: 120px;
             right: 20px;
           }
         }
