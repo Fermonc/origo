@@ -93,7 +93,7 @@ export default function BottomNav() {
           background: rgba(255, 255, 255, 0.98);
           backdrop-filter: blur(20px) saturate(180%);
           -webkit-backdrop-filter: blur(20px) saturate(180%);
-          border: 1px solid rgba(0, 0, 0, 0.08);
+          border: 1px solid rgba(0, 0, 0, 0.15);
           border-radius: 40px;
           display: flex;
           justify-content: space-around;
@@ -111,7 +111,8 @@ export default function BottomNav() {
           align-items: center;
           justify-content: center;
           text-decoration: none;
-          color: #666;
+          color: #000;
+          opacity: 0.4;
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           padding: 12px;
           border-radius: 20px;
@@ -128,7 +129,7 @@ export default function BottomNav() {
         }
 
         .nav-item.active {
-          color: #111;
+          opacity: 1;
         }
 
         .nav-item.active .icon-wrapper {
@@ -138,9 +139,9 @@ export default function BottomNav() {
         .active-dot {
           position: absolute;
           bottom: 8px;
-          width: 4px;
-          height: 4px;
-          background-color: #111;
+          width: 5px;
+          height: 5px;
+          background-color: #000;
           border-radius: 50%;
         }
 
