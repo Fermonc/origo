@@ -266,11 +266,16 @@ export default function MapSidebar({
             transform: translateY(100%);
             opacity: 0;
             background: rgba(255, 255, 255, 0.95);
+            pointer-events: none;
+            visibility: hidden;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, visibility 0.3s;
           }
           
           .map-sidebar.open {
             transform: translateY(0);
             opacity: 1;
+            pointer-events: auto;
+            visibility: visible;
           }
         }
 

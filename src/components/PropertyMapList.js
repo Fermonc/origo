@@ -4,47 +4,47 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 export default function PropertyMapList({ properties, isOpen, onClose }) {
-    if (!isOpen) return null;
+  if (!isOpen) return null;
 
-    return (
-        <div className="map-list-container">
-            <div className="list-header">
-                <h3>Inmuebles en esta zona ({properties.length})</h3>
-                <button onClick={onClose} className="close-btn">×</button>
-            </div>
+  return (
+    <div className="map-list-container">
+      <div className="list-header">
+        <h3>Inmuebles en esta zona ({properties.length})</h3>
+        <button onClick={onClose} className="close-btn">×</button>
+      </div>
 
-            <div className="list-content">
-                {properties.length === 0 ? (
-                    <div className="no-results">
-                        <p>No hay propiedades visibles en esta área.</p>
-                        <small>Intenta mover el mapa o cambiar los filtros.</small>
-                    </div>
-                ) : (
-                    properties.map(property => (
-                        <Link key={property.id} href={`/propiedades/${property.id}`} className="list-item">
-                            <div className="item-image">
-                                <Image
-                                    src={property.images?.[0] || property.image || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=200&q=80'}
-                                    alt={property.title}
-                                    fill
-                                    style={{ objectFit: 'cover' }}
-                                    sizes="100px"
-                                />
-                            </div>
-                            <div className="item-details">
-                                <h4>{property.title}</h4>
-                                <p className="price">{property.price}</p>
-                                <div className="features">
-                                    <span>{property.type}</span>
-                                    {property.area && <span> • {property.area}</span>}
-                                </div>
-                            </div>
-                        </Link>
-                    ))
-                )}
-            </div>
+      <div className="list-content">
+        {properties.length === 0 ? (
+          <div className="no-results">
+            <p>No hay propiedades visibles en esta área.</p>
+            <small>Intenta mover el mapa o cambiar los filtros.</small>
+          </div>
+        ) : (
+          properties.map(property => (
+            <Link key={property.id} href={`/propiedades/${property.id}`} className="list-item">
+              <div className="item-image">
+                <Image
+                  src={property.images?.[0] || property.image || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=200&q=80'}
+                  alt={property.title}
+                  fill
+                  style={{ objectFit: 'cover' }}
+                  sizes="100px"
+                />
+              </div>
+              <div className="item-details">
+                <h4>{property.title}</h4>
+                <p className="price">{property.price}</p>
+                <div className="features">
+                  <span>{property.type}</span>
+                  {property.area && <span> • {property.area}</span>}
+                </div>
+              </div>
+            </Link>
+          ))
+        )}
+      </div>
 
-            <style jsx>{`
+      <style jsx>{`
         .map-list-container {
           position: absolute;
           top: 20px;
@@ -172,8 +172,14 @@ export default function PropertyMapList({ properties, isOpen, onClose }) {
             from { transform: translateY(100%); }
             to { transform: translateY(0); }
           }
+          
+          /* Ensure it doesn't block interactions when closed */
+          :global(.map-list-container:not(.open)) {
+            pointer-events: none;
+            visibility: hidden;
+          }
         }
       `}</style>
-        </div>
-    );
+    </div>
+  );
 }

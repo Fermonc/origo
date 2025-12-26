@@ -77,7 +77,10 @@ export default function MapPage() {
         footer {
           display: none !important;
         }
-        /* Adjust bottom nav z-index if needed */
+        /* Reset body padding for map page specifically */
+        body {
+          padding-bottom: 0 !important;
+        }
       `}</style>
         </div>
     );

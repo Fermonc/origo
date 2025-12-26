@@ -85,7 +85,7 @@ export default function BottomNav() {
           width: 100%;
           display: flex;
           justify-content: center;
-          z-index: var(--z-bottom-nav);
+          z-index: 5000;
           pointer-events: none;
         }
 
