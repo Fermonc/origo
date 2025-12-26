@@ -51,7 +51,7 @@
     font-size: 1.8rem;
     font-weight: 800;
     letter-spacing: -1.5px;
-    color: var(--color-primary);
+    color: #111;
     text-decoration: none;
     transition: transform 0.3s ease;
     display: flex;
@@ -59,7 +59,7 @@
 }
 
 .logo span {
-    color: var(--color-secondary);
+    color: #111;
 }
 
 .logo:hover {
@@ -74,7 +74,7 @@
 }
 
 .navLink {
-    color: var(--color-text-main);
+    color: #333;
     font-weight: 500;
     text-decoration: none;
     font-size: 0.95rem;
@@ -90,13 +90,13 @@
     left: 0;
     width: 0;
     height: 2px;
-    background: var(--color-secondary);
+    background: #111;
     transition: width 0.3s ease;
     border-radius: 2px;
 }
 
 .navLink:hover {
-    color: var(--color-primary);
+    color: #111;
 }
 
 .navLink:hover::after,
@@ -105,7 +105,7 @@
 }
 
 .active {
-    color: var(--color-primary);
+    color: #111;
     font-weight: 700;
 }
 
@@ -116,7 +116,7 @@
 }
 
 .btnLoginText {
-    color: var(--color-text-main);
+    color: #333;
     font-weight: 600;
     text-decoration: none;
     font-size: 0.95rem;
@@ -124,32 +124,32 @@
 }
 
 .btnLoginText:hover {
-    color: var(--color-secondary);
+    color: #111;
 }
 
 .btnRegister {
     padding: 10px 24px;
-    background: var(--color-primary);
+    background: #111;
     color: white;
     border-radius: 50px;
     text-decoration: none;
     font-size: 0.9rem;
     font-weight: 600;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 15px rgba(44, 62, 80, 0.2);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .btnRegister:hover {
     transform: translateY(-2px);
-    background: var(--color-secondary);
-    box-shadow: 0 6px 20px rgba(230, 126, 34, 0.3);
+    background: #333;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
 .btnPublish {
     padding: 8px 18px;
-    border: 1.5px solid var(--color-primary);
+    border: 1.5px solid #111;
     border-radius: 50px;
-    color: var(--color-primary);
+    color: #111;
     font-weight: 600;
     text-decoration: none;
     font-size: 0.85rem;
@@ -158,7 +158,7 @@
 }
 
 .btnPublish:hover {
-    background: var(--color-primary);
+    background: #111;
     color: white;
     transform: translateY(-2px);
 }
@@ -168,7 +168,7 @@
     align-items: center;
     gap: 12px;
     text-decoration: none;
-    color: var(--color-text-main);
+    color: #111;
     padding: 6px 14px 6px 6px;
     background: rgba(0, 0, 0, 0.03);
     border-radius: 50px;
@@ -184,7 +184,7 @@
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: var(--color-primary);
+    background: #111;
     color: white;
     display: flex;
     align-items: center;
@@ -202,7 +202,7 @@
     right: 2px;
     width: 10px;
     height: 10px;
-    background-color: #ff4757;
+    background-color: #000;
     border-radius: 50%;
     border: 2px solid white;
 }
