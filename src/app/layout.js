@@ -1,8 +1,6 @@
 import './globals.css';
 import { Providers } from './providers';
 import Header from '@/components/Header';
-import Link from 'next/link';
-import BottomNav from '@/components/BottomNav';
 import Footer from '@/components/Footer';
 
 export const viewport = {
@@ -86,14 +84,11 @@ export default function RootLayout({ children }) {
       </head>
       <body>
         <Providers>
-          <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-            <Header />
-            <main style={{ flex: 1 }}>{children}</main>
-            <BottomNav />
-            <Footer />
-          </div>
+          <Header />
+          <main style={{ flex: 1 }}>{children}</main>
+          <Footer />
         </Providers>
       </body>
-    </html>
+    </html >
   );
 }
