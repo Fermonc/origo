@@ -1,9 +1,9 @@
 'use client';
 
-import { useRouter, usePathname } from 'next/navigation';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 export default function BottomNav() {
-  const router = useRouter();
   const pathname = usePathname();
 
   // Hide on property detail pages to avoid overlap with the sticky contact bar
@@ -14,12 +14,6 @@ export default function BottomNav() {
   }
 
   const isActive = (path) => pathname === path;
-
-  const handleNavClick = (e, href) => {
-    e.preventDefault();
-    e.stopPropagation();
-    router.push(href);
-  };
 
   const navItems = [
     {
@@ -68,17 +62,21 @@ export default function BottomNav() {
   return (
     <div className="bottom-nav">
       {navItems.map((item) => (
-        <button
+        <Link
           key={item.href}
-          onClick={(e) => handleNavClick(e, item.href)}
+          href={item.href}
           className={`nav-item ${isActive(item.href) ? 'active' : ''}`}
           aria-label={item.label}
+          onClick={(e) => {
+            // Re-ensure click reaches the router
+            e.stopPropagation();
+          }}
         >
           <div className="icon-wrapper">
             {item.icon}
           </div>
           {isActive(item.href) && <span className="active-dot"></span>}
-        </button>
+        </Link>
       ))}
 
       <style jsx>{`
@@ -97,7 +95,7 @@ export default function BottomNav() {
           width: 90%;
           max-width: 400px;
           box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-          z-index: 9999;
+          z-index: 10000;
           backdrop-filter: blur(10px);
           -webkit-backdrop-filter: blur(10px);
           pointer-events: auto !important;
@@ -108,8 +106,6 @@ export default function BottomNav() {
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          background: none;
-          border: none;
           color: #000000;
           opacity: 0.6;
           transition: all 0.2s ease;
@@ -119,6 +115,8 @@ export default function BottomNav() {
           min-width: 60px;
           min-height: 60px;
           cursor: pointer;
+          text-decoration: none;
+          -webkit-tap-highlight-color: transparent;
         }
 
         .icon-wrapper {
