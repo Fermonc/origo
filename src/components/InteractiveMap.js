@@ -108,6 +108,7 @@ export default function InteractiveMap({ properties }) {
           zoom={13}
           style={{ height: '100%', width: '100%' }}
           zoomControl={false}
+          tap={false}
           whenReady={(map) => {
             handleBoundsChange(map.target.getBounds());
           }}

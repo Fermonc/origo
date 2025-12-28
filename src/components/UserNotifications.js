@@ -17,16 +17,25 @@ export default function UserNotifications({ user }) {
       orderBy('createdAt', 'desc')
     );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        // Convert timestamp if it exists, safely
-        createdAt: doc.data().createdAt?.toDate ? doc.data().createdAt.toDate() : new Date(doc.data().createdAt)
-      }));
-      setNotifications(data);
-      setLoading(false);
-    });
+    const unsubscribe = onSnapshot(q,
+      (snapshot) => {
+        const data = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          // Convert timestamp if it exists, safely
+          createdAt: doc.data().createdAt?.toDate ? doc.data().createdAt.toDate() : new Date(doc.data().createdAt)
+        }));
+        setNotifications(data);
+        setLoading(false);
+      },
+      (error) => {
+        console.error("Error in UserNotifications listener:", error);
+        setLoading(false);
+        if (error.code === 'permission-denied') {
+          setNotifications([]);
+        }
+      }
+    );
 
     return () => unsubscribe();
   }, [user]);
@@ -43,31 +52,31 @@ export default function UserNotifications({ user }) {
   if (loading) return <div className="loading">Cargando notificaciones...</div>;
 
   if (notifications.length === 0) {
-      return (
-          <div className="empty-state">
-              <h3>No tienes notificaciones</h3>
-              <p>Te avisaremos cuando encontremos inmuebles que coincidan con tus búsquedas.</p>
-          </div>
-      );
+    return (
+      <div className="empty-state">
+        <h3>No tienes notificaciones</h3>
+        <p>Te avisaremos cuando encontremos inmuebles que coincidan con tus búsquedas.</p>
+      </div>
+    );
   }
 
   return (
     <div className="notifications-list">
       {notifications.map((note) => (
         <div
-            key={note.id}
-            className={`notification-item ${note.read ? 'read' : 'unread'}`}
-            onClick={() => markAsRead(note.id)}
+          key={note.id}
+          className={`notification-item ${note.read ? 'read' : 'unread'}`}
+          onClick={() => markAsRead(note.id)}
         >
           <div className="icon">
-              {note.type === 'match' ? '🏠' : '🔔'}
+            {note.type === 'match' ? '🏠' : '🔔'}
           </div>
           <div className="content">
             <h4>{note.title}</h4>
             <p>{note.body}</p>
             <span className="time">{note.createdAt?.toLocaleDateString()}</span>
             {note.link && (
-                <Link href={note.link} className="link-action">Ver Propiedad →</Link>
+              <Link href={note.link} className="link-action">Ver Propiedad →</Link>
             )}
           </div>
           {!note.read && <div className="dot"></div>}

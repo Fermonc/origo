@@ -36,9 +36,17 @@ export default function Header() {
   useEffect(() => {
     if (user) {
       const q = query(collection(db, 'users', user.uid, 'notifications'), where('read', '==', false));
-      const unsubscribe = onSnapshot(q, (snapshot) => {
-        setUnreadNotifications(snapshot.size);
-      });
+      const unsubscribe = onSnapshot(q,
+        (snapshot) => {
+          setUnreadNotifications(snapshot.size);
+        },
+        (error) => {
+          console.error("Error in Header notifications listener:", error);
+          if (error.code === 'permission-denied') {
+            setUnreadNotifications(0);
+          }
+        }
+      );
       return () => unsubscribe();
     }
   }, [user]);
