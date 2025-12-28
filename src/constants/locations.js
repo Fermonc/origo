@@ -1,5 +1,4 @@
 // Hierarchical Locations Configuration
-// Used in MapSidebar and InteractiveMap
 export const LOCATIONS = [
     {
         name: 'Rionegro',

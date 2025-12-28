@@ -8,10 +8,7 @@ import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { getPropertiesByType } from '@/lib/db/properties';
 
-const HomeMapPreview = dynamic(() => import('@/components/HomeMapPreview'), {
-  ssr: false,
-  loading: () => <div className="map-loading" role="status" aria-label="Cargando mapa"></div>
-});
+
 
 const TABS = ['Destacados', 'Lotes', 'Casas', 'Apartamentos', 'Fincas', 'Locales'];
 
@@ -125,10 +122,7 @@ export default function HomeClient({ initialProperties = [] }) {
         </div>
       </section>
 
-      {/* Map Preview Section */}
-      <section aria-label="Mapa de propiedades">
-        <HomeMapPreview />
-      </section>
+
 
       {/* Categories / Properties Section */}
       <section className="categories-section" id="properties-section">

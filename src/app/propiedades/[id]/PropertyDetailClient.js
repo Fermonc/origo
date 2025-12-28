@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { doc, getDoc, collection, getDocs, query, where, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import SkeletonDetail from '@/components/SkeletonDetail';
-import PropertyMap from '@/components/PropertyMap';
+
 import PropertyCard from '@/components/PropertyCard';
 import ImageGallery from '@/components/property/ImageGallery';
 import ContactSidebar from '@/components/property/ContactSidebar';
@@ -171,14 +171,7 @@ export default function PropertyDetailClient({ id }) {
 
               <hr className="divider" />
 
-              {property.lat && property.lng && (
-                <section className="section">
-                  <h2>Ubicación</h2>
-                  <div className="map-container">
-                    <PropertyMap lat={property.lat} lng={property.lng} title={property.title} />
-                  </div>
-                </section>
-              )}
+
             </div>
 
             {/* Sidebar Column */}
