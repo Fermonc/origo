@@ -44,7 +44,14 @@ export default function InteractiveMap({ properties }) {
   const [mapCenter, setMapCenter] = useState(INITIAL_MAP_CENTER); // Default: Rionegro
   const [visibleProperties, setVisibleProperties] = useState([]);
   const [showList, setShowList] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Default open on desktop
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Default closed to prevent mobile overlap
+
+  // Open sidebar automatically only on desktop
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.innerWidth > 768) {
+      setIsSidebarOpen(true);
+    }
+  }, []);
 
   // Note: Previous filteredProperties useMemo block is removed because the hook provides it.
 
