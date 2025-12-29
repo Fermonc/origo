@@ -1,5 +1,4 @@
 import './globals.css';
-import { Providers } from './providers';
 import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
 import Footer from '@/components/Footer';
@@ -84,12 +83,10 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body>
-        <Providers>
-          <Header />
-          <main style={{ flex: 1 }}>{children}</main>
-          <BottomNav />
-          <Footer />
-        </Providers>
+        <Header />
+        <main style={{ flex: 1 }}>{children}</main>
+        <BottomNav />
+        <Footer />
       </body>
     </html >
   );

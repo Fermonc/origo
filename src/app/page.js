@@ -1,6 +1,4 @@
-
 import HomeClient from '@/components/HomeClient';
-import { getFeaturedProperties } from '@/lib/db/properties';
 import styles from './page.module.css';
 
 export const metadata = {
@@ -13,14 +11,10 @@ export const metadata = {
   },
 };
 
-// Server Component (Default in App Router)
-export default async function Home() {
-  // Fetch initial data on the server (SEO friendly)
-  const initialProperties = await getFeaturedProperties(12);
-
+export default function Home() {
   return (
     <div className={styles.page}>
-      <HomeClient initialProperties={initialProperties} />
+      <HomeClient />
     </div>
   );
 }

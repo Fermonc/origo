@@ -21,17 +21,6 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Links Column */}
-          <div className="footer-col">
-            <h4>Explorar</h4>
-            <nav className="footer-nav">
-              <Link href="/propiedades">Propiedades</Link>
-              <Link href="/propiedades?type=Lote">Lotes</Link>
-              <Link href="/propiedades?type=Finca">Fincas</Link>
-              <Link href="/propiedades?type=Local">Locales</Link>
-            </nav>
-          </div>
-
           {/* Company Column */}
           <div className="footer-col">
             <h4>Empresa</h4>
@@ -40,7 +29,6 @@ export default function Footer() {
               <Link href="/contacto">Contáctanos</Link>
               <Link href="/terminos">Términos y Condiciones</Link>
               <Link href="/privacidad">Política de Privacidad</Link>
-              <Link href="/admin/login">Acceso Admin</Link>
             </nav>
           </div>
 
@@ -75,7 +63,7 @@ export default function Footer() {
 
         @media (min-width: 768px) {
           .footer-grid {
-            grid-template-columns: 2fr 1fr 1fr 1.5fr;
+            grid-template-columns: 2fr 1fr 1fr;
           }
         }
 

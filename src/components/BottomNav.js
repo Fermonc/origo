@@ -5,14 +5,6 @@ import { usePathname } from 'next/navigation';
 
 export default function BottomNav() {
   const pathname = usePathname();
-
-  // Hide on property detail pages to avoid overlap with the sticky contact bar
-  const isPropertyDetail = /^\/propiedades\/.+/.test(pathname);
-
-  if (isPropertyDetail) {
-    return null;
-  }
-
   const isActive = (path) => pathname === path;
 
   const navItems = [
@@ -27,33 +19,11 @@ export default function BottomNav() {
       )
     },
     {
-      href: '/propiedades',
-      label: 'Buscar',
+      href: '/contacto',
+      label: 'Contacto',
       icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="11" cy="11" r="8" />
-          <path d="m21 21-4.3-4.3" />
-        </svg>
-      )
-    },
-    {
-      href: '/mapa',
-      label: 'Mapa',
-      icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21" />
-          <line x1="9" y1="3" x2="9" y2="21" />
-          <line x1="15" y1="6" x2="15" y2="21" />
-        </svg>
-      )
-    },
-    {
-      href: '/perfil',
-      label: 'Perfil',
-      icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-          <circle cx="12" cy="7" r="4" />
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
         </svg>
       )
     }
@@ -67,10 +37,6 @@ export default function BottomNav() {
           href={item.href}
           className={`nav-item ${isActive(item.href) ? 'active' : ''}`}
           aria-label={item.label}
-          onClick={(e) => {
-            // Re-ensure click reaches the router
-            e.stopPropagation();
-          }}
         >
           <div className="icon-wrapper">
             {item.icon}
