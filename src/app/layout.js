@@ -86,7 +86,7 @@ export default function RootLayout({ children }) {
       <body>
         <AuthProvider>
           <Header />
-          <main style={{ flex: 1 }}>{children}</main>
+          <main className="page-offset-top" style={{ flex: 1 }}>{children}</main>
           <BottomNav />
           <Footer />
         </AuthProvider>
