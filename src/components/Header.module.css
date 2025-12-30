@@ -1,132 +1,152 @@
 .header {
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
-    height: 80px;
-    /* Explicit height */
-    background-color: #2C3E50;
-    color: white;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    position: relative;
-    /* Not fixed, to avoid overlap issues by default */
-    z-index: 100;
-}
-
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-    height: 100%;
+    height: var(--header-height);
+    padding: 0 var(--space-lg);
     display: flex;
     align-items: center;
     justify-content: space-between;
+    background-color: rgba(255, 255, 255, 0.85);
+    /* fallback */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .header {
+        background-color: rgba(31, 41, 55, 0.85);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
 }
 
 .logo {
     font-size: 1.5rem;
-    font-weight: bold;
-    color: white;
+    font-weight: 700;
+    color: var(--color-primary);
+    letter-spacing: -0.02em;
     text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .nav {
     display: flex;
+    gap: 2rem;
     align-items: center;
-    gap: 24px;
 }
 
-.link {
-    color: #ecf0f1;
-    text-decoration: none;
+.navLink {
+    color: var(--color-text-main);
     font-weight: 500;
-    transition: color 0.2s;
+    font-size: 0.95rem;
+    text-decoration: none;
+    position: relative;
+    padding: 0.5rem 0;
+    transition: color 0.2s ease;
 }
 
-.link:hover {
-    color: white;
+.navLink::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: var(--color-secondary);
+    transition: width 0.3s ease;
 }
 
-.authSection {
+.navLink:hover {
+    color: var(--color-primary);
+}
+
+.navLink:hover::after {
+    width: 100%;
+}
+
+.actions {
     display: flex;
     align-items: center;
-    gap: 16px;
-    margin-left: 20px;
-    padding-left: 20px;
-    border-left: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.userInfo {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    line-height: 1.2;
-}
-
-.userName {
-    font-size: 0.9rem;
-    font-weight: 600;
-}
-
-.userRole {
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    opacity: 0.8;
-}
-
-.logoutBtn {
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: white;
-    padding: 6px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.8rem;
-    transition: all 0.2s;
-}
-
-.logoutBtn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: white;
+    gap: 1.5rem;
 }
 
 .loginBtn {
-    color: white;
+    color: var(--color-text-main);
+    font-weight: 600;
+    font-size: 0.95rem;
     text-decoration: none;
-    font-size: 0.9rem;
+    transition: color 0.2s;
+}
+
+.loginBtn:hover {
+    color: var(--color-primary);
 }
 
 .registerBtn {
-    background: white;
-    color: #2C3E50;
-    padding: 8px 16px;
-    border-radius: 4px;
-    text-decoration: none;
+    background-color: var(--color-primary);
+    color: white;
+    padding: 0.6rem 1.25rem;
+    border-radius: 8px;
     font-weight: 600;
-    font-size: 0.9rem;
-    transition: background 0.2s;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: background-color 0.2s, transform 0.1s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .registerBtn:hover {
-    background: #ecf0f1;
+    background-color: #34495e;
+    /* slightly darker primary */
+    transform: translateY(-1px);
+}
+
+.registerBtn:active {
+    transform: translateY(0);
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    .header {
+        padding: 0 var(--space-md);
+    }
+
+    .nav {
+        gap: 1.5rem;
+    }
 }
 
 @media (max-width: 768px) {
     .header {
-        position: sticky;
-        /* Sticky on mobile might be nice */
-        top: 0;
+        padding: 0 var(--space-sm);
+    }
+
+    /* 
+   * Note: Instructions say "No ocultar en hamburguesa todavía",
+   * so we try to fit everything or allow horizontal scroll if overflowing,
+   * but typically at this size we'd hide nav.
+   * For now, we'll just reduce padding/gap to fit as much as possible.
+   */
+    .navLink {
+        font-size: 0.85rem;
+    }
+
+    .actions {
+        gap: 0.75rem;
+    }
+
+    .registerBtn {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.85rem;
     }
 
     .nav {
-        gap: 12px;
-    }
-
-    .userInfo {
-        display: none;
-        /* Hide detailed user info on mobile to save space */
-    }
-
-    .authSection {
-        gap: 8px;
-        margin-left: 10px;
-        padding-left: 10px;
+        gap: 1rem;
     }
 }
