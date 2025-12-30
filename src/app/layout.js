@@ -1,5 +1,4 @@
 import './globals.css';
-import Header from '@/components/Header';
 import { AuthProvider } from '@/context/AuthContext';
 
 export const viewport = {
@@ -83,7 +82,6 @@ export default function RootLayout({ children }) {
       </head>
       <body>
         <AuthProvider>
-          <Header />
           <main style={{ flex: 1 }}>{children}</main>
         </AuthProvider>
       </body>
