@@ -17,42 +17,43 @@ export default function Header() {
   };
 
   return (
+    // Clean header structure
     <header className={styles.header}>
       <div className={styles.container}>
-        <Link href="/" className={styles.logo}>
-          Origo
-        </Link>
+        <div className={styles.logoSection}>
+          <Link href="/" className={styles.logo}>
+            Origo
+          </Link>
+        </div>
+
         <nav className={styles.nav}>
           <Link href="/mapa" className={styles.link}>
             Mapa
           </Link>
 
           {!loading && (
-            <>
+            <div className={styles.authSection}>
               {user ? (
-                <div className="flex items-center gap-4 ml-4">
-                  <div className="text-sm text-gray-300">
-                    <span className="block font-medium text-white">{user.displayName || user.email}</span>
-                    <span className="text-xs uppercase tracking-wider opacity-70">{role === 'admin' ? 'Administrador' : 'Usuario'}</span>
+                <>
+                  <div className={styles.userInfo}>
+                    <span className={styles.userName}>{user.displayName || 'Usuario'}</span>
+                    <span className={styles.userRole}>{role === 'admin' ? 'Admin' : 'Cliente'}</span>
                   </div>
-                  <button
-                    onClick={handleLogout}
-                    className="px-3 py-1.5 text-sm bg-gray-700 hover:bg-gray-600 text-white rounded-md transition-colors"
-                  >
+                  <button onClick={handleLogout} className={styles.logoutBtn}>
                     Salir
                   </button>
-                </div>
+                </>
               ) : (
-                <div className="flex items-center gap-3 ml-4">
-                  <Link href="/login" className="px-4 py-2 text-sm text-gray-300 hover:text-white transition-colors">
+                <>
+                  <Link href="/login" className={styles.loginBtn}>
                     Ingresar
                   </Link>
-                  <Link href="/registro" className="px-4 py-2 text-sm bg-white text-gray-900 rounded-lg hover:bg-gray-100 font-medium transition-colors">
+                  <Link href="/registro" className={styles.registerBtn}>
                     Registrarse
                   </Link>
-                </div>
+                </>
               )}
-            </>
+            </div>
           )}
         </nav>
       </div>

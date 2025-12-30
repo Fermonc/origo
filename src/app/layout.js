@@ -1,6 +1,5 @@
 import './globals.css';
 import Header from '@/components/Header';
-import BottomNav from '@/components/BottomNav';
 import Footer from '@/components/Footer';
 import { AuthProvider } from '@/context/AuthContext';
 
@@ -86,8 +85,7 @@ export default function RootLayout({ children }) {
       <body>
         <AuthProvider>
           <Header />
-          <main className="page-offset-top" style={{ flex: 1 }}>{children}</main>
-          <BottomNav />
+          <main style={{ flex: 1 }}>{children}</main>
           <Footer />
         </AuthProvider>
       </body>
