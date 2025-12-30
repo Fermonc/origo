@@ -2,6 +2,7 @@ import './globals.css';
 import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
 import Footer from '@/components/Footer';
+import { AuthProvider } from '@/context/AuthContext';
 
 export const viewport = {
   width: 'device-width',
@@ -83,10 +84,12 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body>
-        <Header />
-        <main style={{ flex: 1 }}>{children}</main>
-        <BottomNav />
-        <Footer />
+        <AuthProvider>
+          <Header />
+          <main style={{ flex: 1 }}>{children}</main>
+          <BottomNav />
+          <Footer />
+        </AuthProvider>
       </body>
     </html >
   );
