@@ -1,6 +1,6 @@
 'use client';
 
-import Footer from '@/components/Footer';
+
 
 export default function PrivacyPage() {
   return (
@@ -38,7 +38,7 @@ export default function PrivacyPage() {
           </div>
         </div>
       </main>
-      <Footer />
+
 
       <style jsx>{`
         .page {

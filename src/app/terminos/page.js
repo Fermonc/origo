@@ -1,6 +1,6 @@
 'use client';
 
-import Footer from '@/components/Footer';
+
 
 export default function TermsPage() {
   return (
@@ -38,7 +38,7 @@ export default function TermsPage() {
           </div>
         </div>
       </main>
-      <Footer />
+
 
       <style jsx>{`
         .page {
