@@ -1,14 +1,15 @@
 :root {
-  /* Brand Colors - Earthy & Premium */
-  --color-primary: #2C3E50;
-  --color-secondary: #E67E22;
+  /* Brand Colors - Monochrome & Minimalist */
+  --color-primary: #111111;
+  --color-secondary: #555555;
   --color-accent: #27AE60;
+  /* Keep accent just in case, or remove if unused */
 
   /* Neutral Colors */
-  --color-bg: #F9FAFB;
+  --color-bg: #FFFFFF;
   --color-surface: #FFFFFF;
-  --color-text-main: #1F2937;
-  --color-text-muted: #6B7280;
+  --color-text-main: #111111;
+  --color-text-muted: #666666;
   --color-border: #E5E7EB;
 
   /* Spacing */
@@ -26,17 +27,7 @@
   --font-serif: Georgia, serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-bg: #111827;
-    --color-surface: #1F2937;
-    --color-text-main: #F9FAFB;
-    --color-text-muted: #D1D5DB;
-    --color-border: #374151;
-    --color-primary: #60A5FA;
-    --color-secondary: #FB923C;
-  }
-}
+/* Removed dark mode overrides to enforce light theme/consistency */
 
 * {
   box-sizing: border-box;

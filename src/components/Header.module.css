@@ -17,13 +17,7 @@
     transition: all 0.3s ease;
 }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-    .header {
-        background-color: rgba(31, 41, 55, 0.85);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    }
-}
+/* Dark mode support removed to enforce consistency with light theme content */
 
 .logo {
     font-size: 1.5rem;
@@ -102,8 +96,8 @@
 }
 
 .registerBtn:hover {
-    background-color: #34495e;
-    /* slightly darker primary */
+    background-color: #333333;
+    /* slightly lighter black */
     transform: translateY(-1px);
 }
 
