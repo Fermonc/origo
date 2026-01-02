@@ -24,7 +24,8 @@
 
 .logo {
     font-size: 1.5rem;
-    font-weight: 700;
+    font-weight: 800;
+    /* Matching Hero title weight */
     color: var(--color-primary);
     letter-spacing: -0.05em;
     /* Tighter tracking for "architectural" look */
