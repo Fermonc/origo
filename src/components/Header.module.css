@@ -127,18 +127,39 @@
         padding: 0 var(--space-sm);
     }
 
-    /* 
-   * Note: Instructions say "No ocultar en hamburguesa todavía",
-   * so we try to fit everything or allow horizontal scroll if overflowing,
-   * but typically at this size we'd hide nav.
-   * For now, we'll just reduce padding/gap to fit as much as possible.
-   */
+    .nav {
+        position: fixed;
+        top: var(--header-height);
+        left: 0;
+        width: 100%;
+        height: calc(100vh - var(--header-height));
+        background-color: var(--color-surface);
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2rem;
+        transform: translateX(100%);
+        transition: transform 0.3s ease-in-out;
+        z-index: 999;
+    }
+
+    .navOpen {
+        transform: translateX(0);
+    }
+
     .navLink {
-        font-size: 0.85rem;
+        font-size: 1.25rem;
     }
 
     .actions {
-        gap: 0.75rem;
+        /* Keep actions visible or adjust? User said: "No ocultar en hamburguesa todavía" */
+        /* But we implemented a toggle for Nav. Let's keep actions visible if space permits, or hide Login/Register buttons and put them in menu */
+        /* For now, we keep them but maybe hide textual buttons if too tight? */
+    }
+
+    .loginBtn {
+        display: none;
+        /* Move to mobile menu if needed, or keep small icon */
     }
 
     .registerBtn {
@@ -146,7 +167,86 @@
         font-size: 0.85rem;
     }
 
-    .nav {
+    .mobileActions {
+        display: flex;
+        flex-direction: column;
         gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .menuToggle {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        width: 1.5rem;
+        height: 1.5rem;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        z-index: 1001;
+        margin-left: 1rem;
+    }
+
+    .bar {
+        width: 100%;
+        height: 2px;
+        background-color: var(--color-text-main);
+        transition: all 0.3s linear;
+        border-radius: 10px;
+    }
+}
+
+/* New User Section Styles */
+.userSection {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.welcomeText {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--color-text-main);
+}
+
+@media (max-width: 768px) {
+    .welcomeText {
+        display: none;
+    }
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid var(--color-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-bg);
+}
+
+.avatarImg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatarPlaceholder {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--color-primary);
+}
+
+/* Mobile Toggle - Desktop Hidden */
+.menuToggle {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .menuToggle {
+        display: flex;
     }
 }
