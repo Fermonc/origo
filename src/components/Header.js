@@ -1,18 +1,31 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import styles from './Header.module.css';
 
+import { usePathname } from 'next/navigation';
+
 export default function Header() {
     const { user, loading } = useAuth();
     const [menuOpen, setMenuOpen] = useState(false);
+    const [scrolled, setScrolled] = useState(false);
+    const pathname = usePathname();
+
+    // Handle scroll effect
+    useEffect(() => {
+        const handleScroll = () => {
+            setScrolled(window.scrollY > 10);
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     // Close menu when a link is clicked
     const closeMenu = () => setMenuOpen(false);
 
     return (
-        <header className={styles.header}>
+        <header className={`${styles.header} ${scrolled ? styles.scrolled : ''}`}>
             {/* Logo Section */}
             <Link href="/" className={styles.logo} onClick={closeMenu}>
                 <span>ORIGO</span>
@@ -20,10 +33,10 @@ export default function Header() {
 
             {/* Navigation Links */}
             <nav className={`${styles.nav} ${menuOpen ? styles.navOpen : ''}`}>
-                <Link href="/" className={styles.navLink} onClick={closeMenu}>Inicio</Link>
-                <Link href="/servicios" className={styles.navLink} onClick={closeMenu}>Servicios</Link>
-                <Link href="/nosotros" className={styles.navLink} onClick={closeMenu}>Nosotros</Link>
-                <Link href="/propiedades" className={styles.navLink} onClick={closeMenu}>Propiedades</Link>
+                <Link href="/" className={`${styles.navLink} ${pathname === '/' ? styles.active : ''}`} onClick={closeMenu}>Inicio</Link>
+                <Link href="/servicios" className={`${styles.navLink} ${pathname === '/servicios' ? styles.active : ''}`} onClick={closeMenu}>Servicios</Link>
+                <Link href="/nosotros" className={`${styles.navLink} ${pathname === '/nosotros' ? styles.active : ''}`} onClick={closeMenu}>Nosotros</Link>
+                <Link href="/propiedades" className={`${styles.navLink} ${pathname.startsWith('/propiedades') ? styles.active : ''}`} onClick={closeMenu}>Propiedades</Link>
 
                 {/* Mobile only actions added to nav for better UX */}
                 <div className={styles.mobileActions}>
